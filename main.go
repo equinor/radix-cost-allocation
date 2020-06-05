@@ -13,7 +13,7 @@ import (
 const port = 1433
 
 func main() {
-	sqlClient := Init(os.Getenv("SQL_SERVER"), os.Getenv("SQL_DATABASE"), port, os.Getenv("SQL_USER"), os.Getenv("SQL_PASSWORD"))
+	sqlClient := NewSQLClient(os.Getenv("SQL_SERVER"), os.Getenv("SQL_DATABASE"), port, os.Getenv("SQL_USER"), os.Getenv("SQL_PASSWORD"))
 	promClient := PrometheusClient{Address: os.Getenv("PROMETHEUS_API")}
 
 	measuredTimeUTC := time.Now().UTC()

@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Chart.Name }}
+spec:
+  schedule: "{{ .Values.job.schedule }}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: {{ .Values.job.restartPolicy }}
+          containers:
+            - name: {{ .Chart.Name }}
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              env:
+                - name: SQL_USER
+                  value: {{ .Values.db.user }}
+                - name: SQL_DATABASE
+                  value: {{ .Values.db.database }}
+                - name: SQL_SERVER
+                  value: {{ .Values.db.server }}
+                - name: PROMETHEUS_API
+                  value: {{ .Values.prometheus.api }}
+              envFrom:
+                - secretRef:
+                    name: {{ .Values.secret.name }}

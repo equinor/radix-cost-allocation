@@ -19,8 +19,8 @@ type SQLClient struct {
 	db       *sql.DB
 }
 
-// Init create sqlclient and setup the db connection
-func Init(server, database string, port int, userID, password string) SQLClient {
+// NewSQLClient create sqlclient and setup the db connection
+func NewSQLClient(server, database string, port int, userID, password string) SQLClient {
 	sqlClient := SQLClient{
 		Server:   server,
 		Database: database,
@@ -28,7 +28,7 @@ func Init(server, database string, port int, userID, password string) SQLClient 
 		UserID:   userID,
 		Password: password,
 	}
-	sqlClient.setupDBConnection()
+	sqlClient.db = sqlClient.setupDBConnection()
 	return sqlClient
 }
 
@@ -65,7 +65,7 @@ func (sqlClient SQLClient) Close() {
 }
 
 // SetupDBConnection sets up db connection
-func (sqlClient SQLClient) setupDBConnection() {
+func (sqlClient SQLClient) setupDBConnection() *sql.DB {
 	// Build connection string
 	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;",
 		sqlClient.Server, sqlClient.UserID, sqlClient.Password, sqlClient.Port, sqlClient.Database)
@@ -83,7 +83,7 @@ func (sqlClient SQLClient) setupDBConnection() {
 		log.Fatal(err.Error())
 	}
 	fmt.Printf("Connected!\n")
-	sqlClient.db = db
+	return db
 }
 
 func (sqlClient SQLClient) execSQL(tsql string, args ...interface{}) (int64, error) {
