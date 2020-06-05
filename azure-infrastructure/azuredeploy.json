@@ -19,8 +19,8 @@
     }
   },
   "variables": {
-    "sqlServerName": "radix-cost-allocation-sql-server",
-    "databaseName": "radix-cost-allocation-database"
+    "sqlServerName": "radix-cost-exporter-sql-server",
+    "databaseName": "radix-cost-exporter-database"
   },
   "resources": [
     {
