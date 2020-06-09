@@ -33,6 +33,6 @@ jobs:
           RESOURCE_GROUP=common
           
           az group deployment create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
-            --template-file ./arm-infrastructure/azuredeploy.json \
-            --parameters ./arm-infrastructure/azuredeploy.parameters.json \
+            --template-file ./azure-infrastructure/azuredeploy.json \
+            --parameters ./azure-infrastructure/azuredeploy.parameters.json \
             --parameters sqlAdministratorLoginPassword=${{ secrets.DB_PASSWORD }}
