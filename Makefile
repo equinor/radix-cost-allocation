@@ -3,11 +3,9 @@ VERSION=latest
 IMAGE_NAME=$(DOCKER_REGISTRY)/radix-cost-exporter:$(VERSION)
 DB_PASSWORD=a_password
 
-# to deploy run:
-# make deploy DB_PASSWORD=<sql_db_password>
+# to deploy run: "make deploy DB_PASSWORD=<sql_db_password>"
 
-# to deploy db:
-# make deploy-azure DB_PASSWORD=<sql_db_password>
+# to deploy db: "make deploy-azure DB_PASSWORD=<sql_db_password>"
 
 build:
 	docker build -t $(IMAGE_NAME) .
