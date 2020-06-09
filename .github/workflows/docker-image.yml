@@ -7,13 +7,10 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  build-deploy-image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Build the Docker image
         run: docker build -t radixdev.azurecr.io/radix-cost-exporter:${GITHUB_REF##*/}-${{ github.sha }} .
       - uses: azure/docker-login@v1
@@ -24,6 +21,13 @@ jobs:
       - name: push to radixdev
         run: |
           docker push radixdev.azurecr.io/radix-cost-exporter:${GITHUB_REF##*/}-${{ github.sha }}
+  deploy-db-arm-template:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: deploy-arm-template
         env:
           DEPLOY_NAME: radix-cost-db-deploy
@@ -31,7 +35,7 @@ jobs:
           BRANCH=${GITHUB_REF##*/} 
           RESOURCE_GROUP=common
           
-          az group deployment create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
+          az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
             --template-file ./azure-infrastructure/azuredeploy.json \
             --parameters ./azure-infrastructure/azuredeploy.parameters.json \
             --parameters sqlAdministratorLoginPassword=${{ secrets.DB_PASSWORD }}
