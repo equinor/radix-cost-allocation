@@ -1,0 +1,38 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Azure/login@v1
+        with:
+          # Paste output of `az ad sp create-for-rbac` as value of secret variable: AZURE_CREDENTIALS
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Build the Docker image
+        run: docker build -t radixdev.azurecr.io/radix-cost-exporter:${GITHUB_REF##*/}-${{ github.sha }} .
+      - uses: azure/docker-login@v1
+        with:
+          login-server: radixdev.azurecr.io
+          username: ${{ secrets.DEV_REGISTRY_USERNAME }}
+          password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
+      - name: push to radixdev
+        run: |
+          docker push radixdev.azurecr.io/radix-cost-exporter:${GITHUB_REF##*/}-${{ github.sha }}
+      - name: deploy-arm-template
+        env:
+          DEPLOY_NAME: radix-cost-db-deploy
+        run: |
+          BRANCH=${GITHUB_REF##*/} 
+          RESOURCE_GROUP=common
+          
+          az group deployment create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
+            --template-file ./arm-infrastructure/azuredeploy.json \
+            --parameters ./arm-infrastructure/azuredeploy.parameters.json \
+            --parameters sqlAdministratorLoginPassword=${{ secrets.DB_PASSWORD }}
