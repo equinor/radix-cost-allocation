@@ -3,7 +3,8 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "sqlAdministratorLoginUser": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "radix"
     },
     "sqlAdministratorLoginPassword": {
       "type": "securestring"

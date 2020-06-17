@@ -18,4 +18,4 @@ deploy:
 	helm upgrade --install radix-cost-exporter ./charts --set db.password=$(DB_PASSWORD)
 
 deploy-azure:
-	az deployment group create --resource-group common --template-file ./azure-infrastructure/azuredeploy.json --parameters @./azure-infrastructure/azuredeploy.parameters.json --parameters sqlAdministratorLoginPassword=$(DB_PASSWORD)
+	az deployment group create --resource-group common --template-file ./azure-infrastructure/azuredeploy.json --parameters sqlAdministratorLoginPassword=$(DB_PASSWORD)

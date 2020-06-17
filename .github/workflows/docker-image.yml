@@ -4,13 +4,19 @@ on:
   push:
     branches: [ master ]
 
+env:
+  DEPLOY_NAME: radix-cost-db-deploy
+  RESOURCE_GROUP: common
+  BRANCH: ${GITHUB_REF##*/} 
+  IMAGE_TAG: ${GITHUB_REF##*/}-${{ github.sha }}
+
 jobs:
   build-deploy-image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Build the Docker image
-        run: docker build -t radixdev.azurecr.io/radix-cost-exporter:${GITHUB_REF##*/}-${{ github.sha }} .
+        run: docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
       - uses: azure/docker-login@v1
         with:
           login-server: radixdev.azurecr.io
@@ -18,7 +24,7 @@ jobs:
           password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
       - name: push to radixdev
         run: |
-          docker push radixdev.azurecr.io/radix-cost-exporter:${GITHUB_REF##*/}-${{ github.sha }}
+          docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
   deploy-db-arm-template:
     runs-on: ubuntu-latest
     steps:
@@ -27,13 +33,14 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: deploy-arm-template
-        env:
-          DEPLOY_NAME: radix-cost-db-deploy
         run: |
-          BRANCH=${GITHUB_REF##*/} 
-          RESOURCE_GROUP=common
-          
           az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
             --template-file ./azure-infrastructure/azuredeploy.json \
-            --parameters ./azure-infrastructure/azuredeploy.parameters.json \
             --parameters sqlAdministratorLoginPassword=${{ secrets.DB_PASSWORD }}
+      - name: apply-sql-script
+        shell: pwsh
+        run: |
+          Install-Module -Name SqlServer
+          Import-Module SqlServer
+
+          Invoke-Sqlcmd -ConnectionString ${{ secrets.AZURE_SQL_CONNECTION_STRING }} -Query $changeTables -InputFile ./azure-infrastructure/createTables.sql
