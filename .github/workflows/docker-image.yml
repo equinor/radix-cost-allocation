@@ -40,7 +40,4 @@ jobs:
       - name: apply-sql-script
         shell: pwsh
         run: |
-          Install-Module -Name SqlServer
-          Import-Module SqlServer
-
           Invoke-Sqlcmd -ConnectionString ${{ secrets.AZURE_SQL_CONNECTION_STRING }} -Query $changeTables -InputFile ./azure-infrastructure/createTables.sql
