@@ -4,19 +4,15 @@ on:
   push:
     branches: [ master ]
 
-env:
-  DEPLOY_NAME: radix-cost-db-deploy
-  RESOURCE_GROUP: common
-  BRANCH: ${GITHUB_REF##*/} 
-  IMAGE_TAG: ${GITHUB_REF##*/}-${{ github.sha }}
-
 jobs:
   build-deploy-image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Build the Docker image
-        run: docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
+        run: |
+          IMAGE_TAG = ${GITHUB_REF##*/}-${{ github.sha }}  
+          docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
       - uses: azure/docker-login@v1
         with:
           login-server: radixdev.azurecr.io
@@ -24,9 +20,13 @@ jobs:
           password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
       - name: push to radixdev
         run: |
+          IMAGE_TAG = ${GITHUB_REF##*/}-${{ github.sha }}
           docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
   deploy-db-arm-template:
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_NAME: radix-cost-db-deploy
+      RESOURCE_GROUP: common
     steps:
       - uses: actions/checkout@v2
       - uses: Azure/login@v1
