@@ -5,23 +5,23 @@ on:
     branches: [ master, keaaa ]
 
 jobs:
-  build-deploy-image:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build the Docker image
-        run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}  
-          docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
-      - uses: azure/docker-login@v1
-        with:
-          login-server: radixdev.azurecr.io
-          username: ${{ secrets.DEV_REGISTRY_USERNAME }}
-          password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
-      - name: push to radixdev
-        run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
+  # build-deploy-image:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Build the Docker image
+  #       run: |
+  #         IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}  
+  #         docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
+  #     - uses: azure/docker-login@v1
+  #       with:
+  #         login-server: radixdev.azurecr.io
+  #         username: ${{ secrets.DEV_REGISTRY_USERNAME }}
+  #         password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
+  #     - name: push to radixdev
+  #       run: |
+  #         IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
+  #         docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
   deploy-db-arm-template:
     runs-on: ubuntu-latest
     env:
@@ -33,11 +33,11 @@ jobs:
       - uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: deploy-arm-template
-        run: |
-          az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
-            --template-file ./azure-infrastructure/azuredeploy.json \
-            --parameters sqlAdministratorLoginPassword=${{ secrets.DB_PASSWORD }}
+      # - name: deploy-arm-template
+      #   run: |
+      #     az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
+      #       --template-file ./azure-infrastructure/azuredeploy.json \
+      #       --parameters sqlAdministratorLoginPassword=${{ secrets.DB_PASSWORD }}
       - name: apply-sql-script
         shell: pwsh
         run: |
@@ -46,7 +46,7 @@ jobs:
           Import-Module SqlServer
           
           $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ServerInstance radix-cost-exporter-sql-server.database.windows.net -Database radix-cost-exporter-database -Username radix -password ${{ secrets.DB_PASSWORD }}
-          if($ds.Tables[0].Rows.Count == 1) 
+          if($ds.Tables[0].Rows.Count -eq 1) 
           {
             Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance radix-cost-exporter-sql-server.database.windows.net -Database radix-cost-exporter-database -Username radix -password ${{ secrets.DB_PASSWORD }}
           }
