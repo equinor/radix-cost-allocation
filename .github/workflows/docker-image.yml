@@ -25,10 +25,7 @@ jobs:
   deploy-db-arm-template:
     runs-on: ubuntu-latest
     env:
-      DEPLOY_NAME: radix-cost-db-deploy
       RESOURCE_GROUP: common
-      KEY_VAULT_NAME: radix-vault-dev
-      SECRET_NAME: radix-cost-allocation-db-admin
       SQL_SERVER_NAME: radix-cost-allocation
       DB_NAME: radix-cost-allocation-db
     steps:
@@ -36,23 +33,28 @@ jobs:
       - uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - uses: Azure/get-keyvault-secrets@v1.0
+        with:
+          keyvault: radix-vault-dev
+          secrets: "radix-cost-allocation-db-admin"
+        id: adminPassword
       - name: deploy-arm-template
+        env:
+          DEPLOY_NAME: radix-cost-db-deploy
         run: |
           az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
             --template-file ./azure-infrastructure/azuredeploy.json \
             --parameters sqlServerName=$SQL_SERVER_NAME \
             --parameters databaseName=$DB_NAME \
-            --parameters sqlAdministratorLoginPassword=${{ secrets.DB_PASSWORD }}
+            --parameters sqlAdministratorLoginPassword=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
       - name: apply-sql-script
         shell: pwsh
         run: |
           Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
           Install-Module -Name SqlServer
-          Install-Module -Name Az.KeyVault
-          
-          $targetSqlPassword = (Get-AzKeyVaultSecret -vaultName $KEY_VAULT_NAME -name $SECRET_NAME).SecretValue
-          $targetSqlServer = Get-AzSqlServer -ServerName $SQL_SERVER_NAME -ResourceGroupName $RESOURCE_GROUP
-          $connectionString = 'Server=$targetSqlServer.FullyQualifiedDomainName;Database=$DB_NAME;User Id=$targetSqlServer.administratorLogin;Password=$targetSqlPassword'
+
+          $targetSqlServer = Get-AzSqlServer -ServerName ${env:SQL_SERVER_NAME} -ResourceGroupName ${env:RESOURCE_GROUP}
+          $connectionString = 'Server=$targetSqlServer.FullyQualifiedDomainName;Database=${env:DB_NAME};User Id=$targetSqlServer.administratorLogin;Password=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}'
 
           $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ConnectionString $connectionString
           if($ds.Tables[0].Rows.Count -eq 1) 
