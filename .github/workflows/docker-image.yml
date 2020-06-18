@@ -33,7 +33,7 @@ jobs:
       - uses: Azure/login@v1.1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          enable-AzPSSession: true
+          # enable-AzPSSession: true
       - uses: Azure/get-keyvault-secrets@v1.0
         with:
           keyvault: radix-vault-dev
