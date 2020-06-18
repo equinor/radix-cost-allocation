@@ -63,6 +63,6 @@ jobs:
           $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ServerInstance $targetSqlServer.FullyQualifiedDomainName -Database ${env:DB_NAME} -Username $targetSqlServer.administratorLogin -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
           if($ds.Tables[0].Rows.Count -eq 1) 
           {
-            Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance $targetSqlServer.FullyQualifiedDomainName -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
+            Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance $targetSqlServer.FullyQualifiedDomainName -Database ${env:DB_NAME} -Username $targetSqlServer.administratorLogin -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
           }
           Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ServerInstance $targetSqlServer.FullyQualifiedDomainName -Database ${env:DB_NAME} -Username $targetSqlServer.administratorLogin -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
