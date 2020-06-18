@@ -34,7 +34,7 @@ func NewSQLClient(server, database string, port int, userID, password string) SQ
 
 // SaveRequiredResources inserts all required resources under run.Resources
 func (sqlClient SQLClient) SaveRequiredResources(run Run) error {
-	tsql := `INSERT INTO radix_cost.required_resources (run_id, wbs, application, environment, component, cpu_millicores, memory_mega_bytes, replicas) 
+	tsql := `INSERT INTO cost.required_resources (run_id, wbs, application, environment, component, cpu_millicores, memory_mega_bytes, replicas) 
 	VALUES (@runId, @wbs, @application, @environment, @component, @cpuMillicores, @memoryMegaBytes, @replicas); select convert(bigint, SCOPE_IDENTITY());`
 	for _, req := range run.Resources {
 		_, err := sqlClient.execSQL(tsql,
@@ -55,7 +55,7 @@ func (sqlClient SQLClient) SaveRequiredResources(run Run) error {
 
 // SaveRun inserts a new run, returns id
 func (sqlClient SQLClient) SaveRun(measuredTime time.Time) (int64, error) {
-	tsql := "INSERT INTO radix_cost.runs (measured_time_utc) VALUES (@measuredTimeUTC); select convert(bigint, SCOPE_IDENTITY());"
+	tsql := "INSERT INTO cost.runs (measured_time_utc) VALUES (@measuredTimeUTC); select convert(bigint, SCOPE_IDENTITY());"
 	return sqlClient.execSQL(tsql, sql.Named("measuredTimeUTC", measuredTime))
 }
 

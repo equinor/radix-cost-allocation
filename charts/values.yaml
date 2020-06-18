@@ -15,8 +15,8 @@ secret:
 
 db:
   user: radix
-  database: radix-cost-exporter-database
-  server: radix-cost-exporter-sql-server.database.windows.net
+  database: radix-cost-allocation-db
+  server: radix-cost-allocation.database.windows.net
   password: password
 
 prometheus:
