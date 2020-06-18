@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build the Docker image
+      - name: Build Docker image
         run: |
           IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
           docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
@@ -18,7 +18,7 @@ jobs:
           login-server: radixdev.azurecr.io
           username: ${{ secrets.DEV_REGISTRY_USERNAME }}
           password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
-      - name: push to radixdev
+      - name: Push to radixdev
         run: |
           IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
           docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
@@ -41,7 +41,7 @@ jobs:
           keyvault: radix-vault-dev
           secrets: "radix-cost-allocation-db-admin"
         id: adminPassword
-      - name: deploy-arm-template
+      - name: Deploy SQL Server and DB
         env:
           DEPLOY_NAME: radix-cost-db-deploy
         run: |
@@ -63,7 +63,7 @@ jobs:
             --name ${env:FIREWALL_RULE_NAME} `
             --resource-group ${env:RESOURCE_GROUP} `
             --server ${env:SQL_SERVER_NAME}
-      - name: apply-sql-script
+      - name: Creating DB schema and tables
         shell: pwsh
         run: |
           Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
@@ -80,6 +80,7 @@ jobs:
           Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
       - name: Blacklist Runner IP in firewalls
         shell: pwsh
+        if: ${{ always() }}
         run: |
           # Get the Runners publics IP
           $runnerIp = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
