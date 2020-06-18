@@ -27,6 +27,7 @@ jobs:
     env:
       DEPLOY_NAME: radix-cost-db-deploy
       RESOURCE_GROUP: common
+      SQL_SERVER_NAME: radix-cost-exporter-sql-server
     steps:
       - uses: actions/checkout@v2
       - uses: Azure/login@v1
@@ -43,5 +44,5 @@ jobs:
           Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
           Install-Module -Name SqlServer
           Import-Module SqlServer
-
-          Invoke-Sqlcmd -ConnectionString ${{ secrets.AZURE_SQL_CONNECTION_STRING }} -Query $changeTables -InputFile ./azure-infrastructure/createTables.sql
+          
+          Invoke-Sqlcmd -ServerInstance radix-cost-exporter-sql-server.database.windows.net -Database radix-cost-exporter-database -Username radix -password ${{ secrets.DB_PASSWORD }} -InputFile ./azure-infrastructure/createTables.sql
