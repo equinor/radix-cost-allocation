@@ -48,7 +48,7 @@ jobs:
         run: |
           Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
           Install-Module -Name SqlServer
-          Import-Module SqlServer
+          Install-Module -Name Az.KeyVault
           
           $targetSqlPassword = (Get-AzKeyVaultSecret -vaultName $KEY_VAULT_NAME -name $SECRET_NAME).SecretValue
           $targetSqlServer = Get-AzSqlServer -ServerName $SQL_SERVER_NAME -ResourceGroupName $RESOURCE_GROUP
