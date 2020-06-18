@@ -5,23 +5,23 @@ on:
     branches: [master, keaaa]
 
 jobs:
-  build-deploy-image:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build the Docker image
-        run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
-      - uses: azure/docker-login@v1
-        with:
-          login-server: radixdev.azurecr.io
-          username: ${{ secrets.DEV_REGISTRY_USERNAME }}
-          password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
-      - name: push to radixdev
-        run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
+  # build-deploy-image:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Build the Docker image
+  #       run: |
+  #         IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
+  #         docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
+  #     - uses: azure/docker-login@v1
+  #       with:
+  #         login-server: radixdev.azurecr.io
+  #         username: ${{ secrets.DEV_REGISTRY_USERNAME }}
+  #         password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
+  #     - name: push to radixdev
+  #       run: |
+  #         IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
+  #         docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
   deploy-db-arm-template:
     runs-on: ubuntu-latest
     env:
@@ -39,28 +39,30 @@ jobs:
           keyvault: radix-vault-dev
           secrets: "radix-cost-allocation-db-admin"
         id: adminPassword
-      - name: deploy-arm-template
-        env:
-          DEPLOY_NAME: radix-cost-db-deploy
-        run: |
-          az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
-            --template-file ./azure-infrastructure/azuredeploy.json \
-            --parameters sqlServerName=$SQL_SERVER_NAME \
-            --parameters databaseName=$DB_NAME \
-            --parameters sqlAdministratorLoginPassword=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
+      # - name: deploy-arm-template
+      #   env:
+      #     DEPLOY_NAME: radix-cost-db-deploy
+      #   run: |
+      #     az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
+      #       --template-file ./azure-infrastructure/azuredeploy.json \
+      #       --parameters sqlServerName=$SQL_SERVER_NAME \
+      #       --parameters databaseName=$DB_NAME \
+      #       --parameters sqlAdministratorLoginPassword=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
       - name: apply-sql-script
-        shell: pwsh
-        run: |
-          Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-          Install-Module -Name SqlServer
-          Install-Module -Name Az.Sql
+        uses: azure/powershell@v1
+        with: 
+          azPSVersion: 'latest'
+          inlineScript: |
+            Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+            Install-Module -Name SqlServer
+            Install-Module -Name Az.Sql
 
-          $targetSqlServer = Get-AzSqlServer -ServerName ${env:SQL_SERVER_NAME} -ResourceGroupName ${env:RESOURCE_GROUP}
-          $connectionString = 'Server=$targetSqlServer.FullyQualifiedDomainName;Database=${env:DB_NAME};User Id=$targetSqlServer.administratorLogin;Password=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}'
+            $targetSqlServer = Get-AzSqlServer -ServerName ${env:SQL_SERVER_NAME} -ResourceGroupName ${env:RESOURCE_GROUP}
+            $connectionString = 'Server=$targetSqlServer.FullyQualifiedDomainName;Database=${env:DB_NAME};User Id=$targetSqlServer.administratorLogin;Password=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}'
 
-          $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ConnectionString $connectionString
-          if($ds.Tables[0].Rows.Count -eq 1) 
-          {
-            Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ConnectionString $connectionString
-          }
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ConnectionString $connectionString
+            $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ConnectionString $connectionString
+            if($ds.Tables[0].Rows.Count -eq 1) 
+            {
+              Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ConnectionString $connectionString
+            }
+            Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ConnectionString $connectionString
