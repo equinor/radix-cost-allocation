@@ -1,9 +1,9 @@
 IF (NOT EXISTS (SELECT *
 FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_SCHEMA = 'radix_cost'
+WHERE TABLE_SCHEMA = 'cost'
     AND TABLE_NAME = 'runs'))
                  BEGIN
-    CREATE TABLE radix_cost.runs
+    CREATE TABLE cost.runs
     (
         id INT IDENTITY(1, 1) NOT NULL PRIMARY KEY,
         measured_time_utc DATETIME2,
@@ -12,13 +12,13 @@ END
 
 IF (NOT EXISTS (SELECT *
 FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_SCHEMA = 'radix_cost'
+WHERE TABLE_SCHEMA = 'cost'
     AND TABLE_NAME = 'required_resources'))
                  BEGIN
-    CREATE TABLE radix_cost.required_resources
+    CREATE TABLE cost.required_resources
     (
         id INT IDENTITY(1, 1) NOT NULL PRIMARY KEY,
-        run_id INT FOREIGN KEY REFERENCES radix_cost.runs(id),
+        run_id INT FOREIGN KEY REFERENCES cost.runs(id),
         wbs VARCHAR(256),
         application VARCHAR(256),
         environment VARCHAR(256),
