@@ -52,6 +52,7 @@ jobs:
         run: |
           Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
           Install-Module -Name SqlServer
+          Install-Module -Name Az.Sql
 
           $targetSqlServer = Get-AzSqlServer -ServerName ${env:SQL_SERVER_NAME} -ResourceGroupName ${env:RESOURCE_GROUP}
           $connectionString = 'Server=$targetSqlServer.FullyQualifiedDomainName;Database=${env:DB_NAME};User Id=$targetSqlServer.administratorLogin;Password=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}'
