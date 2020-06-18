@@ -69,8 +69,8 @@ jobs:
           Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
           Install-Module -Name SqlServer
 
-          $targetSqlServerFQDN = '${env:SQL_SERVER_NAME}.database.windows.net'
-          $connectionString = 'Server=$targetSqlServerFQDN;Database=${env:DB_NAME};User Id=$targetSqlServer.administratorLogin;Password=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}'
+          $targetSqlServerFQDN = "$(az sql server show -n ${env:SQL_SERVER_NAME} -g ${env:RESOURCE_GROUP} | jq -r .fullyQualifiedDomainName)"
+          $connectionString = "Server=$targetSqlServerFQDN;Database=${env:DB_NAME};User Id=$targetSqlServer.administratorLogin;Password=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}"
 
           $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
           if($ds.Tables[0].Rows.Count -eq 1) 
