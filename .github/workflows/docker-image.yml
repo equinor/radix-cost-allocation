@@ -30,7 +30,7 @@ jobs:
       DB_NAME: radix-cost-allocation-db
     steps:
       - uses: actions/checkout@v2
-      - uses: Azure/login@v1
+      - uses: Azure/login@v1.1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
@@ -49,20 +49,18 @@ jobs:
       #       --parameters databaseName=$DB_NAME \
       #       --parameters sqlAdministratorLoginPassword=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
       - name: apply-sql-script
-        uses: azure/powershell@v1
-        with: 
-          azPSVersion: 'latest'
-          inlineScript: |
-            Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-            Install-Module -Name SqlServer
-            Install-Module -Name Az.Sql
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+          Install-Module -Name SqlServer
+          Install-Module -Name Az.Sql
 
-            $targetSqlServer = Get-AzSqlServer -ServerName ${env:SQL_SERVER_NAME} -ResourceGroupName ${env:RESOURCE_GROUP}
-            $connectionString = 'Server=$targetSqlServer.FullyQualifiedDomainName;Database=${env:DB_NAME};User Id=$targetSqlServer.administratorLogin;Password=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}'
+          $targetSqlServer = Get-AzSqlServer -ServerName ${env:SQL_SERVER_NAME} -ResourceGroupName ${env:RESOURCE_GROUP}
+          $connectionString = 'Server=$targetSqlServer.FullyQualifiedDomainName;Database=${env:DB_NAME};User Id=$targetSqlServer.administratorLogin;Password=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}'
 
-            $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ConnectionString $connectionString
-            if($ds.Tables[0].Rows.Count -eq 1) 
-            {
-              Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ConnectionString $connectionString
-            }
-            Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ConnectionString $connectionString
+          $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ConnectionString $connectionString
+          if($ds.Tables[0].Rows.Count -eq 1) 
+          {
+            Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ConnectionString $connectionString
+          }
+          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ConnectionString $connectionString
