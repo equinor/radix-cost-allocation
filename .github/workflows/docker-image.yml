@@ -45,7 +45,7 @@ jobs:
           Install-Module -Name SqlServer
           Import-Module SqlServer
           
-          ds=Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name = 'cost'" -As DataSet -ServerInstance radix-cost-exporter-sql-server.database.windows.net -Database radix-cost-exporter-database -Username radix -password ${{ secrets.DB_PASSWORD }} 
+          $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name = 'cost'" -As DataSet -ServerInstance radix-cost-exporter-sql-server.database.windows.net -Database radix-cost-exporter-database -Username radix -password ${{ secrets.DB_PASSWORD }}
           if(ds.Tables[0].Rows.Count == 0) 
           {
             Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance radix-cost-exporter-sql-server.database.windows.net -Database radix-cost-exporter-database -Username radix -password ${{ secrets.DB_PASSWORD }}
