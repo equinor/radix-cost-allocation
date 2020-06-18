@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ master, keaaa ]
+    branches: [master, keaaa]
 
 jobs:
   build-deploy-image:
@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build the Docker image
         run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}  
+          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
           docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
       - uses: azure/docker-login@v1
         with:
@@ -27,7 +27,10 @@ jobs:
     env:
       DEPLOY_NAME: radix-cost-db-deploy
       RESOURCE_GROUP: common
-      SQL_SERVER_NAME: radix-cost-exporter-sql-server
+      KEY_VAULT_NAME: radix-vault-dev
+      SECRET_NAME: radix-cost-allocation-db-admin
+      SQL_SERVER_NAME: radix-cost-allocation
+      DB_NAME: radix-cost-allocation-db
     steps:
       - uses: actions/checkout@v2
       - uses: Azure/login@v1
@@ -37,6 +40,8 @@ jobs:
         run: |
           az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
             --template-file ./azure-infrastructure/azuredeploy.json \
+            --parameters sqlServerName=$SQL_SERVER_NAME \
+            --parameters databaseName=$DB_NAME \
             --parameters sqlAdministratorLoginPassword=${{ secrets.DB_PASSWORD }}
       - name: apply-sql-script
         shell: pwsh
@@ -45,9 +50,13 @@ jobs:
           Install-Module -Name SqlServer
           Import-Module SqlServer
           
-          $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ServerInstance radix-cost-exporter-sql-server.database.windows.net -Database radix-cost-exporter-database -Username radix -password ${{ secrets.DB_PASSWORD }}
+          $targetSqlPassword = (Get-AzKeyVaultSecret -vaultName $KEY_VAULT_NAME -name $SECRET_NAME).SecretValue
+          $targetSqlServer = Get-AzSqlServer -ServerName $SQL_SERVER_NAME -ResourceGroupName $RESOURCE_GROUP
+          $connectionString = 'Server=$targetSqlServer.FullyQualifiedDomainName;Database=$DB_NAME;User Id=$targetSqlServer.administratorLogin;Password=$targetSqlPassword'
+
+          $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ConnectionString $connectionString
           if($ds.Tables[0].Rows.Count -eq 1) 
           {
-            Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance radix-cost-exporter-sql-server.database.windows.net -Database radix-cost-exporter-database -Username radix -password ${{ secrets.DB_PASSWORD }}
+            Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ConnectionString $connectionString
           }
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ServerInstance radix-cost-exporter-sql-server.database.windows.net -Database radix-cost-exporter-database -Username radix -password ${{ secrets.DB_PASSWORD }}
+          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ConnectionString $connectionString

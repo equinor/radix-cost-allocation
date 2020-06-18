@@ -6,6 +6,12 @@
       "type": "string",
       "defaultValue": "radix"
     },
+    "sqlServerName": {
+      "type": "string"
+    },
+    "databaseName": {
+      "type": "string"
+    },
     "sqlAdministratorLoginPassword": {
       "type": "securestring"
     },
@@ -19,13 +25,9 @@
       "defaultValue": "[resourceGroup().location]"
     }
   },
-  "variables": {
-    "sqlServerName": "radix-cost-exporter-sql-server",
-    "databaseName": "radix-cost-exporter-database"
-  },
   "resources": [
     {
-      "name": "[variables('sqlServerName')]",
+      "name": "[parameters('sqlServerName')]",
       "type": "Microsoft.Sql/servers",
       "apiVersion": "2019-06-01-preview",
       "location": "[parameters('location')]",
@@ -40,14 +42,14 @@
       },
       "resources": [
         {
-          "name": "[variables('databaseName')]",
+          "name": "[parameters('databaseName')]",
           "type": "databases",
           "apiVersion": "2019-06-01-preview",
           "location": "[parameters('location')]",
           "tags": {
             "displayName": "Database"
           },
-          "dependsOn": ["[variables('sqlServerName')]"],
+          "dependsOn": ["[parameters('sqlServerName')]"],
           "sku": {
             "name": "Standard",
             "tier": "Standard",
@@ -71,7 +73,7 @@
               "properties": {
                 "status": "[parameters('transparentDataEncryption')]"
               },
-              "dependsOn": ["[variables('databaseName')]"]
+              "dependsOn": ["[parameters('databaseName')]"]
             }
           ]
         },
@@ -84,7 +86,7 @@
             "endIpAddress": "0.0.0.0",
             "startIpAddress": "0.0.0.0"
           },
-          "dependsOn": ["[variables('sqlServerName')]"]
+          "dependsOn": ["[parameters('sqlServerName')]"]
         }
       ]
     }
@@ -92,11 +94,11 @@
   "outputs": {
     "sqlServerFqdn": {
       "type": "string",
-      "value": "[reference(concat('Microsoft.Sql/servers/', variables('sqlServerName'))).fullyQualifiedDomainName]"
+      "value": "[reference(concat('Microsoft.Sql/servers/', parameters('sqlServerName'))).fullyQualifiedDomainName]"
     },
     "databaseName": {
       "type": "string",
-      "value": "[variables('databaseName')]"
+      "value": "[parameters('databaseName')]"
     }
   }
 }
