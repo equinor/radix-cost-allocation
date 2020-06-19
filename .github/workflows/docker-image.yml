@@ -7,46 +7,56 @@ on:
 jobs:
   build-deploy-image:
     runs-on: ubuntu-latest
+    env:
+      RADIX_ENV: ${{ github.ref == 'refs/heads/release' ? prod : dev }}
     steps:
       - uses: actions/checkout@v2
       - name: Build Docker image
-        run: |
+        run: |          
           IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG -t radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
-      - uses: Azure/login@v1.1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Push to radixdev
-        run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          az acr login -n radixdev -g common
-          docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
-          az logout
-      - uses: Azure/login@v1.1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
-      - name: Push to radixprod
-        run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          az acr login -n radixprod -g common
-          docker push radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG
-  # deploy-db-arm-template:
+          echo $RADIX_ENV
+      #     docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG -t radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
+      # - uses: Azure/login@v1.1
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+      # - name: Push to radixdev
+      #   run: |
+      #     IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
+      #     az acr login -n radixdev -g common
+      #     docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
+      #     az logout
+      # - uses: Azure/login@v1.1
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
+      # - name: Push to radixprod
+      #   run: |
+      #     IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
+      #     az acr login -n radixprod -g common
+      #     docker push radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG
+  # deploy-sql-server:
   #   runs-on: ubuntu-latest
   #   env:
   #     RESOURCE_GROUP: common
-  #     SQL_SERVER_NAME: radix-cost-allocation
-  #     DB_NAME: radix-cost-allocation-db
+  #     SQL_SERVER_NAME: ${{ github.ref == 'refs/heads/release' ? sql-radix-cost-allocation-prod : sql-radix-cost-allocation-dev }}
+  #     DB_NAME: sqldb-radix-cost-allocation
   #     DB_USER_NAME: radix
   #     FIREWALL_RULE_NAME: githubRunnerIp
-  #   steps: admin
+  #     RADIX_ENV: ${{ github.ref == 'refs/heads/release' ? prod : dev }}
+  #   steps: 
   #     - uses: actions/checkout@v2
   #     - uses: Azure/login@v1.1
+  #       if: ${{ github.ref == 'refs/heads/master' }}
   #       with:
   #         creds: ${{ secrets.AZURE_CREDENTIALS }}
   #         enable-AzPSSession: true
+  #     - uses: Azure/login@v1.1
+  #       if: ${{ github.ref == 'refs/heads/release' }}
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
+  #         enable-AzPSSession: true
   #     - uses: Azure/get-keyvault-secrets@v1.0
   #       with:
-  #         keyvault: radix-vault-dev
+  #         keyvault: radix-vault-${{ env.RADIX_ENV }}
   #         secrets: "radix-cost-allocation-db-admin"
   #       id: adminPassword
   #     - name: Deploy SQL Server and DB
