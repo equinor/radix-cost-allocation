@@ -5,31 +5,31 @@ on:
     branches: [master, release, feature/pushacr]
 
 jobs:
-  # build-deploy-image:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Build Docker image
-  #       run: |
-  #         IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-  #         docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG -t radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
-  #     - uses: Azure/login@v1.1
-  #       with:
-  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
-  #     - name: Push to radixdev
-  #       run: |
-  #         IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-  #         az acr login -n radixdev -g common
-  #         docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
-  #         az logout
-  #     - uses: Azure/login@v1.1
-  #       with:
-  #         creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
-  #     - name: Push to radixprod
-  #       run: |
-  #         IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-  #         az acr login -n radixprod -g common
-  #         docker push radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG
+  build-deploy-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build Docker image
+        run: |
+          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
+          docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG -t radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
+      - uses: Azure/login@v1.1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Push to radixdev
+        run: |
+          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
+          az acr login -n radixdev -g common
+          docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
+          az logout
+      - uses: Azure/login@v1.1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
+      - name: Push to radixprod
+        run: |
+          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
+          az acr login -n radixprod -g common
+          docker push radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG
   deploy-sql-server:
     runs-on: ubuntu-latest
     env:
@@ -42,24 +42,20 @@ jobs:
       - name: Set environment variables
         run: |
           RADIX_ENV="dev" && [[ $GITHUB_REF == 'refs/heads/release' ]] && RADIX_ENV="prod"
-          declare -a DEPLOY_SQL_SERVER_NAMES=("sql-radix-cost-allocation-dev" 
-              "sql-radix-cost-allocation-playground"
-              )
-          if [ $RADIX_ENV = "prod" ]; then
-            declare -a DEPLOY_SQL_SERVER_NAMES=("sql-radix-cost-allocation-prod")
-          fi
-          echo "::set-env name=SQL_SERVER_NAME::$DEPLOY_SQL_SERVER_NAMES"
+
+          echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-$RADIX_ENV"
           echo "::set-env name=KEY_VAULT_NAME::radix-vault-$RADIX_ENV"
-      # - uses: Azure/login@v1.1
-      #   if: ${{ github.ref != 'refs/heads/release' }}
-      #   with:
-      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
-      #     enable-AzPSSession: true
-      # - uses: Azure/login@v1.1
-      #   if: ${{ github.ref == 'refs/heads/release' }}
-      #   with:
-      #     creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
-      #     enable-AzPSSession: true
+          echo "::set-env name=RADIX_ENV::$RADIX_ENV"
+      - uses: Azure/login@v1.1
+        if: ${{ github.ref != 'refs/heads/release' }}
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+      - uses: Azure/login@v1.1
+        if: ${{ github.ref == 'refs/heads/release' }}
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
+          enable-AzPSSession: true
       - uses: Azure/get-keyvault-secrets@v1.0
         with:
           keyvault: ${{ env.KEY_VAULT_NAME }}
