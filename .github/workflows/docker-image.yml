@@ -35,7 +35,6 @@ jobs:
     strategy:
       matrix:
         deploy: [dev, prod, playground]
-    # if: ${{ (github.ref == 'refs/heads/release' && matrix.deploy == 'prod') || (github.ref == 'refs/heads/master' && matrix.deploy == 'dev') || (github.ref == 'refs/heads/master' && matrix.deploy == 'playground') }}
     env:
       RESOURCE_GROUP: common
       DB_NAME: sqldb-radix-cost-allocation
@@ -43,6 +42,9 @@ jobs:
       FIREWALL_RULE_NAME: githubRunnerIp
     steps:       
       - uses: actions/checkout@v2
+      - name: Condition - fail run if branch does not match strategy.matrix
+        if: ${{ !((github.ref == 'refs/heads/release' && matrix.deploy == 'prod') || (github.ref == 'refs/heads/master' && matrix.deploy == 'dev') || (github.ref == 'refs/heads/master' && matrix.deploy == 'playground')) }}
+        run: exit 1
       - name: Set environment variables
         run: |
           echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-$matrix.deploy"
