@@ -2,90 +2,97 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [master, keaaa]
+    branches: [master, release, feature/pushacr]
 
 jobs:
   build-deploy-image:
     runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{GITHUB_REF##*/}}-${{ github.sha }}
     steps:
       - uses: actions/checkout@v2
       - name: Build Docker image
         run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
-      - uses: azure/docker-login@v1
-        with:
-          login-server: radixdev.azurecr.io
-          username: ${{ secrets.DEV_REGISTRY_USERNAME }}
-          password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
-      - name: Push to radixdev
-        run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
-  deploy-db-arm-template:
-    runs-on: ubuntu-latest
-    env:
-      RESOURCE_GROUP: common
-      SQL_SERVER_NAME: radix-cost-allocation
-      DB_NAME: radix-cost-allocation-db
-      DB_USER_NAME: radix
-      FIREWALL_RULE_NAME: githubRunnerIp
-    steps:
-      - uses: actions/checkout@v2
+          docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG -t radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
       - uses: Azure/login@v1.1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          enable-AzPSSession: true
-      - uses: Azure/get-keyvault-secrets@v1.0
+      - name: Push to radixdev
+        run: |
+          az acr login -n radixdev -g common
+          docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
+          az logout
+      - uses: Azure/login@v1.1
         with:
-          keyvault: radix-vault-dev
-          secrets: "radix-cost-allocation-db-admin"
-        id: adminPassword
-      - name: Deploy SQL Server and DB
-        env:
-          DEPLOY_NAME: radix-cost-db-deploy
+          creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
+      - name: Push to radixprod
         run: |
-          az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
-            --template-file ./azure-infrastructure/azuredeploy.json \
-            --parameters sqlServerName=$SQL_SERVER_NAME \
-            --parameters databaseName=$DB_NAME \
-            --parameters sqlAdministratorLoginPassword=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }} \
-            --parameters sqlAdministratorLoginUser=$DB_USER_NAME
-      - name: Whitelist Runner IP in firewalls
-        shell: pwsh
-        run: |
-          # Get the Runners publics IP
-          $runnerIp = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
-          # Set runner public IP in the production server firewall
-          az sql server firewall-rule create `
-            --end-ip-address $runnerIp `
-            --start-ip-address $runnerIp `
-            --name ${env:FIREWALL_RULE_NAME} `
-            --resource-group ${env:RESOURCE_GROUP} `
-            --server ${env:SQL_SERVER_NAME}
-      - name: Creating DB schema and tables
-        shell: pwsh
-        run: |
-          Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-          Install-Module -Name SqlServer
+          az acr login -n radixprod -g common
+          docker push radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG
+  # deploy-db-arm-template:
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     RESOURCE_GROUP: common
+  #     SQL_SERVER_NAME: radix-cost-allocation
+  #     DB_NAME: radix-cost-allocation-db
+  #     DB_USER_NAME: radix
+  #     FIREWALL_RULE_NAME: githubRunnerIp
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: Azure/login@v1.1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
+  #         enable-AzPSSession: true
+  #     - uses: Azure/get-keyvault-secrets@v1.0
+  #       with:
+  #         keyvault: radix-vault-dev
+  #         secrets: "radix-cost-allocation-db-admin"
+  #       id: adminPassword
+  #     - name: Deploy SQL Server and DB
+  #       env:
+  #         DEPLOY_NAME: radix-cost-db-deploy
+  #       run: |
+  #         az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
+  #           --template-file ./azure-infrastructure/azuredeploy.json \
+  #           --parameters sqlServerName=$SQL_SERVER_NAME \
+  #           --parameters databaseName=$DB_NAME \
+  #           --parameters sqlAdministratorLoginPassword=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }} \
+  #           --parameters sqlAdministratorLoginUser=$DB_USER_NAME
+  #     - name: Whitelist Runner IP in firewalls
+  #       shell: pwsh
+  #       run: |
+  #         # Get the Runners publics IP
+  #         $runnerIp = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
+  #         # Set runner public IP in the production server firewall
+  #         az sql server firewall-rule create `
+  #           --end-ip-address $runnerIp `
+  #           --start-ip-address $runnerIp `
+  #           --name ${env:FIREWALL_RULE_NAME} `
+  #           --resource-group ${env:RESOURCE_GROUP} `
+  #           --server ${env:SQL_SERVER_NAME}
+  #     - name: Creating DB schema and tables
+  #       shell: pwsh
+  #       run: |
+  #         Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+  #         Install-Module -Name SqlServer
 
-          $targetSqlServerFQDN = "$(az sql server show -n ${env:SQL_SERVER_NAME} -g ${env:RESOURCE_GROUP} | jq -r .fullyQualifiedDomainName)"
-          $connectionString = "Server=$targetSqlServerFQDN;Database=${env:DB_NAME};User Id=$targetSqlServer.administratorLogin;Password=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}"
+  #         $targetSqlServerFQDN = "$(az sql server show -n ${env:SQL_SERVER_NAME} -g ${env:RESOURCE_GROUP} | jq -r .fullyQualifiedDomainName)"
+  #         $connectionString = "Server=$targetSqlServerFQDN;Database=${env:DB_NAME};User Id=$targetSqlServer.administratorLogin;Password=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}"
 
-          $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          if($ds.Tables[0].Rows.Count -eq 1) 
-          {
-            Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          }
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-      - name: Blacklist Runner IP in firewalls
-        shell: pwsh
-        if: ${{ always() }}
-        run: |
-          # Get the Runners publics IP
-          $runnerIp = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
-          # Set runner public IP in the production server firewall
-          az sql server firewall-rule delete `
-            --name ${env:FIREWALL_RULE_NAME} `
-            --resource-group ${env:RESOURCE_GROUP} `
-            --server ${env:SQL_SERVER_NAME}
+  #         $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
+  #         if($ds.Tables[0].Rows.Count -eq 1) 
+  #         {
+  #           Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
+  #         }
+  #         Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
+  #     - name: Blacklist Runner IP in firewalls
+  #       shell: pwsh
+  #       if: ${{ always() }}
+  #       run: |
+  #         # Get the Runners publics IP
+  #         $runnerIp = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
+  #         # Set runner public IP in the production server firewall
+  #         az sql server firewall-rule delete `
+  #           --name ${env:FIREWALL_RULE_NAME} `
+  #           --resource-group ${env:RESOURCE_GROUP} `
+  #           --server ${env:SQL_SERVER_NAME}
