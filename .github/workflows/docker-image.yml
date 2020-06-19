@@ -8,7 +8,7 @@ jobs:
   build-deploy-image:
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: '${{ GITHUB_REF##*/ }}-${{ github.sha }}'
+      IMAGE_TAG: '${ GITHUB_REF##*/ }-${{ github.sha }}'
     steps:
       - uses: actions/checkout@v2
       - name: Build Docker image
