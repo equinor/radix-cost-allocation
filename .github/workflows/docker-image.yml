@@ -35,7 +35,7 @@ jobs:
     strategy:
       matrix:
         deploy: [dev, prod, playground]
-    if: ${{ (github.ref == 'refs/heads/release' && matrix.deploy == 'prod') || (github.ref == 'refs/heads/master' && matrix.deploy == 'dev') || (github.ref == 'refs/heads/master' && matrix.deploy == 'playground') }}
+    # if: ${{ (github.ref == 'refs/heads/release' && matrix.deploy == 'prod') || (github.ref == 'refs/heads/master' && matrix.deploy == 'dev') || (github.ref == 'refs/heads/master' && matrix.deploy == 'playground') }}
     env:
       RESOURCE_GROUP: common
       DB_NAME: sqldb-radix-cost-allocation
