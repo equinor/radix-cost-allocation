@@ -33,6 +33,7 @@ jobs:
   deploy-sql-server:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         deploy: [dev, prod, playground]
     env:
@@ -47,8 +48,8 @@ jobs:
         run: exit 1
       - name: Set environment variables
         run: |
-          echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-$matrix.deploy"
-          echo "::set-env name=KEY_VAULT_NAME::radix-vault-$matrix.deploy"
+          echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-${{ matrix.deploy }}"
+          echo "::set-env name=KEY_VAULT_NAME::radix-vault-${{ matrix.deploy }}"
       - uses: Azure/login@v1.1
         if: ${{ github.ref != 'refs/heads/release' }}
         with:
