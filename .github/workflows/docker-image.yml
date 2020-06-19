@@ -41,8 +41,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: Set environment variables
         run: |
-          echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-dev"
-          echo "::set-env name=KEY_VAULT_NAME::radix-vault-dev"
+          echo "::set-env name=RADIX_ENV::$(( github.ref == 'refs/heads/release' ? 'prod' : 'dev' ))"
+          echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-$RADIX_ENV"
+          echo "::set-env name=KEY_VAULT_NAME::radix-vault-$RADIX_ENV"
       - uses: Azure/login@v1.1
         if: ${{ github.ref != 'refs/heads/release' }}
         with:
