@@ -32,6 +32,10 @@ jobs:
           docker push radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG
   deploy-sql-server:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        deploy: [dev, prod, playground]
+    if: ${{ (github.ref == 'refs/heads/release' && matrix.deploy == 'prod') || (github.ref == 'refs/heads/master' && matrix.deploy == 'dev') || (github.ref == 'refs/heads/master' && matrix.deploy == 'playground') }}
     env:
       RESOURCE_GROUP: common
       DB_NAME: sqldb-radix-cost-allocation
@@ -41,11 +45,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Set environment variables
         run: |
-          RADIX_ENV="dev" && [[ $GITHUB_REF == 'refs/heads/release' ]] && RADIX_ENV="prod"
-
-          echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-$RADIX_ENV"
-          echo "::set-env name=KEY_VAULT_NAME::radix-vault-$RADIX_ENV"
-          echo "::set-env name=RADIX_ENV::$RADIX_ENV"
+          echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-$matrix.deploy"
+          echo "::set-env name=KEY_VAULT_NAME::radix-vault-$matrix.deploy"
       - uses: Azure/login@v1.1
         if: ${{ github.ref != 'refs/heads/release' }}
         with:
