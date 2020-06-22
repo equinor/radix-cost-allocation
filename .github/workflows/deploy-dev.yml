@@ -1,36 +1,20 @@
-name: Docker Image CI
+name: Deploy azure infrastructure to dev
 
 on:
   push:
-    branches: [master, keaaa]
+    branches: [master]
 
 jobs:
-  build-deploy-image:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build Docker image
-        run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
-      - uses: azure/docker-login@v1
-        with:
-          login-server: radixdev.azurecr.io
-          username: ${{ secrets.DEV_REGISTRY_USERNAME }}
-          password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
-      - name: Push to radixdev
-        run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
-  deploy-db-arm-template:
+  deploy-sql-server:
     runs-on: ubuntu-latest
     env:
-      RESOURCE_GROUP: common
-      SQL_SERVER_NAME: radix-cost-allocation
-      DB_NAME: radix-cost-allocation-db
+      RESOURCE_GROUP: cost-allocation
+      KEY_VAULT_NAME: radix-vault-dev
+      SQL_SERVER_NAME: sql-radix-cost-allocation-dev
+      DB_NAME: sqldb-radix-cost-allocation
       DB_USER_NAME: radix
       FIREWALL_RULE_NAME: githubRunnerIp
-    steps:
+    steps:       
       - uses: actions/checkout@v2
       - uses: Azure/login@v1.1
         with:
@@ -38,7 +22,7 @@ jobs:
           enable-AzPSSession: true
       - uses: Azure/get-keyvault-secrets@v1.0
         with:
-          keyvault: radix-vault-dev
+          keyvault: ${{ env.KEY_VAULT_NAME }}
           secrets: "radix-cost-allocation-db-admin"
         id: adminPassword
       - name: Deploy SQL Server and DB
@@ -54,9 +38,7 @@ jobs:
       - name: Whitelist Runner IP in firewalls
         shell: pwsh
         run: |
-          # Get the Runners publics IP
           $runnerIp = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
-          # Set runner public IP in the production server firewall
           az sql server firewall-rule create `
             --end-ip-address $runnerIp `
             --start-ip-address $runnerIp `
@@ -70,7 +52,6 @@ jobs:
           Install-Module -Name SqlServer
 
           $targetSqlServerFQDN = "$(az sql server show -n ${env:SQL_SERVER_NAME} -g ${env:RESOURCE_GROUP} | jq -r .fullyQualifiedDomainName)"
-          $connectionString = "Server=$targetSqlServerFQDN;Database=${env:DB_NAME};User Id=$targetSqlServer.administratorLogin;Password=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}"
 
           $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
           if($ds.Tables[0].Rows.Count -eq 1) 
@@ -82,9 +63,7 @@ jobs:
         shell: pwsh
         if: ${{ always() }}
         run: |
-          # Get the Runners publics IP
           $runnerIp = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
-          # Set runner public IP in the production server firewall
           az sql server firewall-rule delete `
             --name ${env:FIREWALL_RULE_NAME} `
             --resource-group ${env:RESOURCE_GROUP} `
