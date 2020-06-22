@@ -1,4 +1,4 @@
-module github.com/equinor/radix-export-cost-data
+module github.com/equinor/radix-cost-allocation
 
 go 1.13
 
@@ -9,11 +9,11 @@ require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20200428022330-06a60b6afbbc
 	github.com/gophercloud/gophercloud v0.11.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.14.6 // indirect
-	github.com/hashicorp/consul/api v1.4.0
+	github.com/hashicorp/consul/api v1.4.0 // indirect
 	github.com/opentracing/opentracing-go v1.1.0 // indirect
 	github.com/prometheus/client_golang v1.6.0
 	github.com/prometheus/common v0.9.1
-	github.com/prometheus/prometheus v2.5.0+incompatible
+	github.com/prometheus/prometheus v2.5.0+incompatible // indirect
 	github.com/prometheus/tsdb v0.10.0 // indirect
 	github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect

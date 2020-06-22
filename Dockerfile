@@ -5,7 +5,7 @@ RUN apk update && \
     apk add --no-cache gcc musl-dev && \
     go get -u golang.org/x/lint/golint github.com/frapposelli/wwhrd
 
-WORKDIR /go/src/github.com/equinor/radix-export-cost/
+WORKDIR /go/src/github.com/equinor/radix-cost-allocation/
 
 # Install project dependencies
 COPY go.mod go.sum ./
@@ -24,15 +24,15 @@ RUN golint `go list ./...` && \
     CGO_ENABLED=0 GOOS=linux go test `go list ./...`
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -a -installsuffix cgo -o ./rootfs/radix-export-cost
-RUN adduser -D -g '' radix-export-cost
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -a -installsuffix cgo -o ./rootfs/radix-cost-allocation
+RUN adduser -D -g '' radix-cost-allocation
 
 
 # Run operator
 FROM scratch
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /go/src/github.com/equinor/radix-export-cost/rootfs/radix-export-cost /usr/local/bin/radix-export-cost
-USER radix-export-cost
+COPY --from=builder /go/src/github.com/equinor/radix-cost-allocation/rootfs/radix-cost-allocation /usr/local/bin/radix-cost-allocation
+USER radix-cost-allocation
 
-ENTRYPOINT ["/usr/local/bin/radix-export-cost"]
+ENTRYPOINT ["/usr/local/bin/radix-cost-allocation"]
