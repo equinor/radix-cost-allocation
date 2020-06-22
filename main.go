@@ -33,7 +33,7 @@ func main() {
 	}
 	fmt.Printf("Run %d started at %v.\n", runID, measuredTimeUTC)
 
-	run := Run{ID: runID, MeasuredTimeUTC: measuredTimeUTC, Resources: reqResources}
+	run := Run{ID: runID, MeasuredTimeUTC: measuredTimeUTC, ClusterCPUMillicore: nrClusterCPU * 1000, Resources: reqResources}
 	err = sqlClient.SaveRequiredResources(run)
 	if err != nil {
 		log.Fatal("Error saving resources: ", err.Error())
