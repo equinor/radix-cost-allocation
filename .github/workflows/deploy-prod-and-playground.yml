@@ -1,41 +1,16 @@
-name: Docker Image CI
+name: Deploy to prod and playground
 
 on:
   push:
-    branches: [master, release, feature/pushacr]
+    branches: [release, feature/pushacr]
 
 jobs:
-  build-deploy-image:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build Docker image
-        run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          docker build -t radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG -t radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG .
-      - uses: Azure/login@v1.1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Push to radixdev
-        run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          az acr login -n radixdev -g common
-          docker push radixdev.azurecr.io/radix-cost-exporter:$IMAGE_TAG
-          az logout
-      - uses: Azure/login@v1.1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
-      - name: Push to radixprod
-        run: |
-          IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          az acr login -n radixprod -g common
-          docker push radixprod.azurecr.io/radix-cost-exporter:$IMAGE_TAG
   deploy-sql-server:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        deploy: [dev, prod, playground]
+        deploy: [prod, playground]
     env:
       RESOURCE_GROUP: common
       DB_NAME: sqldb-radix-cost-allocation
@@ -43,20 +18,19 @@ jobs:
       FIREWALL_RULE_NAME: githubRunnerIp
     steps:       
       - uses: actions/checkout@v2
-      - name: Condition - fail run if branch does not match strategy.matrix
-        if: ${{ !((github.ref == 'refs/heads/feature/pushacr' && matrix.deploy == 'dev') || (github.ref == 'refs/heads/release' && matrix.deploy == 'prod') || (github.ref == 'refs/heads/master' && matrix.deploy == 'dev') || (github.ref == 'refs/heads/master' && matrix.deploy == 'playground')) }}
-        uses: andymckay/cancel-action@0.2
       - name: Set environment variables
         run: |
+          RADIX_ENV="dev" && [[ $matrix.deploy == 'prod' ]] && RADIX_ENV="prod"
+
           echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-${{ matrix.deploy }}"
-          echo "::set-env name=KEY_VAULT_NAME::radix-vault-${{ matrix.deploy }}"
+          echo "::set-env name=KEY_VAULT_NAME::radix-vault-$RADIX_ENV"
       - uses: Azure/login@v1.1
-        if: ${{ github.ref != 'refs/heads/release' }}
+        if: ${{ $matrix.deploy == 'playground' }}
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
       - uses: Azure/login@v1.1
-        if: ${{ github.ref == 'refs/heads/release' }}
+        if: ${{ $matrix.deploy == 'prod' }}
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
           enable-AzPSSession: true
