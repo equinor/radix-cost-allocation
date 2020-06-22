@@ -2,7 +2,7 @@ name: Deploy ARM to prod and playground
 
 on:
   push:
-    branches: [release, test]
+    branches: [release]
 
 jobs:
   deploy-sql-server:
