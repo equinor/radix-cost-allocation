@@ -36,19 +36,32 @@ func (client PrometheusClient) GetRequiredResources(measuredTime time.Time) ([]R
 	return reqResources, nil
 }
 
+// GetNodeCPUFromPrometheus gets the number of cpu for a given time
+func (client PrometheusClient) GetNodeCPUFromPrometheus(measuredTime time.Time) (int, error) {
+	vector, err := client.getVectorPrometheus(measuredTime, "sum(instance:node_num_cpu:sum)")
+	if err != nil {
+		return 0, err
+	}
+
+	for _, val := range vector {
+		return int(val.Value), nil
+	}
+	return 0, nil
+}
+
 func (client PrometheusClient) getRequiredCPUFromPrometheus(measuredTime time.Time) (model.Vector, error) {
-	return client.getRequiredResourcesFromPrometheus(measuredTime, "(sum(radix_operator_requested_cpu) by (application, environment, component))")
+	return client.getVectorPrometheus(measuredTime, "(sum(radix_operator_requested_cpu) by (application, environment, component))")
 }
 
 func (client PrometheusClient) getRequiredMemoryFromPrometheus(measuredTime time.Time) (model.Vector, error) {
-	return client.getRequiredResourcesFromPrometheus(measuredTime, "(sum(radix_operator_requested_memory) by (application, environment, component))")
+	return client.getVectorPrometheus(measuredTime, "(sum(radix_operator_requested_memory) by (application, environment, component))")
 }
 
 func (client PrometheusClient) getRequiredReplicasFromPrometheus(measuredTime time.Time) (model.Vector, error) {
-	return client.getRequiredResourcesFromPrometheus(measuredTime, "(sum(radix_operator_requested_replicas) by (application, environment, component))")
+	return client.getVectorPrometheus(measuredTime, "(sum(radix_operator_requested_replicas) by (application, environment, component))")
 }
 
-func (client PrometheusClient) getRequiredResourcesFromPrometheus(measuredTime time.Time, query string) (model.Vector, error) {
+func (client PrometheusClient) getVectorPrometheus(measuredTime time.Time, query string) (model.Vector, error) {
 	promClient, err := api.NewClient(api.Config{
 		Address: client.Address,
 	})

@@ -22,7 +22,12 @@ func main() {
 		log.Fatal("Error getting required resources: ", err.Error())
 	}
 
-	runID, err := sqlClient.SaveRun(measuredTimeUTC)
+	nrClusterCPU, err := promClient.GetNodeCPUFromPrometheus(measuredTimeUTC)
+	if err != nil {
+		log.Fatal("Error getting node cpu count: ", err.Error())
+	}
+
+	runID, err := sqlClient.SaveRun(measuredTimeUTC, nrClusterCPU*1000)
 	if err != nil {
 		log.Fatal("Error creating Run: ", err.Error())
 	}

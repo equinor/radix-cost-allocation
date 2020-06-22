@@ -7,6 +7,7 @@ WHERE TABLE_SCHEMA = 'cost'
     (
         id INT IDENTITY(1, 1) NOT NULL PRIMARY KEY,
         measured_time_utc DATETIME2,
+        cluster_cpu_millicores INTEGER,
     );
 END
 

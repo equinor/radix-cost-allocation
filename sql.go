@@ -54,9 +54,11 @@ func (sqlClient SQLClient) SaveRequiredResources(run Run) error {
 }
 
 // SaveRun inserts a new run, returns id
-func (sqlClient SQLClient) SaveRun(measuredTime time.Time) (int64, error) {
-	tsql := "INSERT INTO cost.runs (measured_time_utc) VALUES (@measuredTimeUTC); select convert(bigint, SCOPE_IDENTITY());"
-	return sqlClient.execSQL(tsql, sql.Named("measuredTimeUTC", measuredTime))
+func (sqlClient SQLClient) SaveRun(measuredTime time.Time, clusterCPUMillicores int) (int64, error) {
+	tsql := "INSERT INTO cost.runs (measured_time_utc, cluster_cpu_millicores) VALUES (@measuredTimeUTC, @clusterCPUMillicores); select convert(bigint, SCOPE_IDENTITY());"
+	return sqlClient.execSQL(tsql,
+		sql.Named("measuredTimeUTC", measuredTime),
+		sql.Named("clusterCPUMillicores", clusterCPUMillicores))
 }
 
 // Close the underlying db connection
