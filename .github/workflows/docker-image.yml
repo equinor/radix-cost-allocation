@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Condition - fail run if branch does not match strategy.matrix
         if: ${{ !((github.ref == 'refs/heads/feature/pushacr' && matrix.deploy == 'dev') || (github.ref == 'refs/heads/release' && matrix.deploy == 'prod') || (github.ref == 'refs/heads/master' && matrix.deploy == 'dev') || (github.ref == 'refs/heads/master' && matrix.deploy == 'playground')) }}
-        run: exit 1
+        uses: andymckay/cancel-action@0.2
       - name: Set environment variables
         run: |
           echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-${{ matrix.deploy }}"
