@@ -1,4 +1,4 @@
-name: Deploy to prod and playground
+name: Deploy ARM to prod and playground
 
 on:
   push:

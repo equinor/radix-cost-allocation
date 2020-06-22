@@ -1,4 +1,4 @@
-name: Deploy azure infrastructure to dev
+name: Deploy ARM to dev
 
 on:
   push:
