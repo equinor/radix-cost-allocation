@@ -25,12 +25,12 @@ jobs:
           echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-${{ matrix.deploy }}"
           echo "::set-env name=KEY_VAULT_NAME::radix-vault-$RADIX_ENV"
       - uses: Azure/login@v1.1
-        if: ${{ $matrix.deploy == 'playground' }}
+        if: ${{ matrix.deploy == 'playground' }}
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
       - uses: Azure/login@v1.1
-        if: ${{ $matrix.deploy == 'prod' }}
+        if: ${{ matrix.deploy == 'prod' }}
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
           enable-AzPSSession: true
