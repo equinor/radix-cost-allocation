@@ -2,7 +2,7 @@ name: Deploy to prod and playground
 
 on:
   push:
-    branches: [release, feature/pushacr]
+    branches: [release]
 
 jobs:
   deploy-sql-server:
@@ -12,7 +12,7 @@ jobs:
       matrix:
         deploy: [prod, playground]
     env:
-      RESOURCE_GROUP: common
+      RESOURCE_GROUP: cost-allocation
       DB_NAME: sqldb-radix-cost-allocation
       DB_USER_NAME: radix
       FIREWALL_RULE_NAME: githubRunnerIp

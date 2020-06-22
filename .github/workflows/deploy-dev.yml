@@ -2,13 +2,13 @@ name: Deploy azure infrastructure to dev
 
 on:
   push:
-    branches: [master, feature/pushacr]
+    branches: [master]
 
 jobs:
   deploy-sql-server:
     runs-on: ubuntu-latest
     env:
-      RESOURCE_GROUP: common
+      RESOURCE_GROUP: cost-allocation
       KEY_VAULT_NAME: radix-vault-dev
       SQL_SERVER_NAME: sql-radix-cost-allocation-dev
       DB_NAME: sqldb-radix-cost-allocation
