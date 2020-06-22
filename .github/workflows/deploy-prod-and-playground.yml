@@ -20,9 +20,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: Set environment variables
         run: |
-          RADIX_ENV="dev" && [[ $matrix.deploy == 'prod' ]] && RADIX_ENV="prod"
+          DEPLOY_TO={{ matrix.deploy }}
+          RADIX_ENV="dev" && [[ $DEPLOY_TO == 'prod' ]] && RADIX_ENV="prod"
 
-          echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-${{ matrix.deploy }}"
+          echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-$DEPLOY_TO"
           echo "::set-env name=KEY_VAULT_NAME::radix-vault-$RADIX_ENV"
       - uses: Azure/login@v1.1
         if: ${{ matrix.deploy == 'playground' }}
