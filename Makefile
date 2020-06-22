@@ -1,6 +1,6 @@
 DOCKER_REGISTRY=radixdev.azurecr.io
 VERSION=latest
-IMAGE_NAME=$(DOCKER_REGISTRY)/radix-cost-exporter:$(VERSION)
+IMAGE_NAME=$(DOCKER_REGISTRY)/radix-cost-allocation:$(VERSION)
 DB_PASSWORD=a_password
 
 # to deploy run: "make deploy DB_PASSWORD=<sql_db_password>"
@@ -15,7 +15,7 @@ push:
 	docker push $(IMAGE_NAME)
 
 deploy:
-	helm upgrade --install radix-cost-exporter ./charts --set db.password=$(DB_PASSWORD)
+	helm upgrade --install radix-cost-allocation ./charts --set db.password=$(DB_PASSWORD)
 
 deploy-azure:
 	az deployment group create --resource-group common --template-file ./azure-infrastructure/azuredeploy.json --parameters sqlAdministratorLoginPassword=$(DB_PASSWORD)
