@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/equinor/radix-cost-allocation/models"
 )
 
 // SQLClient used to perform sql queries
@@ -33,7 +35,7 @@ func NewSQLClient(server, database string, port int, userID, password string) SQ
 }
 
 // SaveRequiredResources inserts all required resources under run.Resources
-func (sqlClient SQLClient) SaveRequiredResources(run Run) error {
+func (sqlClient SQLClient) SaveRequiredResources(run models.Run) error {
 	tsql := `INSERT INTO cost.required_resources (run_id, wbs, application, environment, component, cpu_millicores, memory_mega_bytes, replicas) 
 	VALUES (@runId, @wbs, @application, @environment, @component, @cpuMillicores, @memoryMegaBytes, @replicas); select convert(bigint, SCOPE_IDENTITY());`
 	for _, req := range run.Resources {

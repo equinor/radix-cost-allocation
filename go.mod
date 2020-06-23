@@ -16,6 +16,7 @@ require (
 	github.com/prometheus/prometheus v2.5.0+incompatible // indirect
 	github.com/prometheus/tsdb v0.10.0 // indirect
 	github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da // indirect
+	github.com/stretchr/testify v1.5.1
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
 	google.golang.org/api v0.26.0 // indirect
 	google.golang.org/genproto v0.0.0-20200602104108-2bb8d6132df6 // indirect

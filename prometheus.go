@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/equinor/radix-cost-allocation/models"
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
@@ -16,7 +17,7 @@ type PrometheusClient struct {
 }
 
 // GetRequiredResources get required resources for a given time
-func (client PrometheusClient) GetRequiredResources(measuredTime time.Time) ([]RequiredResources, error) {
+func (client PrometheusClient) GetRequiredResources(measuredTime time.Time) ([]models.RequiredResources, error) {
 	requiredCPU, err := client.getRequiredCPUFromPrometheus(measuredTime)
 	if err != nil {
 		return nil, fmt.Errorf("Error getting cpu: %v", err)
@@ -88,15 +89,15 @@ func (client PrometheusClient) getVectorPrometheus(measuredTime time.Time, query
 	return vector, nil
 }
 
-func mapToRequiredResources(requiredCPU, requiredMemory, requiredReplicas model.Vector) ([]RequiredResources, error) {
-	reqResources := make(map[string]map[string]map[string]*RequiredResources)
+func mapToRequiredResources(requiredCPU, requiredMemory, requiredReplicas model.Vector) ([]models.RequiredResources, error) {
+	reqResources := make(map[string]map[string]map[string]*models.RequiredResources)
 	for _, replica := range requiredReplicas {
 		metric := replica.Metric
 		application := string(metric["application"])
 		environment := string(metric["environment"])
 		component := string(metric["component"])
 
-		req := RequiredResources{
+		req := models.RequiredResources{
 			Application: application,
 			Environment: environment,
 			Component:   component,
@@ -104,10 +105,10 @@ func mapToRequiredResources(requiredCPU, requiredMemory, requiredReplicas model.
 		}
 
 		if reqResources[application] == nil {
-			reqResources[application] = make(map[string]map[string]*RequiredResources)
+			reqResources[application] = make(map[string]map[string]*models.RequiredResources)
 		}
 		if reqResources[application][environment] == nil {
-			reqResources[application][environment] = make(map[string]*RequiredResources)
+			reqResources[application][environment] = make(map[string]*models.RequiredResources)
 		}
 		reqResources[application][environment][component] = &req
 	}
@@ -132,7 +133,7 @@ func mapToRequiredResources(requiredCPU, requiredMemory, requiredReplicas model.
 		req.MemoryMegaBytes = int(memory.Value)
 	}
 
-	result := []RequiredResources{}
+	result := []models.RequiredResources{}
 	for _, app := range reqResources {
 		for _, env := range app {
 			for _, comp := range env {

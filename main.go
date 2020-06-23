@@ -7,6 +7,7 @@ import (
 	"time"
 
 	_ "github.com/denisenkom/go-mssqldb"
+	"github.com/equinor/radix-cost-allocation/models"
 )
 
 // todo! create write only connection string? dont need read/admin access
@@ -33,7 +34,7 @@ func main() {
 	}
 	fmt.Printf("Run %d started at %v.\n", runID, measuredTimeUTC)
 
-	run := Run{ID: runID, MeasuredTimeUTC: measuredTimeUTC, ClusterCPUMillicore: nrClusterCPU * 1000, Resources: reqResources}
+	run := models.Run{ID: runID, MeasuredTimeUTC: measuredTimeUTC, ClusterCPUMillicore: nrClusterCPU * 1000, Resources: reqResources}
 	err = sqlClient.SaveRequiredResources(run)
 	if err != nil {
 		log.Fatal("Error saving resources: ", err.Error())
