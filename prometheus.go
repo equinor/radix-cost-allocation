@@ -93,14 +93,13 @@ func mapToRequiredResources(requiredCPU, requiredMemory, requiredReplicas model.
 	reqResources := make(map[string]map[string]map[string]*models.RequiredResources)
 	for _, replica := range requiredReplicas {
 		metric := replica.Metric
-		application := string(metric["application"])
-		environment := string(metric["environment"])
-		component := string(metric["component"])
+		application, environment, component, wbs := getPropFromMetric(metric)
 
 		req := models.RequiredResources{
 			Application: application,
 			Environment: environment,
 			Component:   component,
+			WBS:         wbs,
 			Replicas:    int(replica.Value),
 		}
 
@@ -115,9 +114,7 @@ func mapToRequiredResources(requiredCPU, requiredMemory, requiredReplicas model.
 
 	for _, cpu := range requiredCPU {
 		metric := cpu.Metric
-		application := string(metric["application"])
-		environment := string(metric["environment"])
-		component := string(metric["component"])
+		application, environment, component, _ := getPropFromMetric(metric)
 
 		req := reqResources[application][environment][component]
 		req.CPUMillicore = int(cpu.Value)
@@ -125,9 +122,7 @@ func mapToRequiredResources(requiredCPU, requiredMemory, requiredReplicas model.
 
 	for _, memory := range requiredMemory {
 		metric := memory.Metric
-		application := string(metric["application"])
-		environment := string(metric["environment"])
-		component := string(metric["component"])
+		application, environment, component, _ := getPropFromMetric(metric)
 
 		req := reqResources[application][environment][component]
 		req.MemoryMegaBytes = int(memory.Value)
@@ -142,4 +137,20 @@ func mapToRequiredResources(requiredCPU, requiredMemory, requiredReplicas model.
 		}
 	}
 	return result, nil
+}
+
+func getPropFromMetric(metric model.Metric) (app, env, component, wbs string) {
+	if val, ok := metric["application"]; ok {
+		app = string(val)
+	}
+	if val, ok := metric["environment"]; ok {
+		env = string(val)
+	}
+	if val, ok := metric["component"]; ok {
+		component = string(val)
+	}
+	if val, ok := metric["wbs"]; ok {
+		wbs = string(val)
+	}
+	return
 }
