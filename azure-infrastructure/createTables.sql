@@ -8,6 +8,7 @@ WHERE TABLE_SCHEMA = 'cost'
         id INT IDENTITY(1, 1) NOT NULL PRIMARY KEY,
         measured_time_utc DATETIME2,
         cluster_cpu_millicores INTEGER,
+        cluster_memory_mega_bytes INTEGER,
     );
 END
 
@@ -30,4 +31,9 @@ WHERE TABLE_SCHEMA = 'cost'
     );
 END 
 GO
-/* based on style guide: https://www.sqlstyle.guide/#do */
+/* 
+    based on style guide: https://www.sqlstyle.guide/#do 
+    add new column:
+    ALTER TABLE cost.runs
+    ADD cluster_memory_mega_bytes INTEGER;
+*/

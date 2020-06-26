@@ -4,10 +4,11 @@ import "time"
 
 // Run holds all required resources for a time
 type Run struct {
-	ID                  int64
-	MeasuredTimeUTC     time.Time
-	ClusterCPUMillicore int
-	Resources           []RequiredResources
+	ID                    int64
+	MeasuredTimeUTC       time.Time
+	ClusterCPUMillicore   int
+	ClusterMemoryMegaByte int
+	Resources             []RequiredResources
 }
 
 // RequiredResources holds required resources for a single component
@@ -32,7 +33,20 @@ type Application struct {
 
 // CPUWeightInPeriod weight of a run for a period
 func (run Run) CPUWeightInPeriod(totalRequestedCPUForPeriod int) float64 {
+	if totalRequestedCPUForPeriod == 0 {
+		return 1
+	}
+
 	return float64(run.ClusterCPUMillicore) / float64(totalRequestedCPUForPeriod)
+}
+
+// MemoryWeightInPeriod weight of a run for a period
+func (run Run) MemoryWeightInPeriod(totalRequestedMemoryForPeriod int) float64 {
+	if totalRequestedMemoryForPeriod == 0 {
+		return 1
+	}
+
+	return float64(run.ClusterMemoryMegaByte) / float64(totalRequestedMemoryForPeriod)
 }
 
 // RequestedCPUByApplications total requested cpu by applications for a run

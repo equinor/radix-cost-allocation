@@ -45,18 +45,30 @@ func moveResourceRequestsFromPrometheusToSQLDB(promClient PrometheusClient, sqlC
 		log.Fatal("Error getting required resources: ", err.Error())
 	}
 
-	nrClusterCPU, err := promClient.GetNodeCPUFromPrometheus(measuredTimeUTC)
+	clusterCPUCores, err := promClient.GetClusterTotalCPUCoresFromPrometheus(measuredTimeUTC)
 	if err != nil {
 		log.Fatal("Error getting node cpu count: ", err.Error())
 	}
+	clusterCPUMillieCores := clusterCPUCores * 1000
 
-	runID, err := sqlClient.SaveRun(measuredTimeUTC, nrClusterCPU*1000)
+	clusterMemoryBytes, err := promClient.GetClusterTotalMemoryBytesFromPrometheus(measuredTimeUTC)
+	if err != nil {
+		log.Fatal("Error getting node cpu count: ", err.Error())
+	}
+	clusterMemoryMegaByte := clusterMemoryBytes / 1000000
+
+	runID, err := sqlClient.SaveRun(measuredTimeUTC, clusterCPUMillieCores, clusterMemoryMegaByte)
 	if err != nil {
 		log.Fatal("Error creating Run: ", err.Error())
 	}
 	fmt.Printf("Run %d started at %v.\n", runID, measuredTimeUTC)
 
-	run := models.Run{ID: runID, MeasuredTimeUTC: measuredTimeUTC, ClusterCPUMillicore: nrClusterCPU * 1000, Resources: reqResources}
+	run := models.Run{
+		ID:                    runID,
+		MeasuredTimeUTC:       measuredTimeUTC,
+		ClusterCPUMillicore:   clusterCPUMillieCores,
+		ClusterMemoryMegaByte: clusterMemoryMegaByte,
+		Resources:             reqResources}
 	err = sqlClient.SaveRequiredResources(run)
 	if err != nil {
 		log.Fatal("Error saving resources: ", err.Error())
