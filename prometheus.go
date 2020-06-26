@@ -39,20 +39,16 @@ func (client PrometheusClient) GetRequiredResources(measuredTime time.Time) ([]m
 
 // GetClusterTotalCPUCoresFromPrometheus gets the number of cpu for a given time
 func (client PrometheusClient) GetClusterTotalCPUCoresFromPrometheus(measuredTime time.Time) (int, error) {
-	vector, err := client.getVectorPrometheus(measuredTime, "sum(instance:node_num_cpu:sum)")
-	if err != nil {
-		return 0, err
-	}
-
-	for _, val := range vector {
-		return int(val.Value), nil
-	}
-	return 0, nil
+	return client.getVectorSingleValue(measuredTime, "sum(instance:node_num_cpu:sum)")
 }
 
 // GetClusterTotalMemoryBytesFromPrometheus gets the sum of node_memory_MemTotal_bytes for a given time
 func (client PrometheusClient) GetClusterTotalMemoryBytesFromPrometheus(measuredTime time.Time) (int, error) {
-	vector, err := client.getVectorPrometheus(measuredTime, "sum(node_memory_MemTotal_bytes)")
+	return client.getVectorSingleValue(measuredTime, "sum(node_memory_MemTotal_bytes)")
+}
+
+func (client PrometheusClient) getVectorSingleValue(measuredTime time.Time, query string) (int, error) {
+	vector, err := client.getVectorPrometheus(measuredTime, query)
 	if err != nil {
 		return 0, err
 	}
