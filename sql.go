@@ -78,9 +78,6 @@ func (sqlClient SQLClient) GetRunsBetweenTimes(from, to time.Time) ([]models.Run
 		if err != nil {
 			return nil, err
 		}
-		if runID != 1 {
-			continue
-		}
 
 		resource := models.RequiredResources{
 			ID:              id,

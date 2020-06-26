@@ -13,9 +13,10 @@ type Cost struct {
 }
 
 type ApplicationCost struct {
-	Name           string
-	WBS            string
-	CostPercentage float64
+	Name                   string
+	WBS                    string
+	CostPercentageByCPU    float64
+	CostPercentageByMemory float64
 }
 
 // NewCost aggregate cost over a time period for applications
@@ -42,24 +43,35 @@ func (cost Cost) GetCostBy(appName string) *ApplicationCost {
 // aggregateCostBetweenDatesOnApplications calculates cost for an application
 func aggregateCostBetweenDatesOnApplications(runs []Run) []ApplicationCost {
 	totalRequestedCPU := totalRequestedCPU(runs)
+	totalRequestedMemory := totalRequestedMemoryMegaBytes(runs)
 	cpuPercentages := map[string]float64{}
-	// memoryPercentage := map[string]float64{}
+	memoryPercentage := map[string]float64{}
+
 	for _, runs := range runs {
 		applications := runs.GetApplicationsRequiredResource()
 		for _, application := range applications {
 			cpuPercentages[application.Name] += runs.CPUWeightInPeriod(totalRequestedCPU) * application.RequestedCPUPercentageOfRun
-			// TODO - Get total CLUSTER Memory-  memoryPercentage[application.Name] += runs.CPUWeightInPeriod(totalRequestedMemory) * application.RequestedMemoryPercentageOfRun
+			memoryPercentage[application.Name] += runs.MemoryWeightInPeriod(totalRequestedMemory) * application.RequestedMemoryPercentageOfRun
 		}
 	}
 
 	applications := []ApplicationCost{}
 	for appName, cpu := range cpuPercentages {
 		applications = append(applications, ApplicationCost{
-			Name:           appName,
-			CostPercentage: cpu,
+			Name:                   appName,
+			CostPercentageByCPU:    cpu,
+			CostPercentageByMemory: memoryPercentage[appName],
 		})
 	}
 	return applications
+}
+
+func totalRequestedMemoryMegaBytes(runs []Run) int {
+	memory := 0
+	for _, run := range runs {
+		memory += run.ClusterMemoryMegaByte
+	}
+	return memory
 }
 
 // TotalRequestedCPU total requested cpu for runs between from and to datetime

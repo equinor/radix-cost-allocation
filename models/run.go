@@ -36,6 +36,11 @@ func (run Run) CPUWeightInPeriod(totalRequestedCPUForPeriod int) float64 {
 	return float64(run.ClusterCPUMillicore) / float64(totalRequestedCPUForPeriod)
 }
 
+// MemoryWeightInPeriod weight of a run for a period
+func (run Run) MemoryWeightInPeriod(totalRequestedMemoryForPeriod int) float64 {
+	return float64(run.ClusterMemoryMegaByte) / float64(totalRequestedMemoryForPeriod)
+}
+
 // RequestedCPUByApplications total requested cpu by applications for a run
 func (run Run) RequestedCPUByApplications() int {
 	cpu := 0
