@@ -9,8 +9,9 @@ import (
 
 func getTestRun() models.Run {
 	return models.Run{
-		ID:                  1,
-		ClusterCPUMillicore: 1000,
+		ID:                    1,
+		ClusterCPUMillicore:   1000,
+		ClusterMemoryMegaByte: 1000,
 	}
 }
 
@@ -19,6 +20,13 @@ func Test_run_cpu_weight_in_period(t *testing.T) {
 
 	run.ClusterCPUMillicore = 1000
 	assert.Equal(t, 0.2, run.CPUWeightInPeriod(5000))
+}
+
+func Test_run_memory_weight_in_period(t *testing.T) {
+	run := getTestRun()
+
+	run.ClusterMemoryMegaByte = 1000
+	assert.Equal(t, 0.2, run.MemoryWeightInPeriod(5000))
 }
 
 func Test_run_total_cpu_no_resources(t *testing.T) {
@@ -32,15 +40,15 @@ func Test_run_total_cpu_no_resources(t *testing.T) {
 func Test_run_total_cpu_requested(t *testing.T) {
 	run := getTestRun()
 	run.Resources = []models.RequiredResources{
-		models.RequiredResources{
+		{
 			CPUMillicore: 100,
 			Replicas:     2,
 		},
-		models.RequiredResources{
+		{
 			CPUMillicore: 100,
 			Replicas:     1,
 		},
-		models.RequiredResources{
+		{
 			CPUMillicore: 100,
 			Replicas:     1,
 		},
@@ -61,15 +69,15 @@ func Test_run_total_memory_no_resources(t *testing.T) {
 func Test_run_total_memory_requested(t *testing.T) {
 	run := getTestRun()
 	run.Resources = []models.RequiredResources{
-		models.RequiredResources{
+		{
 			MemoryMegaBytes: 100,
 			Replicas:        2,
 		},
-		models.RequiredResources{
+		{
 			MemoryMegaBytes: 100,
 			Replicas:        1,
 		},
-		models.RequiredResources{
+		{
 			MemoryMegaBytes: 100,
 			Replicas:        1,
 		},
@@ -104,7 +112,7 @@ func Test_get_application_requested_resources(t *testing.T) {
 
 func loadDefaultResources(run models.Run) models.Run {
 	run.Resources = []models.RequiredResources{
-		models.RequiredResources{
+		{
 			Application:     "app-1",
 			Environment:     "env-1",
 			Component:       "comp-1",
@@ -113,7 +121,7 @@ func loadDefaultResources(run models.Run) models.Run {
 			MemoryMegaBytes: 100,
 			Replicas:        2,
 		},
-		models.RequiredResources{
+		{
 			Application:     "app-1",
 			Environment:     "env-2",
 			Component:       "comp-1",
@@ -122,7 +130,7 @@ func loadDefaultResources(run models.Run) models.Run {
 			MemoryMegaBytes: 100,
 			Replicas:        1,
 		},
-		models.RequiredResources{
+		{
 			Application:     "app-2",
 			Environment:     "env-1",
 			Component:       "comp-1",
@@ -131,7 +139,7 @@ func loadDefaultResources(run models.Run) models.Run {
 			MemoryMegaBytes: 100,
 			Replicas:        1,
 		},
-		models.RequiredResources{
+		{
 			Application:     "app-2",
 			Environment:     "env-1",
 			Component:       "comp-2",
@@ -140,7 +148,7 @@ func loadDefaultResources(run models.Run) models.Run {
 			MemoryMegaBytes: 200,
 			Replicas:        1,
 		},
-		models.RequiredResources{
+		{
 			Application:     "app-2",
 			Environment:     "env-2",
 			Component:       "comp-2",

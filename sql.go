@@ -34,6 +34,88 @@ func NewSQLClient(server, database string, port int, userID, password string) SQ
 	return sqlClient
 }
 
+// GetRunsBetweenTimes get all runs with its resources between from and to time
+func (sqlClient SQLClient) GetRunsBetweenTimes(from, to time.Time) ([]models.Run, error) {
+	runsResources := map[int64]*[]models.RequiredResources{}
+	runs := map[int64]models.Run{}
+	ctx, err := sqlClient.verifyConnection()
+	if err != nil {
+		return nil, err
+	}
+
+	tsql := "SELECT r.id run_id, r.measured_time_utc, r.cluster_cpu_millicores, r.cluster_memory_mega_bytes, rr.id, rr.wbs, rr.application, rr.environment, rr.component, rr.cpu_millicores, rr.memory_mega_bytes, rr.replicas FROM [cost].[runs] r JOIN [cost].[required_resources] rr ON r.id = rr.run_id WHERE measured_time_utc BETWEEN @from AND @to;"
+
+	// Execute query
+	rows, err := sqlClient.db.QueryContext(ctx, tsql, sql.Named("from", from), sql.Named("to", to))
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	// Iterate through the result set.
+	for rows.Next() {
+		var measuredTimeUTC time.Time
+		var runID, id int64
+		var clusterCPUMillicores, clusterMemoryMegaBytes, cpuMillicores, memoryMegaBytes, replicas int
+		var wbs, application, environment, component string
+		var run models.Run
+
+		// Get values from row.
+		err := rows.Scan(&runID,
+			&measuredTimeUTC,
+			&clusterCPUMillicores,
+			&clusterMemoryMegaBytes,
+			&id,
+			&wbs,
+			&application,
+			&environment,
+			&component,
+			&cpuMillicores,
+			&memoryMegaBytes,
+			&replicas,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		resource := models.RequiredResources{
+			ID:              id,
+			WBS:             wbs,
+			Application:     application,
+			Environment:     environment,
+			Component:       component,
+			CPUMillicore:    cpuMillicores,
+			MemoryMegaBytes: memoryMegaBytes,
+			Replicas:        replicas,
+		}
+
+		if run = runs[runID]; run.ID == 0 {
+			resources := []models.RequiredResources{resource}
+			runsResources[runID] = &resources
+			run = models.Run{
+				ID:                    runID,
+				MeasuredTimeUTC:       measuredTimeUTC,
+				ClusterCPUMillicore:   clusterCPUMillicores,
+				ClusterMemoryMegaByte: clusterMemoryMegaBytes,
+			}
+			runs[runID] = run
+		} else {
+			resources := *runsResources[runID]
+			resources = append(resources, resource)
+			runsResources[runID] = &resources
+		}
+	}
+
+	runsAsArray := []models.Run{}
+	for key, val := range runs {
+		val.Resources = *runsResources[key]
+		runsAsArray = append(runsAsArray, val)
+	}
+
+	return runsAsArray, nil
+}
+
 // SaveRequiredResources inserts all required resources under run.Resources
 func (sqlClient SQLClient) SaveRequiredResources(run models.Run) error {
 	tsql := `INSERT INTO cost.required_resources (run_id, wbs, application, environment, component, cpu_millicores, memory_mega_bytes, replicas) 
@@ -56,11 +138,13 @@ func (sqlClient SQLClient) SaveRequiredResources(run models.Run) error {
 }
 
 // SaveRun inserts a new run, returns id
-func (sqlClient SQLClient) SaveRun(measuredTime time.Time, clusterCPUMillicores int) (int64, error) {
-	tsql := "INSERT INTO cost.runs (measured_time_utc, cluster_cpu_millicores) VALUES (@measuredTimeUTC, @clusterCPUMillicores); select convert(bigint, SCOPE_IDENTITY());"
+func (sqlClient SQLClient) SaveRun(measuredTime time.Time, clusterCPUMillicores, clusterMemoryMegaBytes int) (int64, error) {
+	tsql := `INSERT INTO cost.runs (measured_time_utc, cluster_cpu_millicores, cluster_memory_mega_bytes) 
+	VALUES (@measuredTimeUTC, @clusterCPUMillicores, @clusterMemoryMegaBytes); select convert(bigint, SCOPE_IDENTITY());`
 	return sqlClient.execSQL(tsql,
 		sql.Named("measuredTimeUTC", measuredTime),
-		sql.Named("clusterCPUMillicores", clusterCPUMillicores))
+		sql.Named("clusterCPUMillicores", clusterCPUMillicores),
+		sql.Named("clusterMemoryMegaBytes", clusterMemoryMegaBytes))
 }
 
 // Close the underlying db connection
