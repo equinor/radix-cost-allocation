@@ -22,8 +22,22 @@
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]"
+    },
+    "adminGroupName": {
+      "type": "string"
+    },
+    "adminGroupId": {
+      "type": "string"
+    },
+    "storageAccountId": {
+      "type": "string"
     }
   },
+
+  "variables": {
+    "tenantId": "[subscription().tenantId]"
+  },
+
   "resources": [
     {
       "name": "[parameters('sqlServerName')]",
@@ -40,6 +54,41 @@
         "version": "12.0"
       },
       "resources": [
+        {
+          "name": "default",
+          "type": "auditingSettings",
+          "apiVersion": "2017-03-01-preview",
+          "dependsOn": [
+            "[concat(parameters('sqlServerName'))]"
+          ],
+          "properties": {
+            "state": "Enabled",
+            "storageEndpoint": "[reference(parameters('storageAccountId'), '2019-06-01', 'Full').properties.primaryEndpoints.blob]",
+            "storageAccountAccessKey": "[listKeys(parameters('storageAccountId'), '2019-04-01').keys[0].value]",
+            "retentionDays": 7,
+            "auditActionsAndGroups": [
+              "BATCH_COMPLETED_GROUP",
+              "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
+              "FAILED_DATABASE_AUTHENTICATION_GROUP"
+            ]
+          }
+        },
+        {
+          "type": "vulnerabilityAssessments",
+          "apiVersion": "2018-06-01-preview",
+          "name": "Default",
+          "dependsOn": [
+            "[concat(parameters('sqlServerName'))]"
+          ],
+          "properties": {
+            "storageContainerPath": "[concat(reference(parameters('storageAccountId'), '2019-06-01', 'Full').properties.primaryEndpoints.blob, parameters('sqlServerName'))]",
+            "storageAccountAccessKey": "[listKeys(parameters('storageAccountId'), '2019-04-01').keys[0].value]", 
+            "recurringScans": {
+              "isEnabled": true,
+              "emailSubscriptionAdmins": true
+            }
+          }
+        },
         {
           "name": "[parameters('databaseName')]",
           "type": "databases",
@@ -86,6 +135,20 @@
             "startIpAddress": "0.0.0.0"
           },
           "dependsOn": ["[parameters('sqlServerName')]"]
+        },
+        {
+          "name": "[concat(parameters('sqlServerName'), '/', 'activeDirectory')]",
+          "type": "Microsoft.Sql/servers/administrators",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', parameters('sqlServerName'))]"
+          ],
+          "apiVersion": "2014-04-01",
+          "properties": {
+            "administratorType": "ActiveDirectory",
+            "login": "[parameters('adminGroupName')]",
+            "sid": "[parameters('adminGroupId')]",
+            "tenantId": "[variables('tenantId')]"
+          }
         }
       ]
     }
