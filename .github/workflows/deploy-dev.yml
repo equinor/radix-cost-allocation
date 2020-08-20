@@ -14,6 +14,9 @@ jobs:
       DB_NAME: sqldb-radix-cost-allocation
       DB_USER_NAME: radix
       FIREWALL_RULE_NAME: githubRunnerIp
+      ADMIN_GROUP_NAME: 'Radix Platform Developers'
+      ADMIN_GROUP_ID: "a5dfa635-dc00-4a28-9ad9-9e7f1e56919d"
+      SQL_LOG_STORAGE_NAME: radixsqllogsdev
     steps:       
       - uses: actions/checkout@v2
       - uses: Azure/login@v1.1
@@ -29,12 +32,20 @@ jobs:
         env:
           DEPLOY_NAME: radix-cost-db-deploy
         run: |
-          az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
+
+          # Get Storage Account ID for sql logs
+          storageId=$(az storage account show --name "$SQL_LOG_STORAGE_NAME" --query "id" --output tsv)        
+
+          az deployment group create -g "$RESOURCE_GROUP" -n "$DEPLOY_NAME" \
             --template-file ./azure-infrastructure/azuredeploy.json \
-            --parameters sqlServerName=$SQL_SERVER_NAME \
-            --parameters databaseName=$DB_NAME \
+            --parameters sqlServerName="$SQL_SERVER_NAME" \
+            --parameters databaseName="$DB_NAME" \
             --parameters sqlAdministratorLoginPassword=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }} \
-            --parameters sqlAdministratorLoginUser=$DB_USER_NAME
+            --parameters sqlAdministratorLoginUser="$DB_USER_NAME" \
+            --parameters adminGroupName="$ADMIN_GROUP_NAME" \
+            --parameters adminGroupId="$ADMIN_GROUP_ID" \
+            --parameters storageAccountId=$storageId
+
       - name: Whitelist Runner IP in firewalls
         shell: pwsh
         run: |
