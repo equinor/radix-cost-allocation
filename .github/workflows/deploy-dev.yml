@@ -16,7 +16,7 @@ jobs:
       FIREWALL_RULE_NAME: githubRunnerIp
       ADMIN_GROUP_NAME: "Radix Platform Developers"
       ADMIN_GROUP_ID: "a5dfa635-dc00-4a28-9ad9-9e7f1e56919d"
-      SQL_LOG_STORAGE_NAME: costallocationdevsqllog
+      SQL_LOG_STORAGE_NAME: radixsqllogsdev
     steps:       
       - uses: actions/checkout@v2
       - uses: Azure/login@v1.1

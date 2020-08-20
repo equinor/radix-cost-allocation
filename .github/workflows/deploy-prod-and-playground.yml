@@ -26,7 +26,7 @@ jobs:
 
           echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-${{ matrix.deploy }}"
           echo "::set-env name=KEY_VAULT_NAME::radix-vault-$RADIX_ENV"
-          echo "::set-env name=SQL_LOG_STORAGE_NAME::costallocation${RADIX_ENV}sqllog"
+          echo "::set-env name=SQL_LOG_STORAGE_NAME::radixsqllogs${RADIX_ENV}"
       - uses: Azure/login@v1.1
         if: ${{ matrix.deploy == 'playground' }}
         with:

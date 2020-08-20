@@ -29,7 +29,13 @@ WHERE TABLE_SCHEMA = 'cost'
         memory_mega_bytes INTEGER,
         replicas INTEGER,
     );
-END 
+END
+IF (NOT EXISTS (SELECT *
+FROM sys.indexes
+WHERE name='req_resource_to_run' AND object_id = OBJECT_ID('cost.required_resources')))
+        BEGIN
+    CREATE INDEX req_resource_to_run ON cost.required_resources (run_id);
+END
 GO
 /* 
     based on style guide: https://www.sqlstyle.guide/#do 
