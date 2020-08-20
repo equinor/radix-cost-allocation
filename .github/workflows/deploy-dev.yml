@@ -35,7 +35,7 @@ jobs:
 
           # Get Storage Account ID for sql logs
           storageId=$(az storage account show --name "$SQL_LOG_STORAGE_NAME" --query "id")
-          
+          echo $storageId          
 
           az deployment group create -g "$RESOURCE_GROUP" -n "$DEPLOY_NAME" \
             --template-file ./azure-infrastructure/azuredeploy.json \
