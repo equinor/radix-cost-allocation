@@ -43,7 +43,8 @@ jobs:
             --parameters sqlAdministratorLoginPassword=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }} \
             --parameters sqlAdministratorLoginUser="$DB_USER_NAME" \
             --parameters adminGroupName="$ADMIN_GROUP_NAME" \
-            --parameters adminGroupId="$ADMIN_GROUP_ID" --parameters storageAccountId=$storageId
+            --parameters adminGroupId="$ADMIN_GROUP_ID" \
+            --parameters storageAccountId=$storageId
 
       - name: Whitelist Runner IP in firewalls
         shell: pwsh
