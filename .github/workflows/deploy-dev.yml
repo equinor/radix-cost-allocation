@@ -42,7 +42,7 @@ jobs:
             --parameters databaseName=$DB_NAME \
             --parameters sqlAdministratorLoginPassword=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }} \
             --parameters sqlAdministratorLoginUser=$DB_USER_NAME \
-            --parameters adminGroupName=$ADMIN_GROUP_NAME \
+            --parameters adminGroupName="$ADMIN_GROUP_NAME" \
             --parameters adminGroupId=$ADMIN_GROUP_ID \
             --parameters storageAccountId=$storageId
 
