@@ -16,7 +16,7 @@ jobs:
       DB_NAME: sqldb-radix-cost-allocation
       DB_USER_NAME: radix
       FIREWALL_RULE_NAME: githubRunnerIp
-      ADMIN_GROUP_NAME: "Radix Platform Developers"
+      ADMIN_GROUP_NAME: 'Radix Platform Developers'
       ADMIN_GROUP_ID: "a5dfa635-dc00-4a28-9ad9-9e7f1e56919d"
     steps:       
       - uses: actions/checkout@v2
