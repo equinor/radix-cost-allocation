@@ -19,3 +19,7 @@ deploy:
 
 deploy-azure:
 	az deployment group create --resource-group common --template-file ./azure-infrastructure/azuredeploy.json --parameters sqlAdministratorLoginPassword=$(DB_PASSWORD)
+
+.PHONY: test
+test:
+	go test -cover `go list ./...`
