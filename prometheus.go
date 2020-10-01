@@ -60,15 +60,15 @@ func (client PrometheusClient) getVectorSingleValue(measuredTime time.Time, quer
 }
 
 func (client PrometheusClient) getRequiredCPUFromPrometheus(measuredTime time.Time) (model.Vector, error) {
-	return client.getVectorPrometheus(measuredTime, "(sum(radix_operator_requested_cpu) by (application, environment, component))")
+	return client.getVectorPrometheus(measuredTime, "(sum(radix_operator_requested_cpu) by (application, environment, component, wbs))")
 }
 
 func (client PrometheusClient) getRequiredMemoryFromPrometheus(measuredTime time.Time) (model.Vector, error) {
-	return client.getVectorPrometheus(measuredTime, "(sum(radix_operator_requested_memory) by (application, environment, component))")
+	return client.getVectorPrometheus(measuredTime, "(sum(radix_operator_requested_memory) by (application, environment, component, wbs))")
 }
 
 func (client PrometheusClient) getRequiredReplicasFromPrometheus(measuredTime time.Time) (model.Vector, error) {
-	return client.getVectorPrometheus(measuredTime, "(sum(radix_operator_requested_replicas) by (application, environment, component))")
+	return client.getVectorPrometheus(measuredTime, "(sum(radix_operator_requested_replicas) by (application, environment, component, wbs))")
 }
 
 func (client PrometheusClient) getVectorPrometheus(measuredTime time.Time, query string) (model.Vector, error) {
