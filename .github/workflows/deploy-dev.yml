@@ -64,12 +64,10 @@ jobs:
 
           $targetSqlServerFQDN = "$(az sql server show -n ${env:SQL_SERVER_NAME} -g ${env:RESOURCE_GROUP} | jq -r .fullyQualifiedDomainName)"
 
-          $ds = Invoke-Sqlcmd -Query "SELECT * FROM sys.schemas WHERE name IN ('cost', 'dbo')" -As DataSet -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          if($ds.Tables[0].Rows.Count -eq 1) 
-          {
-            Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          }
+          Invoke-Sqlcmd -InputFile ./azure-infrastructure/preDeployScript.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
+          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
           Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
+          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createViews.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
       - name: Blacklist Runner IP in firewalls
         shell: pwsh
         if: ${{ always() }}
