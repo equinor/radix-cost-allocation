@@ -24,9 +24,9 @@ jobs:
         run: |
           RADIX_ENV="dev" && [[ ${{ matrix.deploy }} == 'prod' ]] && RADIX_ENV="prod"
 
-          echo "::set-env name=SQL_SERVER_NAME::sql-radix-cost-allocation-${{ matrix.deploy }}"
-          echo "::set-env name=KEY_VAULT_NAME::radix-vault-$RADIX_ENV"
-          echo "::set-env name=SQL_LOG_STORAGE_NAME::radixsqllogs${RADIX_ENV}"
+          echo "name=SQL_SERVER_NAME=sql-radix-cost-allocation-${{ matrix.deploy }}" >> $GITHUB_ENV
+          echo "name=KEY_VAULT_NAME=radix-vault-$RADIX_ENV" >> $GITHUB_ENV
+          echo "name=SQL_LOG_STORAGE_NAME=radixsqllogs${RADIX_ENV}" >> $GITHUB_ENV
       - uses: Azure/login@v1.1
         if: ${{ matrix.deploy == 'playground' }}
         with:
@@ -37,7 +37,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
           enable-AzPSSession: true
-      - uses: Azure/get-keyvault-secrets@v1.0
+      - uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: ${{ env.KEY_VAULT_NAME }}
           secrets: "radix-cost-allocation-db-admin"
