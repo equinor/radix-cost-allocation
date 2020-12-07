@@ -24,9 +24,9 @@ jobs:
         run: |
           RADIX_ENV="dev" && [[ ${{ matrix.deploy }} == 'prod' ]] && RADIX_ENV="prod"
 
-          echo "name=SQL_SERVER_NAME=sql-radix-cost-allocation-${{ matrix.deploy }}" >> $GITHUB_ENV
-          echo "name=KEY_VAULT_NAME=radix-vault-$RADIX_ENV" >> $GITHUB_ENV
-          echo "name=SQL_LOG_STORAGE_NAME=radixsqllogs${RADIX_ENV}" >> $GITHUB_ENV
+          echo "SQL_SERVER_NAME=sql-radix-cost-allocation-${{ matrix.deploy }}" >> $GITHUB_ENV
+          echo "KEY_VAULT_NAME=radix-vault-$RADIX_ENV" >> $GITHUB_ENV
+          echo "SQL_LOG_STORAGE_NAME=radixsqllogs${RADIX_ENV}" >> $GITHUB_ENV
       - uses: Azure/login@v1.1
         if: ${{ matrix.deploy == 'playground' }}
         with:
