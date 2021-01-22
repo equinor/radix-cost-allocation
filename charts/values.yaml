@@ -14,7 +14,7 @@ secret:
   name: sql-credential
 
 db:
-  user: radix
+  user: radixwriter
   database: sqldb-radix-cost-allocation
   server: sql-radix-cost-allocation-dev.database.windows.net
   password: password

@@ -13,3 +13,15 @@ All SQL scripts on azure-infrastructure must be idempotent.
 ## Deploy to cluster
 
 Installation on cluster is handled by flux through [flux repo](https://github.com/equinor/radix-flux). Before being installed, it requires that there exist a namespace called `radix-cost-allocation`. In that namespace there must be a secret called `cost-db-secret` that contains the database password. This is handled through the setup script in [radix-platform](https://github.com/equinor/radix-platform)
+
+tag in git repository (in master branch) - matching to the version of Version in docs/docs.go
+
+## Update version
+
+`tag` in git repository (in master branch) - matching to the version of appVersion in `charts/Chart.yaml`
+
+Run following command to set tag (with corresponding version)
+```
+git tag v1.0.0
+git push origin v1.0.0
+```
