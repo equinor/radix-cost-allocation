@@ -19,10 +19,10 @@ jobs:
       SQL_LOG_STORAGE_NAME: radixsqllogsdev
     steps:       
       - uses: actions/checkout@v2
-      - uses: Azure/login@v1.1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-          enable-AzPSSession: true
+      - name: Azure login
+        run: |
+          az login --service-principal --username ${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
+          az account set -s "${{secrets.DEV_AZURE_SUBSCRIPTION_ID}}"
       - uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: ${{ env.KEY_VAULT_NAME }}
