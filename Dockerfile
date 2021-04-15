@@ -1,15 +1,19 @@
 FROM golang:1.16.3-alpine3.13 as builder
 
 RUN apk update
-RUN apk add ca-certificates curl git  && \
-    apk add --no-cache gcc musl-dev && \
-    go get -u golang.org/x/lint/golint github.com/frapposelli/wwhrd
+RUN apk add ca-certificates curl git && \
+    apk add --no-cache gcc musl-dev
+RUN go get -u \
+    golang.org/x/lint/golint \
+    github.com/frapposelli/wwhrd \
+    github.com/nats-io/nats-server/v2
 
 WORKDIR /go/src/github.com/equinor/radix-cost-allocation/
 
 # Install project dependencies
 COPY go.mod go.sum ./
-RUN go mod download
+RUN go mod download && \
+    go mod download github.com/nats-io/nats-server/v2
 
 # Check dependency licenses using https://github.com/frapposelli/wwhrd
 COPY .wwhrd.yml ./
