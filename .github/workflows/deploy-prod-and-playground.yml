@@ -20,25 +20,21 @@ jobs:
       ADMIN_GROUP_ID: "a5dfa635-dc00-4a28-9ad9-9e7f1e56919d"
     steps:
       - uses: actions/checkout@v2
-      - name: Set environment variables for playground
+      - name: Login to playground
         if: ${{ matrix.deploy == 'playground' }}
         env:
           SQL_SERVER_NAME: sql-radix-cost-allocation-dev
           KEY_VAULT_NAME: radix-vault-dev
           SQL_LOG_STORAGE_NAME: radixsqllogsdev
-      - name: Set environment variables for prod
+        run: |
+          az login --service-principal --username ${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
+          az account set -s "${{secrets.DEV_AZURE_SUBSCRIPTION_ID}}"
+      - name: Login for prod
         if: ${{ matrix.deploy == 'prod' }}
         env:
           SQL_SERVER_NAME=sql-radix-cost-allocation-prod
           KEY_VAULT_NAME=radix-vault-prod
           SQL_LOG_STORAGE_NAME=radixsqllogsprod
-      - name: Azure login dev/playground
-        if: ${{ matrix.deploy == 'playground' }}
-        run: |
-          az login --service-principal --username ${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
-          az account set -s "${{secrets.DEV_AZURE_SUBSCRIPTION_ID}}"
-      - name: Azure login prod
-        if: ${{ matrix.deploy == 'prod' }}
         run: |
           az login --service-principal --username ${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
           az account set -s "${{secrets.PROD_AZURE_SUBSCRIPTION_ID}}"
