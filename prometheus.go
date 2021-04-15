@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"go.etcd.io/etcd/v3/models"
 	"time"
 
-	"github.com/equinor/radix-cost-allocation/models"
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"

@@ -1,9 +1,9 @@
 package models_test
 
 import (
+	"go.etcd.io/etcd/v3/models"
 	"testing"
 
-	"github.com/equinor/radix-cost-allocation/models"
 	"github.com/stretchr/testify/assert"
 )
 
