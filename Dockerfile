@@ -1,9 +1,10 @@
 FROM golang:1.16.3-alpine3.13 as builder
 
 RUN apk update
-RUN apk add ca-certificates curl git  && \
-    apk add --no-cache gcc musl-dev && \
-    go get -u golang.org/x/lint/golint github.com/frapposelli/wwhrd
+RUN apk add ca-certificates curl git && \
+    apk add --no-cache gcc musl-dev
+RUN go get -u golang.org/x/lint/golint github.com/frapposelli/wwhrd && \
+    go get github.com/nats-io/nats-server/v2
 
 WORKDIR /go/src/github.com/equinor/radix-cost-allocation/
 
