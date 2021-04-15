@@ -1,7 +1,7 @@
-FROM golang:1.14-alpine as builder
+FROM golang:1.16.3-alpine3.13 as builder
 
-RUN apk update && \
-    apk add ca-certificates curl git  && \
+RUN apk update
+RUN apk add ca-certificates curl git  && \
     apk add --no-cache gcc musl-dev && \
     go get -u golang.org/x/lint/golint github.com/frapposelli/wwhrd
 
