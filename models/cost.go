@@ -12,6 +12,7 @@ type Cost struct {
 	runs         []Run
 }
 
+// ApplicationCost holds cost information with resources
 type ApplicationCost struct {
 	Name                   string
 	WBS                    string
