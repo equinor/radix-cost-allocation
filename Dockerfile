@@ -5,15 +5,13 @@ RUN apk add ca-certificates curl git && \
     apk add --no-cache gcc musl-dev
 RUN go get -u \
     golang.org/x/lint/golint \
-    github.com/frapposelli/wwhrd \
-    github.com/nats-io/nats-server/v2
+    github.com/frapposelli/wwhrd
 
 WORKDIR /go/src/github.com/equinor/radix-cost-allocation/
 
 # Install project dependencies
 COPY go.mod go.sum ./
-RUN go mod download && \
-    go mod download github.com/nats-io/nats-server/v2
+RUN go mod download
 
 # Check dependency licenses using https://github.com/frapposelli/wwhrd
 COPY .wwhrd.yml ./
