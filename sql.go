@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"go.etcd.io/etcd/v3/models"
+	"github.com/equinor/radix-cost-allocation/models"
 	"log"
 	"time"
 )

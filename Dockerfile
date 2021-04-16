@@ -5,7 +5,8 @@ RUN apk add ca-certificates curl git && \
     apk add --no-cache gcc musl-dev
 RUN go get -u \
     golang.org/x/lint/golint \
-    github.com/frapposelli/wwhrd
+    github.com/frapposelli/wwhrd \
+    github.com/nats-io/nats-server/v2
 
 WORKDIR /go/src/github.com/equinor/radix-cost-allocation/
 
