@@ -18,25 +18,26 @@ jobs:
       FIREWALL_RULE_NAME: githubRunnerIp
       ADMIN_GROUP_NAME: 'Radix Platform Developers'
       ADMIN_GROUP_ID: "a5dfa635-dc00-4a28-9ad9-9e7f1e56919d"
-    steps:       
+    steps:
       - uses: actions/checkout@v2
-      - name: Set environment variables
-        run: |
-          RADIX_ENV="dev" && [[ ${{ matrix.deploy }} == 'prod' ]] && RADIX_ENV="prod"
-
-          echo "SQL_SERVER_NAME=sql-radix-cost-allocation-${{ matrix.deploy }}" >> $GITHUB_ENV
-          echo "KEY_VAULT_NAME=radix-vault-$RADIX_ENV" >> $GITHUB_ENV
-          echo "SQL_LOG_STORAGE_NAME=radixsqllogs${RADIX_ENV}" >> $GITHUB_ENV
-      - uses: Azure/login@v1.1
+      - name: Login to playground
         if: ${{ matrix.deploy == 'playground' }}
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-          enable-AzPSSession: true
-      - uses: Azure/login@v1.1
+        env:
+          SQL_SERVER_NAME: sql-radix-cost-allocation-dev
+          KEY_VAULT_NAME: radix-vault-dev
+          SQL_LOG_STORAGE_NAME: radixsqllogsdev
+        run: |
+          az login --service-principal --username ${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
+          az account set -s "${{secrets.DEV_AZURE_SUBSCRIPTION_ID}}"
+      - name: Login for prod
         if: ${{ matrix.deploy == 'prod' }}
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
-          enable-AzPSSession: true
+        env:
+          SQL_SERVER_NAME=sql-radix-cost-allocation-prod
+          KEY_VAULT_NAME=radix-vault-prod
+          SQL_LOG_STORAGE_NAME=radixsqllogsprod
+        run: |
+          az login --service-principal --username ${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
+          az account set -s "${{secrets.PROD_AZURE_SUBSCRIPTION_ID}}"
       - uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: ${{ env.KEY_VAULT_NAME }}
@@ -85,7 +86,6 @@ jobs:
         shell: pwsh
         if: ${{ always() }}
         run: |
-          $runnerIp = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
           az sql server firewall-rule delete `
             --name ${env:FIREWALL_RULE_NAME} `
             --resource-group ${env:RESOURCE_GROUP} `
