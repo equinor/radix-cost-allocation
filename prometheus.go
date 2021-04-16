@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"go.etcd.io/etcd/v3/models"
+	"github.com/equinor/radix-cost-allocation/models"
 	"time"
 
 	"github.com/prometheus/client_golang/api"

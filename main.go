@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"go.etcd.io/etcd/v3/models"
+	"github.com/equinor/radix-cost-allocation/models"
 	"log"
 	"os"
 	"time"
