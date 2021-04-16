@@ -32,9 +32,9 @@ jobs:
       - name: Login for prod
         if: ${{ matrix.deploy == 'prod' }}
         env:
-          SQL_SERVER_NAME=sql-radix-cost-allocation-prod
-          KEY_VAULT_NAME=radix-vault-prod
-          SQL_LOG_STORAGE_NAME=radixsqllogsprod
+          SQL_SERVER_NAME: sql-radix-cost-allocation-prod
+          KEY_VAULT_NAME: radix-vault-prod
+          SQL_LOG_STORAGE_NAME: radixsqllogsprod
         run: |
           az login --service-principal --username ${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
           az account set -s "${{secrets.PROD_AZURE_SUBSCRIPTION_ID}}"
