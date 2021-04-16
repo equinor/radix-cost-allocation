@@ -1,9 +1,11 @@
-FROM golang:1.14-alpine as builder
+FROM golang:1.16.3-alpine3.13 as builder
 
-RUN apk update && \
-    apk add ca-certificates curl git  && \
-    apk add --no-cache gcc musl-dev && \
-    go get -u golang.org/x/lint/golint github.com/frapposelli/wwhrd
+RUN apk update
+RUN apk add ca-certificates curl git && \
+    apk add --no-cache gcc musl-dev
+RUN go get -u \
+    golang.org/x/lint/golint \
+    github.com/frapposelli/wwhrd
 
 WORKDIR /go/src/github.com/equinor/radix-cost-allocation/
 
@@ -27,7 +29,6 @@ RUN golint `go list ./...` && \
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -a -installsuffix cgo -o ./rootfs/radix-cost-allocation
 RUN addgroup -S -g 1000 radix-cost-allocation
 RUN adduser -S -u 1000 -G radix-cost-allocation radix-cost-allocation
-
 
 # Run operator
 FROM scratch
