@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/equinor/radix-cost-allocation/models"
 	"log"
 	"os"
 	"time"
 
 	_ "github.com/denisenkom/go-mssqldb"
-	"github.com/equinor/radix-cost-allocation/models"
 )
 
 // todo! create write only connection string? dont need read/admin access

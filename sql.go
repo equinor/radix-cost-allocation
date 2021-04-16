@@ -5,10 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/equinor/radix-cost-allocation/models"
 	"log"
 	"time"
-
-	"github.com/equinor/radix-cost-allocation/models"
 )
 
 // SQLClient used to perform sql queries

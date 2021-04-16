@@ -23,6 +23,7 @@ type RequiredResources struct {
 	Replicas        int
 }
 
+//Application holds requests values
 type Application struct {
 	Name                           string
 	RequestedCPUMillicore          int

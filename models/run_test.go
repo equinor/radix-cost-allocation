@@ -1,9 +1,9 @@
 package models_test
 
 import (
+	"github.com/equinor/radix-cost-allocation/models"
 	"testing"
 
-	"github.com/equinor/radix-cost-allocation/models"
 	"github.com/stretchr/testify/assert"
 )
 
