@@ -39,3 +39,10 @@ BEGIN
 		ON cost.application_resource_run_aggregation(measured_time_utc, application, wbs, run_id)
 END
 
+if EXISTS(select 1 from sys.views where object_id=OBJECT_ID('cost.application_resource_run_aggregation'))
+	AND NOT EXISTS(select 1 from sys.indexes WHERE object_id=OBJECT_ID('cost.ix_application_resource_run_aggregation_runid_app_wbs'))
+BEGIN
+	CREATE NONCLUSTERED INDEX ix_application_resource_run_aggregation_runid_app_wbs
+		ON [cost].[application_resource_run_aggregation] ([run_id],[application],[wbs])
+		INCLUDE ([cpu_millicores],[memory_mega_bytes],[row_count])
+END
