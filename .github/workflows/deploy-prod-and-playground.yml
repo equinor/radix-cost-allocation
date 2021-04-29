@@ -53,7 +53,7 @@ jobs:
             --template-file ./azure-infrastructure/azuredeploy.json \
             --parameters sqlServerName=$SQL_SERVER_NAME \
             --parameters databaseName=$DB_NAME \
-            --parameters sqlAdministratorLoginPassword=${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }} \
+            --parameters sqlAdministratorLoginPassword="${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}" \
             --parameters sqlAdministratorLoginUser=$DB_USER_NAME \
             --parameters adminGroupName="$ADMIN_GROUP_NAME" \
             --parameters adminGroupId=$ADMIN_GROUP_ID \
