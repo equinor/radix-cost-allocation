@@ -48,7 +48,7 @@ jobs:
 
           # Get Storage Account ID for sql logs
           storageId=$(az storage account show --name "$SQL_LOG_STORAGE_NAME" --query "id" --output tsv)
-          cat /home/runner/work/_temp/*.sh
+          
           az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
             --template-file ./azure-infrastructure/azuredeploy.json \
             --parameters sqlServerName=$SQL_SERVER_NAME \
@@ -76,10 +76,10 @@ jobs:
 
           $targetSqlServerFQDN = "$(az sql server show -n ${env:SQL_SERVER_NAME} -g ${env:RESOURCE_GROUP} | jq -r .fullyQualifiedDomainName)"
 
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/preDeployScript.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createViews.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
+          Invoke-Sqlcmd -InputFile ./azure-infrastructure/preDeployScript.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password "${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}"
+          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password "${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}"
+          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password "${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}"
+          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createViews.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password "${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}"
       - name: Blacklist Runner IP in firewalls
         shell: pwsh
         if: ${{ always() }}
