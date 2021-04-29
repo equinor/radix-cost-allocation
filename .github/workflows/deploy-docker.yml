@@ -36,7 +36,7 @@ jobs:
       - name: Build Docker image dev
         run: |
           IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          docker build -t radixdev.azurecr.io/$IMAGE_NAME:$IMAGE_TAG
+          docker build -t radixdev.azurecr.io/$IMAGE_NAME:$IMAGE_TAG .
       - name: Azure login dev
         run: |
           az login --service-principal --username ${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
@@ -51,7 +51,7 @@ jobs:
       - name: Build Docker image prod
         run: |
           IMAGE_TAG=${GITHUB_REF##*/}-${{ github.sha }}
-          docker build -t radixprod.azurecr.io/$IMAGE_NAME:$IMAGE_TAG
+          docker build -t radixprod.azurecr.io/$IMAGE_NAME:$IMAGE_TAG .
       - name: Azure login prod
         run: |
           az login --service-principal --username ${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
