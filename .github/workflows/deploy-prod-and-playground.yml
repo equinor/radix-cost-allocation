@@ -25,7 +25,7 @@ jobs:
         run: |
           az login --service-principal --username ${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
           az account set -s "${{secrets.DEV_AZURE_SUBSCRIPTION_ID}}"
-          echo "SQL_SERVER_NAME=sql-radix-cost-allocation-dev" >> $GITHUB_ENV
+          echo "SQL_SERVER_NAME=sql-radix-cost-allocation-playground" >> $GITHUB_ENV
           echo "KEY_VAULT_NAME=radix-vault-dev" >> $GITHUB_ENV
           echo "SQL_LOG_STORAGE_NAME=radixsqllogsdev" >> $GITHUB_ENV
       - name: Login for prod
@@ -48,7 +48,7 @@ jobs:
 
           # Get Storage Account ID for sql logs
           storageId=$(az storage account show --name "$SQL_LOG_STORAGE_NAME" --query "id" --output tsv)
-
+          cat /home/runner/work/_temp/*.sh
           az deployment group create -g $RESOURCE_GROUP -n $DEPLOY_NAME \
             --template-file ./azure-infrastructure/azuredeploy.json \
             --parameters sqlServerName=$SQL_SERVER_NAME \
