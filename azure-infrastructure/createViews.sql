@@ -40,7 +40,7 @@ BEGIN
 END
 
 if EXISTS(select 1 from sys.views where object_id=OBJECT_ID('cost.application_resource_run_aggregation'))
-	AND NOT EXISTS(select 1 from sys.indexes WHERE object_id=OBJECT_ID('cost.ix_application_resource_run_aggregation_runid_app_wbs'))
+	AND NOT EXISTS(select 1 from sys.indexes WHERE object_id=OBJECT_ID('cost.application_resource_run_aggregation') and name='ix_application_resource_run_aggregation_runid_app_wbs')
 BEGIN
 	CREATE NONCLUSTERED INDEX ix_application_resource_run_aggregation_runid_app_wbs
 		ON [cost].[application_resource_run_aggregation] ([run_id],[application],[wbs])
