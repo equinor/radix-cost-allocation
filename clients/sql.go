@@ -1,13 +1,14 @@
-package main
+package clients
 
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
-	"github.com/equinor/radix-cost-allocation/models"
-	"log"
 	"time"
+
+	"github.com/pkg/errors"
+
+	"github.com/equinor/radix-cost-allocation/models"
 )
 
 // SQLClient used to perform sql queries
@@ -21,7 +22,7 @@ type SQLClient struct {
 }
 
 // NewSQLClient create sqlclient and setup the db connection
-func NewSQLClient(server, database string, port int, userID, password string) SQLClient {
+func NewSQLClient(server, database string, port int, userID, password string) (SQLClient, error) {
 	sqlClient := SQLClient{
 		Server:   server,
 		Database: database,
@@ -29,8 +30,12 @@ func NewSQLClient(server, database string, port int, userID, password string) SQ
 		UserID:   userID,
 		Password: password,
 	}
-	sqlClient.db = sqlClient.setupDBConnection()
-	return sqlClient
+	db, err := sqlClient.setupDBConnection()
+	if err != nil {
+		return sqlClient, err
+	}
+	sqlClient.db = db
+	return sqlClient, nil
 }
 
 // GetRunsBetweenTimes get all runs with its resources between from and to time
@@ -152,25 +157,23 @@ func (sqlClient SQLClient) Close() {
 }
 
 // SetupDBConnection sets up db connection
-func (sqlClient SQLClient) setupDBConnection() *sql.DB {
+func (sqlClient SQLClient) setupDBConnection() (*sql.DB, error) {
 	// Build connection string
 	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;",
 		sqlClient.Server, sqlClient.UserID, sqlClient.Password, sqlClient.Port, sqlClient.Database)
 
-	var err error
-
 	// Create connection pool
 	db, err := sql.Open("sqlserver", connString)
 	if err != nil {
-		log.Fatal("Error creating connection pool: ", err.Error())
+		return nil, errors.WithMessage(err, "error creating connection pool")
 	}
 	ctx := context.Background()
 	err = db.PingContext(ctx)
 	if err != nil {
-		log.Fatal(err.Error())
+		return nil, err
 	}
 	fmt.Printf("Connected!\n")
-	return db
+	return db, nil
 }
 
 func (sqlClient SQLClient) execSQL(tsql string, args ...interface{}) (int64, error) {

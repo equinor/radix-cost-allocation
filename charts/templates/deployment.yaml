@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Chart.Name }}
+  labels:
+    app: "radix-cost-allocation"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "radix-cost-allocation"
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: "radix-operator"
+        release: {{ .Release.Name }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        supplementalGroups:
+          - 1000
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: CRON_SCHEDULE
+              value: {{ .Values.schedule }}
+            - name: SQL_USER
+              value: {{ .Values.db.user }}
+            - name: SQL_DATABASE
+              value: {{ .Values.db.database }}
+            - name: SQL_SERVER
+              value: {{ .Values.db.server }}
+            - name: SQL_PORT
+              value: {{ .Values.db.port }}
+            - name: PROMETHEUS_API
+              value: {{ .Values.prometheus.api }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secret.name }}
+          securityContext:
+            privileged: false
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false

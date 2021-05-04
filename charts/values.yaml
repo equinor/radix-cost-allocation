@@ -6,10 +6,6 @@ image:
   tag: latest
   pullPolicy: Always
 
-job:
-  schedule: "0 * * * *"
-  restartPolicy: Never
-
 secret:
   name: sql-credential
 
@@ -18,6 +14,9 @@ db:
   database: sqldb-radix-cost-allocation
   server: sql-radix-cost-allocation-dev.database.windows.net
   password: password
+  port: 1433
+
+schedule: "0 * * * *"
 
 prometheus:
   api: http://prometheus-operator-prometheus.default:9090

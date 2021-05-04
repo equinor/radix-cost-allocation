@@ -1,10 +1,11 @@
-package main
+package clients
 
 import (
 	"context"
 	"fmt"
-	"github.com/equinor/radix-cost-allocation/models"
 	"time"
+
+	"github.com/equinor/radix-cost-allocation/models"
 
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"

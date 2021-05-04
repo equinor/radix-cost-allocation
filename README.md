@@ -25,3 +25,12 @@ Run following command to set tag (with corresponding version)
 git tag v1.0.0
 git push origin v1.0.0
 ```
+
+## Debugging locally
+
+Create a copy of .env.template and name it .env. Set variables to allow local debugging. This file is ignored by git.
+
+Prometheus operator must be port forwarded to a local port:
+```
+k port-forward pod/prometheus-prometheus-operator-prometheus-0 9090:9090
+```
