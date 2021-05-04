@@ -29,6 +29,8 @@ var Conf struct {
 	}
 }
 
+var sem = semaphore.NewWeighted(1)
+
 func main() {
 	if err := envconfig.Init(&Conf); err != nil {
 		log.Fatal(err)
@@ -43,9 +45,12 @@ func main() {
 	defer sqlClient.Close()
 
 	// printCostBetweenDates(time.Now().UTC().AddDate(0, 0, -3), time.Now().UTC(), promClient, sqlClient)
-	c := cron.New()
-	sem := semaphore.NewWeighted(1)
 
+	initAndRunDataCollector(promClient, sqlClient)
+}
+
+func initAndRunDataCollector(promClient clients.PrometheusClient, sqlClient clients.SQLClient) {
+	c := cron.New()
 	c.AddFunc(Conf.CronSchedule, func() {
 		if !sem.TryAcquire(1) {
 			return
