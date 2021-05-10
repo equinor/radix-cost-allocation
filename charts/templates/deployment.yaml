@@ -47,6 +47,8 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ .Values.secret.name }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
             privileged: false
             readOnlyRootFilesystem: false

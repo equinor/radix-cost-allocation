@@ -20,3 +20,11 @@ schedule: "0 * * * *"
 
 prometheus:
   api: http://prometheus-operator-prometheus.default:9090
+
+resources:
+  limits:
+    cpu: 50m
+    memory: 100Mi
+  requests:
+    cpu: 50m
+    memory: 100Mi
