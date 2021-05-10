@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/equinor/radix-cost-allocation/models"
-
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
+	log "github.com/sirupsen/logrus"
 )
 
 // PrometheusClient used to perform queries towards prometheus
@@ -89,7 +89,7 @@ func (client PrometheusClient) getVectorPrometheus(measuredTime time.Time, query
 		return nil, fmt.Errorf("error querying Prometheus: %v", err)
 	}
 	if len(warnings) > 0 {
-		fmt.Printf("Warnings: %v\n", warnings)
+		log.Warningf("Warnings: %v", warnings)
 	}
 	if result.Type() != model.ValVector {
 		return nil, fmt.Errorf("query prom required resources returned wrong datatype %s", result.Type())

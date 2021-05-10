@@ -1,14 +1,12 @@
 package main
 
 import (
-	"fmt"
-
 	"time"
 
 	"github.com/equinor/radix-cost-allocation/clients"
 	"github.com/equinor/radix-cost-allocation/models"
 	"github.com/pkg/errors"
-	"github.com/robfig/cron"
+	cron "github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	"golang.org/x/sync/semaphore"
@@ -47,6 +45,7 @@ func main() {
 }
 
 func initAndRunDataCollector(promClient clients.PrometheusClient, sqlClient clients.SQLClient) {
+	log.Infof("Starting cron job using schedule %s", Conf.CronSchedule)
 	c := cron.New()
 	c.AddFunc(Conf.CronSchedule, func() {
 		if !sem.TryAcquire(1) {
@@ -85,7 +84,7 @@ func moveResourceRequestsFromPrometheusToSQLDB(promClient clients.PrometheusClie
 	if err != nil {
 		return errors.WithMessage(err, "error creating Run")
 	}
-	fmt.Printf("Run %d started at %v.\n", runID, measuredTimeUTC)
+	log.Infof("Run %d started at %v.", runID, measuredTimeUTC)
 
 	run := models.Run{
 		ID:                    runID,
@@ -98,6 +97,6 @@ func moveResourceRequestsFromPrometheusToSQLDB(promClient clients.PrometheusClie
 		return errors.WithMessage(err, "error saving resources")
 	}
 
-	fmt.Printf("Run %d finished successfully at %v", runID, time.Now().UTC())
+	log.Infof("Run %d finished successfully at %v", runID, time.Now().UTC())
 	return nil
 }
