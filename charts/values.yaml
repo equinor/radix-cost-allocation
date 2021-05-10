@@ -14,7 +14,7 @@ db:
   database: sqldb-radix-cost-allocation
   server: sql-radix-cost-allocation-dev.database.windows.net
   password: password
-  port: 1433
+  port: "1433"
 
 schedule: "0 * * * *"
 
