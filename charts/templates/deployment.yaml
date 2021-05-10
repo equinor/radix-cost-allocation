@@ -17,7 +17,7 @@ spec:
   template:
     metadata:
       labels:
-        app: "radix-operator"
+        app: "radix-cost-allocation"
         release: {{ .Release.Name }}
     spec:
       securityContext:

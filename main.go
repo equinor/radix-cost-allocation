@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"time"
@@ -44,8 +43,6 @@ func main() {
 	}
 	defer sqlClient.Close()
 
-	// printCostBetweenDates(time.Now().UTC().AddDate(0, 0, -3), time.Now().UTC(), promClient, sqlClient)
-
 	initAndRunDataCollector(promClient, sqlClient)
 }
 
@@ -65,27 +62,11 @@ func initAndRunDataCollector(promClient clients.PrometheusClient, sqlClient clie
 	c.Run()
 }
 
-func printCostBetweenDates(from, to time.Time, promClient clients.PrometheusClient, sqlClient clients.SQLClient) error {
-	runs, err := sqlClient.GetRunsBetweenTimes(from, to)
-	if err != nil {
-		return errors.WithMessage(err, "error getting runs")
-	}
-
-	cost := models.NewCost(from, to, runs)
-	costJSON, err := json.Marshal(cost.Applications)
-	if err != nil {
-		return errors.WithMessage(err, "error converting to json")
-	}
-	fmt.Println(string(costJSON))
-
-	return nil
-}
-
 func moveResourceRequestsFromPrometheusToSQLDB(promClient clients.PrometheusClient, sqlClient clients.SQLClient) error {
 	measuredTimeUTC := time.Now().UTC()
 	reqResources, err := promClient.GetRequiredResources(measuredTimeUTC)
 	if err != nil {
-		return errors.WithMessage(err, "eror getting required resources")
+		return errors.WithMessage(err, "error getting required resources")
 	}
 
 	clusterCPUCores, err := promClient.GetClusterTotalCPUCoresFromPrometheus(measuredTimeUTC)

@@ -32,5 +32,5 @@ Create a copy of .env.template and name it .env. Set variables to allow local de
 
 Prometheus operator must be port forwarded to a local port:
 ```
-k port-forward pod/prometheus-prometheus-operator-prometheus-0 9090:9090
+kubectl port-forward pod/prometheus-prometheus-operator-prometheus-0 9090:9090
 ```
