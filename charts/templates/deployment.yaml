@@ -33,7 +33,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: CRON_SCHEDULE
-              value: {{ .Values.schedule }}
+              value: {{ .Values.schedule | quote }}
             - name: SQL_USER
               value: {{ .Values.db.user }}
             - name: SQL_DATABASE
@@ -41,7 +41,7 @@ spec:
             - name: SQL_SERVER
               value: {{ .Values.db.server }}
             - name: SQL_PORT
-              value: {{ .Values.db.port }}
+              value: {{ .Values.db.port | quote }}
             - name: PROMETHEUS_API
               value: {{ .Values.prometheus.api }}
           envFrom:
