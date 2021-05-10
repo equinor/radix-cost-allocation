@@ -45,7 +45,7 @@ func main() {
 }
 
 func initAndRunDataCollector(promClient clients.PrometheusClient, sqlClient clients.SQLClient) {
-	log.Infof("Starting cron job using schedule %s", Conf.CronSchedule)
+	log.Infof("Registering cron job using schedule %s", Conf.CronSchedule)
 	c := cron.New()
 	c.AddFunc(Conf.CronSchedule, func() {
 		if !sem.TryAcquire(1) {
