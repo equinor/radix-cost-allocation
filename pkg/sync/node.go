@@ -1,4 +1,4 @@
-package jobs
+package sync
 
 import (
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
@@ -24,18 +24,10 @@ func NewNodeSyncJob(nodeTvpBuilder tvpbuilder.NodeBulkTvpBuilder, repository rep
 	}
 }
 
-// Run implements the cron.Job interface
-func (s *NodeSyncJob) Run() {
-	if err := s.writeToRepository(); err != nil {
-		log.Error(err)
-	}
-}
-
 // Sync writes the current list of nodes to the repository
-func (s *NodeSyncJob) writeToRepository() error {
+func (s *NodeSyncJob) Sync() error {
 	if !s.sem.TryAcquire(1) {
-		log.Debugf("Node sync already running")
-		return nil
+		return NewSyncAlreadyRunningError("node")
 	}
 	defer s.sem.Release(1)
 	log.Info("Start syncing nodes")

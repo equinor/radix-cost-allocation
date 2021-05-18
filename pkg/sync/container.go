@@ -1,4 +1,4 @@
-package jobs
+package sync
 
 import (
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
@@ -24,17 +24,10 @@ func NewContainerSyncJob(containerTvpBuilder tvpbuilder.ContainerBulkTvpBuilder,
 	}
 }
 
-// Run implements the cron.Job interface
-func (s *ContainerSyncJob) Run() {
-	if err := s.writeToRepository(); err != nil {
-		log.Error(err)
-	}
-}
-
-func (s *ContainerSyncJob) writeToRepository() error {
+// Sync writes the current list of containers to the repository
+func (s *ContainerSyncJob) Sync() error {
 	if !s.sem.TryAcquire(1) {
-		log.Debug("Container sync already running")
-		return nil
+		return NewSyncAlreadyRunningError("container")
 	}
 	defer s.sem.Release(1)
 

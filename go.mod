@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/denisenkom/go-mssqldb v0.10.0
 	github.com/equinor/radix-operator v1.11.3
+	github.com/golang/mock v1.5.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.10.0
 	github.com/prometheus/common v0.20.0

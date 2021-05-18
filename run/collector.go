@@ -4,17 +4,41 @@ import (
 	"context"
 
 	"github.com/equinor/radix-cost-allocation/config"
-	"github.com/equinor/radix-cost-allocation/pkg/jobs"
 	"github.com/equinor/radix-cost-allocation/pkg/listers"
 	"github.com/equinor/radix-cost-allocation/pkg/reflectorcontroller"
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
+	"github.com/equinor/radix-cost-allocation/pkg/sync"
 	"github.com/equinor/radix-cost-allocation/pkg/tvpbuilder"
 	kubeUtils "github.com/equinor/radix-cost-allocation/pkg/utils/kube"
 	mssqlUtils "github.com/equinor/radix-cost-allocation/pkg/utils/mssql"
 	"github.com/equinor/radix-cost-allocation/pkg/utils/reflectorstore"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
+	log "github.com/sirupsen/logrus"
 )
+
+type syncerJobWrapper struct {
+	syncer sync.Syncer
+}
+
+func newSyncerJobWrapper(syncer sync.Syncer) *syncerJobWrapper {
+	return &syncerJobWrapper{syncer: syncer}
+}
+
+func (w *syncerJobWrapper) Run() {
+	if err := w.syncer.Sync(); err != nil {
+		handleSyncError(err)
+	}
+}
+
+func handleSyncError(err error) {
+	switch err.(type) {
+	case *sync.SyncAlreadyRunningError:
+		log.Debug(err)
+	default:
+		log.Error(err)
+	}
+}
 
 // InitAndStartCollector starts collecting and writing container and node resources to the database
 func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSchedule, stopCh <-chan struct{}) error {
@@ -52,15 +76,15 @@ func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSch
 	nodeTvpBuilder := tvpbuilder.NewNodeBulk(nodeLister)
 
 	// Create sync jobs
-	containerSyncJob := jobs.NewContainerSyncJob(containerTvpBuilder, repo)
-	nodeSyncJob := jobs.NewNodeSyncJob(nodeTvpBuilder, repo)
+	containerSyncJob := sync.NewContainerSyncJob(containerTvpBuilder, repo)
+	nodeSyncJob := sync.NewNodeSyncJob(nodeTvpBuilder, repo)
 
 	// Create cron scheduler and add sync jobs
 	c := cron.New(cron.WithSeconds())
-	if _, err := c.AddJob(cronConfig.PodSync, containerSyncJob); err != nil {
+	if _, err := c.AddJob(cronConfig.PodSync, newSyncerJobWrapper(containerSyncJob)); err != nil {
 		return err
 	}
-	if _, err := c.AddJob(cronConfig.NodeSync, nodeSyncJob); err != nil {
+	if _, err := c.AddJob(cronConfig.NodeSync, newSyncerJobWrapper(nodeSyncJob)); err != nil {
 		return err
 	}
 	c.Start()
