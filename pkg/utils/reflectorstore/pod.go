@@ -6,7 +6,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-// NewPodReflectorAndStore creates and returns a new store and reflector using the store
+// NewPodReflectorAndStore creates and returns a new store and a reflector using the store
 // The reflector keeps an up to date list of Pod resources in k8s
 func NewPodReflectorAndStore(client kubernetes.Interface) (*cache.Reflector, cache.Store) {
 	store := newStore()

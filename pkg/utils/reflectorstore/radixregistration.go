@@ -6,7 +6,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-// NewRadixRegistrationReflectorAndStore creates and returns a new store and reflector using the store
+// NewRadixRegistrationReflectorAndStore creates and returns a new store and a reflector using the store
 // The reflector keeps an up to date list of RadixRegistration resources in k8s
 func NewRadixRegistrationReflectorAndStore(client radixclientset.Interface) (*cache.Reflector, cache.Store) {
 	store := newStore()

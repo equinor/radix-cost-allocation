@@ -6,7 +6,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-// NewLimitRangeReflectorAndStore creates and returns a new store and reflector using the store
+// NewLimitRangeReflectorAndStore creates and returns a new store and a reflector using the store
 // The reflector keeps an up to date list of LimitRange resources in k8s
 func NewLimitRangeReflectorAndStore(client kubernetes.Interface) (*cache.Reflector, cache.Store) {
 	store := newStore()
