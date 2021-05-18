@@ -6,11 +6,11 @@ import (
 	"github.com/equinor/radix-cost-allocation/config"
 	"github.com/equinor/radix-cost-allocation/pkg/jobs"
 	"github.com/equinor/radix-cost-allocation/pkg/listers"
+	"github.com/equinor/radix-cost-allocation/pkg/reflectorcontroller"
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
 	"github.com/equinor/radix-cost-allocation/pkg/tvpbuilder"
 	kubeUtils "github.com/equinor/radix-cost-allocation/pkg/utils/kube"
 	mssqlUtils "github.com/equinor/radix-cost-allocation/pkg/utils/mssql"
-	"github.com/equinor/radix-cost-allocation/pkg/utils/reflector"
 	"github.com/equinor/radix-cost-allocation/pkg/utils/reflectorstore"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
@@ -37,7 +37,7 @@ func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSch
 	rrReflector, rrStore := reflectorstore.NewRadixRegistrationReflectorAndStore(radixclient)
 
 	// Create and start reflector controller
-	reflectorController := reflector.NewController(podReflector, nodeReflector, limitrangeReflector, rrReflector)
+	reflectorController := reflectorcontroller.New(podReflector, nodeReflector, limitrangeReflector, rrReflector)
 	reflectorController.Start()
 	defer reflectorController.Stop()
 
