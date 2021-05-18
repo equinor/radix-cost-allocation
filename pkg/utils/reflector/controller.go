@@ -6,21 +6,23 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-type ReflectorController struct {
+// Controller controls start and stop of multiple reflectors
+type Controller struct {
 	reflectors []*cache.Reflector
 	mu         sync.Mutex
 	running    bool
 	stopCh     chan struct{}
 }
 
-func NewReflectorController(reflectors ...*cache.Reflector) *ReflectorController {
-	return &ReflectorController{
+// NewController creates a new Controller responsible for starting and stopping the reflectors specified in the input parameter
+func NewController(reflectors ...*cache.Reflector) *Controller {
+	return &Controller{
 		reflectors: reflectors,
 	}
 }
 
 // Start all reflectors referenced by this controller, or no-op if already started.
-func (c *ReflectorController) Start() {
+func (c *Controller) Start() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.running {
@@ -33,7 +35,7 @@ func (c *ReflectorController) Start() {
 }
 
 //Stop all reflectors referenced by this controller, or no-op if not running.
-func (c *ReflectorController) Stop() {
+func (c *Controller) Stop() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if !c.running {

@@ -14,8 +14,9 @@ import (
 
 var sem = semaphore.NewWeighted(1)
 
-func InitAndRunOldDataCollector(prometheusApiUrl, cronSchedule string, sqlConfig config.SQLConfig, stopCh <-chan struct{}) {
-	promClient := clients.PrometheusClient{Address: prometheusApiUrl}
+// InitAndStartOldDataCollector starts the old (and soon to be deprecated) resource collector
+func InitAndStartOldDataCollector(prometheusAPIURL, cronSchedule string, sqlConfig config.SQLConfig, stopCh <-chan struct{}) {
+	promClient := clients.PrometheusClient{Address: prometheusAPIURL}
 	sqlClient, err := clients.NewSQLClient(sqlConfig.Server, sqlConfig.Database, sqlConfig.Port, sqlConfig.User, sqlConfig.Password, sqlConfig.QueryTimeout)
 	if err != nil {
 		log.Fatal(err)
@@ -23,7 +24,7 @@ func InitAndRunOldDataCollector(prometheusApiUrl, cronSchedule string, sqlConfig
 	}
 	defer sqlClient.Close()
 
-	log.Infof("Registering cron job using schedule %s", cronSchedule)
+	log.Infof("Registering old job using cron schedule %s", cronSchedule)
 	c := cron.New(cron.WithSeconds())
 	c.AddFunc(cronSchedule, func() {
 		if !sem.TryAcquire(1) {

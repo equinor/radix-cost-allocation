@@ -1,4 +1,4 @@
-package models
+package tvp
 
 import (
 	"errors"
@@ -6,27 +6,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/equinor/radix-cost-allocation/pkg/repository"
 	"github.com/equinor/radix-operator/pkg/apis/kube"
 	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
 	corev1 "k8s.io/api/core/v1"
 )
 
-type ContainerBulkTvp struct {
-	ContainerId          string
-	ContainerName        string
-	PodName              string
-	ApplicationName      string
-	EnvironmentName      string
-	ComponentName        string
-	Wbs                  string
-	StartedAt            time.Time
-	LastKnowRunningAt    time.Time
-	CpuRequestMillicores int64
-	MemoryRequestBytes   int64
-	NodeName             string
-}
-
-func ContainerBulkTvpFromPod(pod *corev1.Pod, rrMap map[string]*v1.RadixRegistration, limitRangeMap map[string]*corev1.LimitRange) (containersTvp []ContainerBulkTvp, err error) {
+// NewContainerBulkTvpFromPod builds a ContainerBulkTvp from containers in the pod.
+// Container information is only extracted if the pod has a "radix-app" label.
+// WBS is extracted from the rrMap where rrMap key must match the value of the "radix-app" label for the pod
+// CPU and memory is read from limitRangeMap, where key must match the namespace of the pod, if missing in pod container spec.
+func NewContainerBulkTvpFromPod(pod *corev1.Pod, rrMap map[string]*v1.RadixRegistration, limitRangeMap map[string]*corev1.LimitRange) (containersTvp []repository.ContainerBulkTvp, err error) {
 	if pod == nil {
 		err = errors.New("pod is nil")
 		return
@@ -45,8 +35,8 @@ func ContainerBulkTvpFromPod(pod *corev1.Pod, rrMap map[string]*v1.RadixRegistra
 			continue
 		}
 
-		containerTvp := ContainerBulkTvp{
-			ContainerId:     containerStatus.ContainerID,
+		containerTvp := repository.ContainerBulkTvp{
+			ContainerID:     containerStatus.ContainerID,
 			ContainerName:   containerStatus.Name,
 			PodName:         pod.Name,
 			ApplicationName: appName,
@@ -83,7 +73,7 @@ func getEnvironmentNameFromNamespace(appName, ns string) string {
 	return ""
 }
 
-func setContainerBulkTvpRadixRegistrationProps(cbt *ContainerBulkTvp, rr *v1.RadixRegistration) {
+func setContainerBulkTvpRadixRegistrationProps(cbt *repository.ContainerBulkTvp, rr *v1.RadixRegistration) {
 	if cbt == nil || rr == nil {
 		return
 	}
@@ -91,28 +81,28 @@ func setContainerBulkTvpRadixRegistrationProps(cbt *ContainerBulkTvp, rr *v1.Rad
 	cbt.Wbs = rr.Spec.WBS
 }
 
-func setContainerBulkTvpResourceProps(cbt *ContainerBulkTvp, container *corev1.Container) {
+func setContainerBulkTvpResourceProps(cbt *repository.ContainerBulkTvp, container *corev1.Container) {
 	if cbt == nil || container == nil {
 		return
 	}
 
 	setContainerBulkTvpMemory(cbt, container.Resources.Requests)
-	setContainerBulkTvpCpu(cbt, container.Resources.Requests)
+	setContainerBulkTvpCPU(cbt, container.Resources.Requests)
 }
 
-func setContainerBulkTvpCpu(cbt *ContainerBulkTvp, resourceList corev1.ResourceList) {
+func setContainerBulkTvpCPU(cbt *repository.ContainerBulkTvp, resourceList corev1.ResourceList) {
 	if cpu := resourceList.Cpu(); cpu != nil {
-		cbt.CpuRequestMillicores = cpu.MilliValue()
+		cbt.CPURequestMillicores = cpu.MilliValue()
 	}
 }
 
-func setContainerBulkTvpMemory(cbt *ContainerBulkTvp, resourceList corev1.ResourceList) {
+func setContainerBulkTvpMemory(cbt *repository.ContainerBulkTvp, resourceList corev1.ResourceList) {
 	if mem := resourceList.Memory(); mem != nil {
 		cbt.MemoryRequestBytes = mem.Value()
 	}
 }
 
-func setContainerBulkTvpLimitRangeProps(cbt *ContainerBulkTvp, limitRange *corev1.LimitRange) {
+func setContainerBulkTvpLimitRangeProps(cbt *repository.ContainerBulkTvp, limitRange *corev1.LimitRange) {
 	if cbt == nil || limitRange == nil {
 		return
 	}
@@ -122,8 +112,8 @@ func setContainerBulkTvpLimitRangeProps(cbt *ContainerBulkTvp, limitRange *corev
 			setContainerBulkTvpMemory(cbt, lri.DefaultRequest)
 		}
 
-		if cbt.CpuRequestMillicores == 0 {
-			setContainerBulkTvpCpu(cbt, lri.DefaultRequest)
+		if cbt.CPURequestMillicores == 0 {
+			setContainerBulkTvpCPU(cbt, lri.DefaultRequest)
 		}
 	}
 }
@@ -138,17 +128,17 @@ func getFirstContainerLimitRangeItem(items []corev1.LimitRangeItem) *corev1.Limi
 	return nil
 }
 
-func setContainerBulkTvpTerminatedProps(cbt *ContainerBulkTvp, terminated *corev1.ContainerStateTerminated) {
+func setContainerBulkTvpTerminatedProps(cbt *repository.ContainerBulkTvp, terminated *corev1.ContainerStateTerminated) {
 	if cbt == nil || terminated == nil {
 		return
 	}
 
-	cbt.ContainerId = terminated.ContainerID
+	cbt.ContainerID = terminated.ContainerID
 	cbt.StartedAt = terminated.StartedAt.Time
 	cbt.LastKnowRunningAt = terminated.FinishedAt.Time
 }
 
-func setContainerBulkTvpRunningProps(cbt *ContainerBulkTvp, running *corev1.ContainerStateRunning) {
+func setContainerBulkTvpRunningProps(cbt *repository.ContainerBulkTvp, running *corev1.ContainerStateRunning) {
 	if cbt == nil || running == nil {
 		return
 	}

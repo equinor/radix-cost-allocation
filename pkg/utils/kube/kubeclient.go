@@ -10,6 +10,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+// GetKubernetesClients returns clients for accessing k8s and Radix resources in a cluster
 func GetKubernetesClients() (kubernetes.Interface, radixclientset.Interface, error) {
 	config, err := getClientConfig()
 	if err != nil {

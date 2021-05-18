@@ -7,7 +7,6 @@ import (
 	"time"
 
 	mssql "github.com/denisenkom/go-mssqldb"
-	"github.com/equinor/radix-cost-allocation/pkg/models"
 	"github.com/pkg/errors"
 )
 
@@ -23,7 +22,8 @@ type sqlRepository struct {
 	ctx          context.Context
 }
 
-func NewSqlRepository(db *sql.DB, QueryTimeout int, context context.Context) Repository {
+// NewSQLRepository returns a SQL Server implementation of the Repository interface
+func NewSQLRepository(context context.Context, db *sql.DB, QueryTimeout int) Repository {
 	return &sqlRepository{
 		db:           db,
 		queryTimeout: QueryTimeout,
@@ -32,8 +32,7 @@ func NewSqlRepository(db *sql.DB, QueryTimeout int, context context.Context) Rep
 }
 
 // BulkUpsertContainers writes the list of containers to the database
-// If the container exists in the database, only LastKnowRunningAt will be updated
-func (repo *sqlRepository) BulkUpsertContainers(containers []models.ContainerBulkTvp) error {
+func (repo *sqlRepository) BulkUpsertContainers(containers []ContainerBulkTvp) error {
 	nodeArg := sql.Named("containers",
 		mssql.TVP{
 			TypeName: containerTvpTypeName,
@@ -46,7 +45,8 @@ func (repo *sqlRepository) BulkUpsertContainers(containers []models.ContainerBul
 	return nil
 }
 
-func (repo *sqlRepository) BulkUpsertNodes(nodes []models.NodeBulkTvp) error {
+// BulkUpsertNodes writes the list of nodes to the database
+func (repo *sqlRepository) BulkUpsertNodes(nodes []NodeBulkTvp) error {
 	nodeArg := sql.Named("nodes",
 		mssql.TVP{
 			TypeName: nodeTvpTypeName,
@@ -91,7 +91,7 @@ func (repo *sqlRepository) executeWithTransaction(query string, args ...interfac
 func (repo *sqlRepository) getContext() (ctx context.Context, cancel context.CancelFunc) {
 	if repo.queryTimeout > 0 {
 		return context.WithTimeout(repo.ctx, time.Duration(repo.queryTimeout)*time.Second)
-	} else {
-		return context.WithCancel(repo.ctx)
 	}
+
+	return context.WithCancel(repo.ctx)
 }

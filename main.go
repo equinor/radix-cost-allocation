@@ -12,17 +12,24 @@ import (
 	"github.com/vrischmann/envconfig"
 )
 
-var Config config.AppConfig
+var appConfig config.AppConfig
 
 func main() {
-	if err := envconfig.Init(&Config); err != nil {
+	if err := envconfig.Init(&appConfig); err != nil {
 		log.Fatal(err)
 	}
 
+	logLevel, err := log.ParseLevel(appConfig.LogLevel)
+	if err != nil {
+		log.Warnf("Log level '%s' is not valid. Using 'info' level", appConfig.LogLevel)
+		logLevel = log.InfoLevel
+	}
+	log.SetLevel(logLevel)
+
 	stopCh := make(chan struct{})
-	go run.InitAndRunOldDataCollector(Config.PrometheusAPI, Config.CronSchedule, Config.SQL, stopCh)
+	go run.InitAndStartOldDataCollector(appConfig.PrometheusAPI, appConfig.CronSchedule, appConfig.SQL, stopCh)
 	go func() {
-		if err := run.InitAndStartCollector(Config, stopCh); err != nil {
+		if err := run.InitAndStartCollector(appConfig.SQL, appConfig.Schedule, stopCh); err != nil {
 			log.Fatal(err)
 		}
 	}()

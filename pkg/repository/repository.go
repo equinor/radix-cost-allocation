@@ -1,8 +1,7 @@
 package repository
 
-import "github.com/equinor/radix-cost-allocation/pkg/models"
-
+// Repository defines methods for bulk upserting container and node resources to a database
 type Repository interface {
-	BulkUpsertContainers([]models.ContainerBulkTvp) error
-	BulkUpsertNodes([]models.NodeBulkTvp) error
+	BulkUpsertContainers([]ContainerBulkTvp) error
+	BulkUpsertNodes([]NodeBulkTvp) error
 }

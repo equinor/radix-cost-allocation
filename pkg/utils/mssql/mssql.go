@@ -7,9 +7,10 @@ import (
 	mssql "github.com/denisenkom/go-mssqldb"
 )
 
-func OpenSqlServer(server, database, userID, password string, port int) (*sql.DB, error) {
+// OpenSQLServer opens a new connection to a SQL Server
+func OpenSQLServer(server, database, userID, password string, port int) (*sql.DB, error) {
 	c, err := mssql.NewConnector(
-		GetSqlServerDsn(server, database, userID, password, port),
+		GetSQLServerDsn(server, database, userID, password, port),
 	)
 	if err != nil {
 		return nil, err
@@ -18,7 +19,8 @@ func OpenSqlServer(server, database, userID, password string, port int) (*sql.DB
 	return sql.OpenDB(c), nil
 }
 
-func GetSqlServerDsn(server, database, userID, password string, port int) string {
+// GetSQLServerDsn builds a SQL Server specific DSN
+func GetSQLServerDsn(server, database, userID, password string, port int) string {
 	dsn := fmt.Sprintf("server=%s;user id=%s;password=%s;database=%s",
 		server, userID, password, database)
 

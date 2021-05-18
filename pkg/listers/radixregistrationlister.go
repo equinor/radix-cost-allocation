@@ -5,7 +5,9 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
+// RadixRegistrationLister defines a method to list RadixRegistrations from a k8s cluster
 type RadixRegistrationLister interface {
+	// List returns a list of RadixRegistrations
 	List() []*v1.RadixRegistration
 }
 
@@ -13,13 +15,14 @@ type radixRegistrationLister struct {
 	store cache.Store
 }
 
+// NewRadixRegistrationLister returns a RadixRegistrationLister that uses a store as source for listing RadixRegistration resources
 func NewRadixRegistrationLister(store cache.Store) RadixRegistrationLister {
 	return &radixRegistrationLister{
 		store: store,
 	}
 }
 
-// List returns radixregistrations in the store
+// List returns RadixRegistrations in the store
 func (pl *radixRegistrationLister) List() []*v1.RadixRegistration {
 	objs := pl.store.List()
 	rrlist := make([]*v1.RadixRegistration, 0, len(objs))

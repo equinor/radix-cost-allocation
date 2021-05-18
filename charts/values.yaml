@@ -18,9 +18,13 @@ db:
   queryTimeout: "30"
 
 # Using non-standard cron spec where first value is second, ref https://github.com/robfig/cron
-nodeSyncSchedule: "0 0/5 * * * *" # At seconds 0, every 5 minute
-podSyncSchedule: "10 * * * * *" # At second 10, every minute
-schedule: "0 0 * * * *" # At second seonds 0, minute 0, every hour
+cronSchedule: "0 0 * * * *" # At second seonds 0, minute 0, every hour
+schedule:
+  nodeSync: "0 0/5 * * * *" # At seconds 0, every 5 minute
+  podSync: "10 * * * * *" # At second 10, every minute
+
+# Logging
+logLevel: info
 
 prometheus:
   api: http://prometheus-operator-prometheus.default:9090

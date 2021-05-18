@@ -20,6 +20,7 @@ spec:
         app: "radix-cost-allocation"
         release: {{ .Release.Name }}
     spec:
+      serviceAccount: "{{ .Chart.Name }}"
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -33,7 +34,11 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: CRON_SCHEDULE
-              value: {{ .Values.schedule | quote }}
+              value: {{ .Values.cronSchedule | quote }}
+            - name: SCHEDULE_NODE_SYNC
+              value: {{ .Values.schedule.nodeSync | quote }}
+            - name: SCHEDULE_POD_SYNC
+              value: {{ .Values.schedule.podSync | quote }}
             - name: SQL_USER
               value: {{ .Values.db.user }}
             - name: SQL_DATABASE
@@ -44,6 +49,8 @@ spec:
               value: {{ .Values.db.port | quote }}
             - name: PROMETHEUS_API
               value: {{ .Values.prometheus.api }}
+            - name: LOG_LEVEL
+              value: {{ .Values.logLevel }}
           envFrom:
             - secretRef:
                 name: {{ .Values.secret.name }}
