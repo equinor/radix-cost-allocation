@@ -22,7 +22,7 @@ type sqlRepository struct {
 	ctx          context.Context
 }
 
-// NewSQLRepository returns a SQL Server implementation of the Repository interface
+// NewSQLRepository returns a SQL implementation of the Repository interface
 func NewSQLRepository(context context.Context, db *sql.DB, QueryTimeout int) Repository {
 	return &sqlRepository{
 		db:           db,
@@ -32,7 +32,7 @@ func NewSQLRepository(context context.Context, db *sql.DB, QueryTimeout int) Rep
 }
 
 // BulkUpsertContainers writes the list of containers to the database
-func (repo *sqlRepository) BulkUpsertContainers(containers []ContainerBulkTvp) error {
+func (repo *sqlRepository) BulkUpsertContainers(containers []ContainerBulkDto) error {
 	nodeArg := sql.Named("containers",
 		mssql.TVP{
 			TypeName: containerTvpTypeName,
@@ -46,7 +46,7 @@ func (repo *sqlRepository) BulkUpsertContainers(containers []ContainerBulkTvp) e
 }
 
 // BulkUpsertNodes writes the list of nodes to the database
-func (repo *sqlRepository) BulkUpsertNodes(nodes []NodeBulkTvp) error {
+func (repo *sqlRepository) BulkUpsertNodes(nodes []NodeBulkDto) error {
 	nodeArg := sql.Named("nodes",
 		mssql.TVP{
 			TypeName: nodeTvpTypeName,

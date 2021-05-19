@@ -38,15 +38,12 @@ $ mockgen -source ./pkg/repository/repository.go -destination ./pkg/repository/m
 ```
 listers:
 ```
-$ mockgen -source ./pkg/listers/limitrangelister.go -destination ./pkg/listers/mock/limitrangelister.go -package mock
-$ mockgen -source ./pkg/listers/nodelister.go -destination ./pkg/listers/mock/nodelister.go -package mock
-$ mockgen -source ./pkg/listers/podlister.go -destination ./pkg/listers/mock/podlister.go -package mock
-$ mockgen -source ./pkg/listers/radixregistrationlister.go -destination ./pkg/listers/mock/radixregistrationlister.go -package mock
-```
-tvpbuilder:
-```
-$ mockgen -source ./pkg/tvpbuilder/container.go -destination ./pkg/tvpbuilder/mock/container.go -package mock
-$ mockgen -source ./pkg/tvpbuilder/node.go -destination ./pkg/tvpbuilder/mock/node.go -package mock
+$ mockgen -source ./pkg/listers/limitrange.go -destination ./pkg/listers/mock/limitrange.go -package mock
+$ mockgen -source ./pkg/listers/node.go -destination ./pkg/listers/mock/node.go -package mock
+$ mockgen -source ./pkg/listers/pod.go -destination ./pkg/listers/mock/pod.go -package mock
+$ mockgen -source ./pkg/listers/radixregistration.go -destination ./pkg/listers/mock/radixregistration.go -package mock
+$ mockgen -source ./pkg/listers/containerbulkdto.go -destination ./pkg/listers/mock/containerbulkdto.go -package mock
+$ mockgen -source ./pkg/listers/nodebulkdto.go -destination ./pkg/listers/mock/nodebulkdto.go -package mock
 ```
 
 AuthProvider and IDToken:

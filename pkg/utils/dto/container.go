@@ -1,7 +1,6 @@
-package tvp
+package dto
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -12,16 +11,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// NewContainerBulkTvpFromPod builds a ContainerBulkTvp from containers in the pod.
+// MapContainerBulkDtoFromPod builds a ContainerBulkDto from containers in the pod.
 // Container information is only extracted if the pod has a "radix-app" label.
-// WBS is extracted from the rrMap where rrMap key must match the value of the "radix-app" label for the pod
+// WBS is extracted from the rrMap, where rrMap key must match the value of the "radix-app" label for the pod
 // CPU and memory is read from limitRangeMap, where key must match the namespace of the pod, if missing in pod container spec.
-func NewContainerBulkTvpFromPod(pod *corev1.Pod, rrMap map[string]*v1.RadixRegistration, limitRangeMap map[string]*corev1.LimitRange) (containersTvp []repository.ContainerBulkTvp, err error) {
-	if pod == nil {
-		err = errors.New("pod is nil")
-		return
-	}
-
+func MapContainerBulkDtoFromPod(pod *corev1.Pod, rrMap map[string]*v1.RadixRegistration, limitRangeMap map[string]*corev1.LimitRange) (containersDto []repository.ContainerBulkDto) {
 	appName, ok := pod.Labels[kube.RadixAppLabel]
 	if !ok {
 		return
@@ -35,7 +29,7 @@ func NewContainerBulkTvpFromPod(pod *corev1.Pod, rrMap map[string]*v1.RadixRegis
 			continue
 		}
 
-		containerTvp := repository.ContainerBulkTvp{
+		containerDto := repository.ContainerBulkDto{
 			ContainerID:     containerStatus.ContainerID,
 			ContainerName:   containerStatus.Name,
 			PodName:         pod.Name,
@@ -46,19 +40,19 @@ func NewContainerBulkTvpFromPod(pod *corev1.Pod, rrMap map[string]*v1.RadixRegis
 		}
 
 		if container := getContainerByName(containerStatus.Name, pod.Spec.Containers); container != nil {
-			setContainerBulkTvpResourceProps(&containerTvp, container)
+			setContainerBulkDtoResourceProps(&containerDto, container)
 		}
-		setContainerBulkTvpLimitRangeProps(&containerTvp, limitRangeMap[pod.Namespace])
-		setContainerBulkTvpRunningProps(&containerTvp, containerStatus.State.Running)
-		setContainerBulkTvpTerminatedProps(&containerTvp, containerStatus.State.Terminated)
-		setContainerBulkTvpRadixRegistrationProps(&containerTvp, rrMap[appName])
+		setContainerBulkDtoLimitRangeProps(&containerDto, limitRangeMap[pod.Namespace])
+		setContainerBulkDtoRunningProps(&containerDto, containerStatus.State.Running)
+		setContainerBulkDtoTerminatedProps(&containerDto, containerStatus.State.Terminated)
+		setContainerBulkDtoRadixRegistrationProps(&containerDto, rrMap[appName])
 
-		containersTvp = append(containersTvp, containerTvp)
+		containersDto = append(containersDto, containerDto)
 
 		if lastTerminatedState := containerStatus.LastTerminationState.Terminated; lastTerminatedState != nil {
-			lastTerminatedTvp := containerTvp
-			setContainerBulkTvpTerminatedProps(&lastTerminatedTvp, lastTerminatedState)
-			containersTvp = append(containersTvp, lastTerminatedTvp)
+			lastTerminatedDto := containerDto
+			setContainerBulkDtoTerminatedProps(&lastTerminatedDto, lastTerminatedState)
+			containersDto = append(containersDto, lastTerminatedDto)
 		}
 	}
 
@@ -73,7 +67,7 @@ func getEnvironmentNameFromNamespace(appName, ns string) string {
 	return ""
 }
 
-func setContainerBulkTvpRadixRegistrationProps(cbt *repository.ContainerBulkTvp, rr *v1.RadixRegistration) {
+func setContainerBulkDtoRadixRegistrationProps(cbt *repository.ContainerBulkDto, rr *v1.RadixRegistration) {
 	if cbt == nil || rr == nil {
 		return
 	}
@@ -81,39 +75,39 @@ func setContainerBulkTvpRadixRegistrationProps(cbt *repository.ContainerBulkTvp,
 	cbt.Wbs = rr.Spec.WBS
 }
 
-func setContainerBulkTvpResourceProps(cbt *repository.ContainerBulkTvp, container *corev1.Container) {
+func setContainerBulkDtoResourceProps(cbt *repository.ContainerBulkDto, container *corev1.Container) {
 	if cbt == nil || container == nil {
 		return
 	}
 
-	setContainerBulkTvpMemory(cbt, container.Resources.Requests)
-	setContainerBulkTvpCPU(cbt, container.Resources.Requests)
+	setContainerBulkDtoMemory(cbt, container.Resources.Requests)
+	setContainerBulkDtoCPU(cbt, container.Resources.Requests)
 }
 
-func setContainerBulkTvpCPU(cbt *repository.ContainerBulkTvp, resourceList corev1.ResourceList) {
+func setContainerBulkDtoCPU(cbt *repository.ContainerBulkDto, resourceList corev1.ResourceList) {
 	if cpu := resourceList.Cpu(); cpu != nil {
 		cbt.CPURequestMillicores = cpu.MilliValue()
 	}
 }
 
-func setContainerBulkTvpMemory(cbt *repository.ContainerBulkTvp, resourceList corev1.ResourceList) {
+func setContainerBulkDtoMemory(cbt *repository.ContainerBulkDto, resourceList corev1.ResourceList) {
 	if mem := resourceList.Memory(); mem != nil {
 		cbt.MemoryRequestBytes = mem.Value()
 	}
 }
 
-func setContainerBulkTvpLimitRangeProps(cbt *repository.ContainerBulkTvp, limitRange *corev1.LimitRange) {
+func setContainerBulkDtoLimitRangeProps(cbt *repository.ContainerBulkDto, limitRange *corev1.LimitRange) {
 	if cbt == nil || limitRange == nil {
 		return
 	}
 
 	if lri := getFirstContainerLimitRangeItem(limitRange.Spec.Limits); lri != nil {
 		if cbt.MemoryRequestBytes == 0 {
-			setContainerBulkTvpMemory(cbt, lri.DefaultRequest)
+			setContainerBulkDtoMemory(cbt, lri.DefaultRequest)
 		}
 
 		if cbt.CPURequestMillicores == 0 {
-			setContainerBulkTvpCPU(cbt, lri.DefaultRequest)
+			setContainerBulkDtoCPU(cbt, lri.DefaultRequest)
 		}
 	}
 }
@@ -128,7 +122,7 @@ func getFirstContainerLimitRangeItem(items []corev1.LimitRangeItem) *corev1.Limi
 	return nil
 }
 
-func setContainerBulkTvpTerminatedProps(cbt *repository.ContainerBulkTvp, terminated *corev1.ContainerStateTerminated) {
+func setContainerBulkDtoTerminatedProps(cbt *repository.ContainerBulkDto, terminated *corev1.ContainerStateTerminated) {
 	if cbt == nil || terminated == nil {
 		return
 	}
@@ -138,7 +132,7 @@ func setContainerBulkTvpTerminatedProps(cbt *repository.ContainerBulkTvp, termin
 	cbt.LastKnowRunningAt = terminated.FinishedAt.Time
 }
 
-func setContainerBulkTvpRunningProps(cbt *repository.ContainerBulkTvp, running *corev1.ContainerStateRunning) {
+func setContainerBulkDtoRunningProps(cbt *repository.ContainerBulkDto, running *corev1.ContainerStateRunning) {
 	if cbt == nil || running == nil {
 		return
 	}

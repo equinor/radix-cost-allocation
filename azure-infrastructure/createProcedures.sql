@@ -16,18 +16,20 @@ WHERE
 
 WITH nodes AS (
 	SELECT
-		t.node_name, p.id
+		t.node_name, p.id as pool_id
 	FROM
 		@nodes t
 		LEFT JOIN cost.node_pool p ON t.node_pool_name = p.[name]
 )
-INSERT INTO cost.nodes([name],pool_id)
-SELECT
-	t.node_name, t.id
-FROM
-	nodes t
-WHERE
-	NOT EXISTS(SELECT 1 FROM cost.nodes n where t.node_name=n.[name])
+MERGE INTO cost.nodes as t
+USING nodes as s
+	ON s.node_name = t.name
+WHEN NOT MATCHED BY TARGET THEN
+	INSERT(name, pool_id)
+	VALUES(s.node_name, s.pool_id)
+WHEN MATCHED AND s.pool_id IS NOT NULL THEN
+	UPDATE SET
+		pool_id=s.pool_id;
 
 GO
 

@@ -8,7 +8,6 @@ import (
 	"github.com/equinor/radix-cost-allocation/pkg/reflectorcontroller"
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
 	"github.com/equinor/radix-cost-allocation/pkg/sync"
-	"github.com/equinor/radix-cost-allocation/pkg/tvpbuilder"
 	kubeUtils "github.com/equinor/radix-cost-allocation/pkg/utils/kube"
 	mssqlUtils "github.com/equinor/radix-cost-allocation/pkg/utils/mssql"
 	"github.com/equinor/radix-cost-allocation/pkg/utils/reflectorstore"
@@ -71,13 +70,12 @@ func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSch
 	limitRangeLister := listers.NewLimitRangeLister(limitrangeStore)
 	rrLister := listers.NewRadixRegistrationLister(rrStore)
 
-	// Create TVP (Table Valued Parameter) builders
-	containerTvpBuilder := tvpbuilder.NewContainerBulk(podLister, rrLister, limitRangeLister)
-	nodeTvpBuilder := tvpbuilder.NewNodeBulk(nodeLister)
+	containerDtoLister := listers.NewContainerBulkDtoLister(podLister, rrLister, limitRangeLister)
+	nodeDtoLister := listers.NewNodeBulkDtoLister(nodeLister)
 
 	// Create sync jobs
-	containerSyncJob := sync.NewContainerSyncJob(containerTvpBuilder, repo)
-	nodeSyncJob := sync.NewNodeSyncJob(nodeTvpBuilder, repo)
+	containerSyncJob := sync.NewContainerSyncJob(containerDtoLister, repo)
+	nodeSyncJob := sync.NewNodeSyncJob(nodeDtoLister, repo)
 
 	// Create cron scheduler and add sync jobs
 	c := cron.New(cron.WithSeconds())

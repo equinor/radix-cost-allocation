@@ -35,7 +35,7 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // BulkUpsertContainers mocks base method.
-func (m *MockRepository) BulkUpsertContainers(arg0 []repository.ContainerBulkTvp) error {
+func (m *MockRepository) BulkUpsertContainers(arg0 []repository.ContainerBulkDto) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BulkUpsertContainers", arg0)
 	ret0, _ := ret[0].(error)
@@ -49,7 +49,7 @@ func (mr *MockRepositoryMockRecorder) BulkUpsertContainers(arg0 interface{}) *go
 }
 
 // BulkUpsertNodes mocks base method.
-func (m *MockRepository) BulkUpsertNodes(arg0 []repository.NodeBulkTvp) error {
+func (m *MockRepository) BulkUpsertNodes(arg0 []repository.NodeBulkDto) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BulkUpsertNodes", arg0)
 	ret0, _ := ret[0].(error)
