@@ -5,6 +5,7 @@ import (
 
 	"github.com/equinor/radix-cost-allocation/pkg/listers/mock"
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
+	"github.com/equinor/radix-cost-allocation/pkg/utils/clock"
 	radixv1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -35,7 +36,7 @@ func TestContainerBulkDtoLister(t *testing.T) {
 		mapperRrMapReceived = append(mapperRrMapReceived, m1)
 		mapperLrMapReceived = append(mapperLrMapReceived, m2)
 	}
-	var fakeMapper containerDtoMapperFunc = func(p *corev1.Pod, m1 map[string]*radixv1.RadixRegistration, m2 map[string]*corev1.LimitRange) []repository.ContainerBulkDto {
+	var fakeMapper containerDtoMapperFunc = func(p *corev1.Pod, m1 map[string]*radixv1.RadixRegistration, m2 map[string]*corev1.LimitRange, c clock.Clock) []repository.ContainerBulkDto {
 		mapperRecorder(p, m1, m2)
 		return mapperReturnVals[p.Name]
 	}

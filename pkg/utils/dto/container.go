@@ -3,11 +3,11 @@ package dto
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
+	"github.com/equinor/radix-cost-allocation/pkg/utils/clock"
 	"github.com/equinor/radix-operator/pkg/apis/kube"
-	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
+	radixv1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -15,7 +15,7 @@ import (
 // Container information is only extracted if the pod has a "radix-app" label.
 // WBS is extracted from the rrMap, where rrMap key must match the value of the "radix-app" label for the pod
 // CPU and memory is read from limitRangeMap, where key must match the namespace of the pod, if missing in pod container spec.
-func MapContainerBulkDtoFromPod(pod *corev1.Pod, rrMap map[string]*v1.RadixRegistration, limitRangeMap map[string]*corev1.LimitRange) (containersDto []repository.ContainerBulkDto) {
+func MapContainerBulkDtoFromPod(pod *corev1.Pod, rrMap map[string]*radixv1.RadixRegistration, limitRangeMap map[string]*corev1.LimitRange, clock clock.Clock) (containersDto []repository.ContainerBulkDto) {
 	appName, ok := pod.Labels[kube.RadixAppLabel]
 	if !ok {
 		return
@@ -43,7 +43,7 @@ func MapContainerBulkDtoFromPod(pod *corev1.Pod, rrMap map[string]*v1.RadixRegis
 			setContainerBulkDtoResourceProps(&containerDto, container)
 		}
 		setContainerBulkDtoLimitRangeProps(&containerDto, limitRangeMap[pod.Namespace])
-		setContainerBulkDtoRunningProps(&containerDto, containerStatus.State.Running)
+		setContainerBulkDtoRunningProps(&containerDto, containerStatus.State.Running, clock)
 		setContainerBulkDtoTerminatedProps(&containerDto, containerStatus.State.Terminated)
 		setContainerBulkDtoRadixRegistrationProps(&containerDto, rrMap[appName])
 
@@ -67,7 +67,7 @@ func getEnvironmentNameFromNamespace(appName, ns string) string {
 	return ""
 }
 
-func setContainerBulkDtoRadixRegistrationProps(cbt *repository.ContainerBulkDto, rr *v1.RadixRegistration) {
+func setContainerBulkDtoRadixRegistrationProps(cbt *repository.ContainerBulkDto, rr *radixv1.RadixRegistration) {
 	if cbt == nil || rr == nil {
 		return
 	}
@@ -132,13 +132,13 @@ func setContainerBulkDtoTerminatedProps(cbt *repository.ContainerBulkDto, termin
 	cbt.LastKnowRunningAt = terminated.FinishedAt.Time
 }
 
-func setContainerBulkDtoRunningProps(cbt *repository.ContainerBulkDto, running *corev1.ContainerStateRunning) {
+func setContainerBulkDtoRunningProps(cbt *repository.ContainerBulkDto, running *corev1.ContainerStateRunning, clock clock.Clock) {
 	if cbt == nil || running == nil {
 		return
 	}
 
 	cbt.StartedAt = running.StartedAt.Time
-	cbt.LastKnowRunningAt = time.Now()
+	cbt.LastKnowRunningAt = clock.Now()
 }
 
 func getContainerByName(name string, containers []corev1.Container) *corev1.Container {

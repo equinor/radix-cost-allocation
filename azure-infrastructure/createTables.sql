@@ -92,11 +92,11 @@ BEGIN
 		cpu_request_millicores BIGINT NOT NULL,
 		memory_request_bytes BIGINT NOT NULL,
 		node_id INT NOT NULL,
-		CONSTRAINT pk_container_resources PRIMARY KEY NONCLUSTERED(container_id) ,
+		CONSTRAINT pk_container_resources PRIMARY KEY(container_id) ,
 		CONSTRAINT fk_containers_node_id FOREIGN KEY(node_id) REFERENCES cost.nodes(id)
 	)
 
-	CREATE CLUSTERED INDEX cx_container_started_at on cost.containers(started_at)
+	CREATE INDEX ix_container_last_known_running_at on cost.containers(last_known_running_at) include(started_at)
 	CREATE INDEX ix_container_resources_node_id on cost.containers(node_id)
 END
 
