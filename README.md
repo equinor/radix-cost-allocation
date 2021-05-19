@@ -46,12 +46,6 @@ $ mockgen -source ./pkg/listers/containerbulkdto.go -destination ./pkg/listers/m
 $ mockgen -source ./pkg/listers/nodebulkdto.go -destination ./pkg/listers/mock/nodebulkdto.go -package mock
 ```
 
-AuthProvider and IDToken:
-```
-$ mockgen -source ./api/utils/auth/auth_provider.go -destination ./api/test/mock/auth_provider_mock.go -package mock
-```
-
-
 ## Update version
 
 `tag` in git repository (in master branch) - matching to the version of appVersion in `charts/Chart.yaml`
