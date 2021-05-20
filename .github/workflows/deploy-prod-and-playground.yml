@@ -79,7 +79,9 @@ jobs:
           Invoke-Sqlcmd -InputFile ./azure-infrastructure/preDeployScript.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password "${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}"
           Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password "${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}"
           Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password "${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}"
+          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTypes.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
           Invoke-Sqlcmd -InputFile ./azure-infrastructure/createViews.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password "${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}"
+          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createProcedures.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
       - name: Blacklist Runner IP in firewalls
         shell: pwsh
         if: ${{ always() }}
