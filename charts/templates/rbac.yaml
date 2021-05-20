@@ -21,13 +21,6 @@ rules:
   resources:
   - pods
   - nodes
-  verbs:
-  - list
-  - watch
-  - get
-- apiGroups:
-  - limits
-  resources:
   - limitranges
   verbs:
   - list
