@@ -40,7 +40,7 @@ func handleSyncError(err error) {
 }
 
 // InitAndStartCollector starts collecting and writing container and node resources to the database
-func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSchedule, stopCh <-chan struct{}) error {
+func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSchedule, appNameExcludeList []string, stopCh <-chan struct{}) error {
 	kubeclient, radixclient, err := kubeUtils.GetKubernetesClients()
 	if err != nil {
 		errors.WithMessage(err, "failed to get kubernetes clients")
@@ -74,7 +74,7 @@ func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSch
 	nodeDtoLister := listers.NewNodeBulkDtoLister(nodeLister)
 
 	// Create sync jobs
-	containerSyncJob := sync.NewContainerSyncJob(containerDtoLister, repo)
+	containerSyncJob := sync.NewContainerSyncJob(containerDtoLister, repo, appNameExcludeList)
 	nodeSyncJob := sync.NewNodeSyncJob(nodeDtoLister, repo)
 
 	// Create cron scheduler and add sync jobs

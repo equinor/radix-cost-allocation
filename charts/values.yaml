@@ -23,6 +23,9 @@ schedule:
   nodeSync: "0 0/5 * * * *" # At seconds 0, every 5 minute
   podSync: "10 * * * * *" # At second 10, every minute
 
+# App name exclude list
+appNameExcludeList: canarycicd-test1,canarycicd-test2,canarycicd-test3,canarycicd-test4
+
 # Logging
 logLevel: info
 
