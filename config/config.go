@@ -2,11 +2,12 @@ package config
 
 // AppConfig holds all configuration options for the application
 type AppConfig struct {
-	PrometheusAPI string
-	CronSchedule  string `envconfig:"default=0 0 * * * *"`
-	Schedule      CronSchedule
-	SQL           SQLConfig
-	LogLevel      string `envconfig:"default=info"`
+	PrometheusAPI      string
+	CronSchedule       string `envconfig:"default=0 0 * * * *"`
+	Schedule           CronSchedule
+	SQL                SQLConfig
+	AppNameExcludeList []string `envconfig:"optional"`
+	LogLevel           string   `envconfig:"default=info"`
 }
 
 // SQLConfig defines configuration settings used to manage connections to SQL Server

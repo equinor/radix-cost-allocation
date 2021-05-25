@@ -29,7 +29,7 @@ func main() {
 	stopCh := make(chan struct{})
 	go run.InitAndStartOldDataCollector(appConfig.PrometheusAPI, appConfig.CronSchedule, appConfig.SQL, stopCh)
 	go func() {
-		if err := run.InitAndStartCollector(appConfig.SQL, appConfig.Schedule, stopCh); err != nil {
+		if err := run.InitAndStartCollector(appConfig.SQL, appConfig.Schedule, appConfig.AppNameExcludeList, stopCh); err != nil {
 			log.Fatal(err)
 		}
 	}()

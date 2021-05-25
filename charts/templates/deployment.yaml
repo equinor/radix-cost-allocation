@@ -51,6 +51,8 @@ spec:
               value: {{ .Values.prometheus.api }}
             - name: LOG_LEVEL
               value: {{ .Values.logLevel }}
+            - name: APP_NAME_EXCLUDE_LIST
+              value: {{ .Values.appNameExcludeList }}
           envFrom:
             - secretRef:
                 name: {{ .Values.secret.name }}
