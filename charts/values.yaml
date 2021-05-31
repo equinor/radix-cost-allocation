@@ -15,8 +15,19 @@ db:
   server: sql-radix-cost-allocation-dev.database.windows.net
   password: password
   port: "1433"
+  queryTimeout: "30"
 
-schedule: "0 * * * *"
+# Using non-standard cron spec where first value is second, ref https://github.com/robfig/cron
+cronSchedule: "0 0 * * * *" # At second seonds 0, minute 0, every hour
+schedule:
+  nodeSync: "0 0/5 * * * *" # At seconds 0, every 5 minute
+  podSync: "10 * * * * *" # At second 10, every minute
+
+# App name exclude list
+appNameExcludeList: canarycicd-test1,canarycicd-test2,canarycicd-test3,canarycicd-test4
+
+# Logging
+logLevel: info
 
 prometheus:
   api: http://prometheus-operator-prometheus.default:9090
