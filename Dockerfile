@@ -36,6 +36,6 @@ FROM scratch
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /go/src/github.com/equinor/radix-cost-allocation/rootfs/radix-cost-allocation /usr/local/bin/radix-cost-allocation
-USER radix-cost-allocation
+USER 1000
 
 ENTRYPOINT ["/usr/local/bin/radix-cost-allocation"]
