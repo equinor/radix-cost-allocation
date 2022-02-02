@@ -22,10 +22,11 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t radixdev.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }} -t radixprod.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }} .
-      - name: Azure login
-        run: |
-          az login --service-principal --username ${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
-          az account set -s "${{secrets.DEV_AZURE_SUBSCRIPTION_ID}}"
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
       - name: Push to radixdev
         run: |
           az acr login -n radixdev -g common
@@ -48,10 +49,11 @@ jobs:
       - name: Build Docker image dev
         run: |
           docker build -t radixdev.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }} .
-      - name: Azure login dev
-        run: |
-          az login --service-principal --username ${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
-          az account set -s "${{secrets.DEV_AZURE_SUBSCRIPTION_ID}}"
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
       - name: Push to radix dev
         run: |
           az acr login -n radixdev -g common
@@ -60,10 +62,11 @@ jobs:
       - name: Build Docker image prod
         run: |
           docker build -t radixprod.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }} .
-      - name: Azure login prod
-        run: |
-          az login --service-principal --username ${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
-          az account set -s "${{secrets.PROD_AZURE_SUBSCRIPTION_ID}}"
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_PROD }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
       - name: Push to radix prod
         run: |
           az acr login -n radixprod -g common
