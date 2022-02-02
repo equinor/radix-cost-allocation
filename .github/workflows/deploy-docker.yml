@@ -3,7 +3,8 @@ name: Docker Image CI
 on:
   push:
     branches: [master, release]
-
+permissions:
+  id-token: write
 jobs:
   build-deploy-image-master:
     if: github.ref == 'refs/heads/master'
