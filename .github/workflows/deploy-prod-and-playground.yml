@@ -3,7 +3,8 @@ name: Deploy ARM to prod and playground
 on:
   push:
     branches: [release]
-
+permissions:
+  id-token: write
 jobs:
   deploy-sql-server:
     runs-on: ubuntu-latest
@@ -23,19 +24,29 @@ jobs:
       - name: Login to playground
         if: ${{ matrix.deploy == 'playground' }}
         run: |
-          az login --service-principal --username ${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
-          az account set -s "${{secrets.DEV_AZURE_SUBSCRIPTION_ID}}"
+#          az login --service-principal --username ${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
+#          az account set -s "${{secrets.DEV_AZURE_SUBSCRIPTION_ID}}"
           echo "SQL_SERVER_NAME=sql-radix-cost-allocation-playground" >> $GITHUB_ENV
           echo "KEY_VAULT_NAME=radix-vault-dev" >> $GITHUB_ENV
           echo "SQL_LOG_STORAGE_NAME=radixsqllogsdev" >> $GITHUB_ENV
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
       - name: Login for prod
         if: ${{ matrix.deploy == 'prod' }}
         run: |
-          az login --service-principal --username ${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
-          az account set -s "${{secrets.PROD_AZURE_SUBSCRIPTION_ID}}"
+#          az login --service-principal --username ${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
+#          az account set -s "${{secrets.PROD_AZURE_SUBSCRIPTION_ID}}"
           echo "SQL_SERVER_NAME=sql-radix-cost-allocation-prod" >> $GITHUB_ENV
           echo "KEY_VAULT_NAME=radix-vault-prod" >> $GITHUB_ENV
           echo "SQL_LOG_STORAGE_NAME=radixsqllogsprod" >> $GITHUB_ENV
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_PROD }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
       - uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: ${{ env.KEY_VAULT_NAME }}
