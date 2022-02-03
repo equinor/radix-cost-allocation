@@ -1,17 +1,20 @@
 name: Docker Image CI
-
 on:
   push:
-    branches: [master, release]
+    branches:
+      - master
+      - release
 permissions:
   id-token: write
 jobs:
-  build-deploy-image-master:
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
+  build:
+    name: Build-push
     env:
-      IMAGE: radix-cost-allocation
+      IMAGE: radix-velero-plugin
+    runs-on: ubuntu-latest
     steps:
+      - name: build-deploy-image-master
+        if: github.ref == 'refs/heads/master'
       - uses: actions/checkout@v2
       - name: Generate build ID
         id: prep
@@ -33,12 +36,8 @@ jobs:
           az acr login -n radixdev -g common
           docker push radixdev.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }}
           az logout
-  build-deploy-image-release:
-    if: github.ref == 'refs/heads/release'
-    runs-on: ubuntu-latest
-    env:
-      IMAGE: radix-cost-allocation
-    steps:
+      - name: build-deploy-image-release
+        if: github.ref == 'refs/heads/release'
       - uses: actions/checkout@v2
       - name: Generate build ID
         id: prep
