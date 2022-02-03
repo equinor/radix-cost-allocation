@@ -3,7 +3,8 @@ name: Deploy ARM to dev
 on:
   push:
     branches: [master]
-
+permissions:
+  id-token: write
 jobs:
   deploy-sql-server:
     runs-on: ubuntu-latest
