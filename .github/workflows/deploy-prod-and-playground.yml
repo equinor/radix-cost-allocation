@@ -24,8 +24,6 @@ jobs:
       - name: Login to playground
         if: ${{ matrix.deploy == 'playground' }}
         run: |
-#          az login --service-principal --username ${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.DEV_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
-#          az account set -s "${{secrets.DEV_AZURE_SUBSCRIPTION_ID}}"
           echo "SQL_SERVER_NAME=sql-radix-cost-allocation-playground" >> $GITHUB_ENV
           echo "KEY_VAULT_NAME=radix-vault-dev" >> $GITHUB_ENV
           echo "SQL_LOG_STORAGE_NAME=radixsqllogsdev" >> $GITHUB_ENV
@@ -37,8 +35,6 @@ jobs:
       - name: Login for prod
         if: ${{ matrix.deploy == 'prod' }}
         run: |
-#          az login --service-principal --username ${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_ID}}  --password "${{secrets.PROD_AZURE_CREDENTIALS_CLIENT_SECRET}}" --tenant ${{secrets.AZURE_TENANT_ID}}
-#          az account set -s "${{secrets.PROD_AZURE_SUBSCRIPTION_ID}}"
           echo "SQL_SERVER_NAME=sql-radix-cost-allocation-prod" >> $GITHUB_ENV
           echo "KEY_VAULT_NAME=radix-vault-prod" >> $GITHUB_ENV
           echo "SQL_LOG_STORAGE_NAME=radixsqllogsprod" >> $GITHUB_ENV
