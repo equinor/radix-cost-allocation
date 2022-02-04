@@ -21,24 +21,26 @@ jobs:
           sha=${GITHUB_SHA::8}
           ts=$(date +%s)
           echo "::set-output name=BUILD_ID::${branch}-${sha}-${ts}"
-      - name: 'step-default'
+      - name: 'Login to dev'
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
+      - name: 'Push to dev'
         run: |
           docker build -t radixdev.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }} .
           az acr login --name radixdev --resource-group common
           docker push radixdev.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }}
           az logout
-      - name: 'step-release'
+      - name: 'Login to prod'
         if: github.ref == 'refs/heads/release'
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID_PROD }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
+      - name: 'Push to prod'
         run: |
           docker build -t radixprod.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }} .
           az acr login --name radixprod --resource-group common

@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        deploy: [prod, playground]
+        deploy: [prod, playground, dev]
     env:
       RESOURCE_GROUP: cost-allocation
       DB_NAME: sqldb-radix-cost-allocation
@@ -22,34 +22,33 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Login for dev
-        if: ${{ matrix.deploy == 'development' }}
+        if: ${{ matrix.deploy != 'prod' }}
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
-        run: |
-          echo "SQL_SERVER_NAME=sql-radix-cost-allocation-playground" >> $GITHUB_ENV
-          echo "KEY_VAULT_NAME=radix-vault-dev" >> $GITHUB_ENV
-          echo "SQL_LOG_STORAGE_NAME=radixsqllogsdev" >> $GITHUB_ENV
-      - name: Login for playground
-        if: ${{ matrix.deploy == 'playground' }}
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
-        run: |
-          echo "SQL_SERVER_NAME=sql-radix-cost-allocation-playground" >> $GITHUB_ENV
-          echo "KEY_VAULT_NAME=radix-vault-dev" >> $GITHUB_ENV
-          echo "SQL_LOG_STORAGE_NAME=radixsqllogsdev" >> $GITHUB_ENV
       - name: Login for prod
-        if: ${{ matrix.deploy == 'prod' }}
+        if: ${{ matrix.deploy == 'prod' && github.ref == 'refs/heads/release' }}
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID_PROD }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
+      - name: Define variables for dev
+        if: ${{ matrix.deploy == 'dev' && github.ref == 'refs/heads/master' }}
+        run: |
+          echo "SQL_SERVER_NAME=sql-radix-cost-allocation-dev" >> $GITHUB_ENV
+          echo "KEY_VAULT_NAME=radix-vault-dev" >> $GITHUB_ENV
+          echo "SQL_LOG_STORAGE_NAME=radixsqllogsdev" >> $GITHUB_ENV
+      - name: Define variables for playground
+        if: ${{ matrix.deploy == 'playground' && github.ref == 'refs/heads/release' }}
+        run: |
+          echo "SQL_SERVER_NAME=sql-radix-cost-allocation-playground" >> $GITHUB_ENV
+          echo "KEY_VAULT_NAME=radix-vault-dev" >> $GITHUB_ENV
+          echo "SQL_LOG_STORAGE_NAME=radixsqllogsdev" >> $GITHUB_ENV
+      - name: Define varables for prod
+        if: ${{ matrix.deploy == 'prod' && github.ref == 'refs/heads/release' }}
         run: |
           echo "SQL_SERVER_NAME=sql-radix-cost-allocation-prod" >> $GITHUB_ENV
           echo "KEY_VAULT_NAME=radix-vault-prod" >> $GITHUB_ENV
