@@ -15,11 +15,7 @@ jobs:
     steps:
       - name: build-deploy-image-master
         if: github.ref == 'refs/heads/master'
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
+        uses: actions/checkout@v2
       - name: Generate build ID
         id: prep
         run: |
@@ -35,6 +31,9 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
+      - name: 'Login to ACR radixdev'
+        run: |
+          az acr login --name radixdev
       - name: Push to radixdev
         run: |
           az acr login -n radixdev -g common
@@ -58,6 +57,9 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
+      - name: 'Login to ACR radixdev'
+        run: |
+          az acr login --name radixdev
       - name: Push to radix dev
         run: |
           az acr login -n radixdev -g common
@@ -71,6 +73,9 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID_PROD }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
+      - name: 'Login to ACR radixprod'
+        run: |
+          az acr login --name radixprod
       - name: Push to radix prod
         run: |
           az acr login -n radixprod -g common
