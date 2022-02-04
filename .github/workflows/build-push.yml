@@ -41,6 +41,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
       - name: 'Push to prod'
+        if: github.ref == 'refs/heads/release'
         run: |
           docker build -t radixprod.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }} .
           az acr login --name radixprod --resource-group common
