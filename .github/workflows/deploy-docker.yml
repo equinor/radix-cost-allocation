@@ -13,7 +13,7 @@ jobs:
       IMAGE: radix-velero-plugin
     runs-on: ubuntu-latest
     steps:
-      - name: 'Check out code into the Go module directory'
+      #- name: 'Check out code into the Go module directory'
       - uses: actions/checkout@v2
       - name: Generate build ID
         id: prep
@@ -44,7 +44,7 @@ jobs:
           docker build -t radixprod.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }} .
       - name: Build Docker image prod
         if: github.ref == 'refs/heads/release'
-      - uses: azure/login@v1
+        uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID_PROD }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
