@@ -27,7 +27,10 @@ func main() {
 	log.SetLevel(logLevel)
 
 	stopCh := make(chan struct{})
-	go run.InitAndStartOldDataCollector(appConfig.PrometheusAPI, appConfig.CronSchedule, appConfig.SQL, stopCh)
+
+	// Disable collection of the old data used for cost allocation
+	// go run.InitAndStartOldDataCollector(appConfig.PrometheusAPI, appConfig.CronSchedule, appConfig.SQL, stopCh)
+
 	go func() {
 		if err := run.InitAndStartCollector(appConfig.SQL, appConfig.Schedule, appConfig.AppNameExcludeList, stopCh); err != nil {
 			log.Fatal(err)
