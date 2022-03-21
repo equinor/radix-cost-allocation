@@ -14,15 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: 'Whitelist runner IP'
-        run: |
-          RUNNER_IP="$(curl --silent http://ifconfig.me/ip)"
-          if [ -z "$(az acr network-rule list --name radixdev --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }} | grep ${RUNNER_IP})"]; then
-            echo "Adding runner IP '${RUNNER_IP}' to Azure Container Registry 'radixdev' firewall whitelist"
-            az acr network-rule add --name radixdev --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }} --ip-address $RUNNER_IP
-          else
-            echo "Runner is already whitelisted; skipping."
-          fi
       - name: Generate build ID
         id: prep
         run: |
@@ -39,6 +30,15 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
+      - name: 'Whitelist runner IP'
+        run: |
+          RUNNER_IP="$(curl --silent http://ifconfig.me/ip)"
+          if [ -z "$(az acr network-rule list --name radixdev --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }} | grep ${RUNNER_IP})"]; then
+            echo "Adding runner IP '${RUNNER_IP}' to Azure Container Registry 'radixdev' firewall whitelist"
+            az acr network-rule add --name radixdev --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }} --ip-address $RUNNER_IP
+          else
+            echo "Runner is already whitelisted; skipping."
+          fi
       - name: 'Push to dev'
         run: |
           az acr login --name radixdev --resource-group common
@@ -56,15 +56,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: 'Whitelist runner IP'
-        run: |
-          RUNNER_IP="$(curl --silent http://ifconfig.me/ip)"
-          if [ -z "$(az acr network-rule list --name radixprod --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }} | grep ${RUNNER_IP})"]; then
-            echo "Adding runner IP '${RUNNER_IP}' to Azure Container Registry 'radixprod' firewall whitelist"
-            az acr network-rule add --name radixprod --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }} --ip-address $RUNNER_IP
-          else
-            echo "Runner is already whitelisted; skipping."
-          fi
       - name: Generate build ID
         id: prep
         run: |
@@ -81,6 +72,15 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID_PROD }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
+      - name: 'Whitelist runner IP'
+        run: |
+          RUNNER_IP="$(curl --silent http://ifconfig.me/ip)"
+          if [ -z "$(az acr network-rule list --name radixprod --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }} | grep ${RUNNER_IP})"]; then
+            echo "Adding runner IP '${RUNNER_IP}' to Azure Container Registry 'radixprod' firewall whitelist"
+            az acr network-rule add --name radixprod --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }} --ip-address $RUNNER_IP
+          else
+            echo "Runner is already whitelisted; skipping."
+          fi
       - name: 'Push to prod'
         run: |
           az acr login --name radixprod --resource-group common
