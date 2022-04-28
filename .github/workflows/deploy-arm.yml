@@ -5,177 +5,74 @@ on:
     branches: [master, release]
 permissions:
   id-token: write
+
 jobs:
-  deploy-sql-server-master:
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    env:
-      RESOURCE_GROUP: cost-allocation
-      DB_NAME: sqldb-radix-cost-allocation
-      DB_USER_NAME: radix
-      FIREWALL_RULE_NAME: githubRunnerIp
-      ADMIN_GROUP_NAME: 'Radix Platform Developers'
-      ADMIN_GROUP_ID: "a5dfa635-dc00-4a28-9ad9-9e7f1e56919d"
+  get-target-configs:
+    name: Get target configs for branch
+    outputs:
+      target_configs: ${{ steps.get-target-configs.outputs.target_configs }}
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - name: Login for dev
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
-      - name: Define variables for dev
+      - name: Get target configs
+        id: get-target-configs
         run: |
-          echo "SQL_SERVER_NAME=sql-radix-cost-allocation-dev" >> $GITHUB_ENV
-          echo "KEY_VAULT_NAME=radix-vault-dev" >> $GITHUB_ENV
-          echo "SQL_LOG_STORAGE_NAME=radixsqllogsdev" >> $GITHUB_ENV
-      - uses: Azure/get-keyvault-secrets@v1
-        with:
-          keyvault: ${{ env.KEY_VAULT_NAME }}
-          secrets: "radix-cost-allocation-db-admin"
-        id: adminPassword
-      - name: Deploy SQL Server and DB
-        env:
-          DEPLOY_NAME: radix-cost-db-deploy
-        run: |
-          # Get Storage Account ID for sql logs
-          storageId=$(az storage account show --name "$SQL_LOG_STORAGE_NAME" --query "id" --output tsv)
+          configs=$(ls $GITHUB_WORKSPACE/.github/workflows/config/${GITHUB_REF_NAME} | jq -Rsc '. / "\n" - [""]')
+          echo ::set-output name=target_configs::${configs}  
 
-          az deployment group create -g "$RESOURCE_GROUP" -n "$DEPLOY_NAME" \
-            --template-file ./azure-infrastructure/azuredeploy.json \
-            --parameters sqlServerName="$SQL_SERVER_NAME" \
-            --parameters databaseName="$DB_NAME" \
-            --parameters sqlAdministratorLoginPassword="${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}" \
-            --parameters sqlAdministratorLoginUser="$DB_USER_NAME" \
-            --parameters adminGroupName="$ADMIN_GROUP_NAME" \
-            --parameters adminGroupId="$ADMIN_GROUP_ID" \
-            --parameters storageAccountId=$storageId
-
-      - name: Whitelist Runner IP in firewalls
-        shell: pwsh
-        run: |
-          $runnerIp = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
-          az sql server firewall-rule create `
-            --end-ip-address $runnerIp `
-            --start-ip-address $runnerIp `
-            --name ${env:FIREWALL_RULE_NAME} `
-            --resource-group ${env:RESOURCE_GROUP} `
-            --server ${env:SQL_SERVER_NAME}
-      - name: Creating DB schema and tables
-        shell: pwsh
-        run: |
-          Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-          Install-Module -Name SqlServer
-
-          $targetSqlServerFQDN = "$(az sql server show -n ${env:SQL_SERVER_NAME} -g ${env:RESOURCE_GROUP} | jq -r .fullyQualifiedDomainName)"
-
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/preDeployScript.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTypes.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createViews.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createProcedures.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-      - name: Blacklist Runner IP in firewalls
-        shell: pwsh
-        if: ${{ always() }}
-        run: |
-          az sql server firewall-rule delete `
-            --name ${env:FIREWALL_RULE_NAME} `
-            --resource-group ${env:RESOURCE_GROUP} `
-            --server ${env:SQL_SERVER_NAME}
-  deploy-sql-server-release:
-    if: github.ref == 'refs/heads/release'
-    runs-on: ubuntu-latest
+  deploy-sql-server:
+    runs-on: ubuntu-20.04
+    needs:
+      - get-target-configs
     strategy:
       fail-fast: false
-      matrix:
-        deploy: [prod, playground]
-    env:
-      RESOURCE_GROUP: cost-allocation
-      DB_NAME: sqldb-radix-cost-allocation
-      DB_USER_NAME: radix
-      FIREWALL_RULE_NAME: githubRunnerIp
-      ADMIN_GROUP_NAME: 'Radix Platform Developers'
-      ADMIN_GROUP_ID: "a5dfa635-dc00-4a28-9ad9-9e7f1e56919d"
+      matrix: 
+        config: ${{ fromJson(needs.get-target-configs.outputs.target_configs) }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Login for dev
-        if: ${{ matrix.deploy == 'playground' }}
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
-      - name: Login for prod
-        if: ${{ matrix.deploy == 'prod' }}
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID_PROD }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
-      - name: Define variables for playground
-        if: ${{ matrix.deploy == 'playground' }}
-        run: |
-          echo "SQL_SERVER_NAME=sql-radix-cost-allocation-playground" >> $GITHUB_ENV
-          echo "KEY_VAULT_NAME=radix-vault-dev" >> $GITHUB_ENV
-          echo "SQL_LOG_STORAGE_NAME=radixsqllogsdev" >> $GITHUB_ENV
-      - name: Define varables for prod
-        if: ${{ matrix.deploy == 'prod' }}
-        run: |
-          echo "SQL_SERVER_NAME=sql-radix-cost-allocation-prod" >> $GITHUB_ENV
-          echo "KEY_VAULT_NAME=radix-vault-prod" >> $GITHUB_ENV
-          echo "SQL_LOG_STORAGE_NAME=radixsqllogsprod" >> $GITHUB_ENV
-      - uses: Azure/get-keyvault-secrets@v1
-        with:
-          keyvault: ${{ env.KEY_VAULT_NAME }}
-          secrets: "radix-cost-allocation-db-admin"
-        id: adminPassword
-      - name: Deploy SQL Server and DB
-        env:
-          DEPLOY_NAME: radix-cost-db-deploy
-        run: |
-          # Get Storage Account ID for sql logs
-          storageId=$(az storage account show --name "$SQL_LOG_STORAGE_NAME" --query "id" --output tsv)
+    - uses: actions/checkout@v2
+    - name: Persist environment from ${{ matrix.config }} across steps
+      run: |
+        $GITHUB_WORKSPACE/.github/workflows/scripts/persist-env.sh ${{ matrix.config }}
 
-          az deployment group create -g "$RESOURCE_GROUP" -n "$DEPLOY_NAME" \
-            --template-file ./azure-infrastructure/azuredeploy.json \
-            --parameters sqlServerName="$SQL_SERVER_NAME" \
-            --parameters databaseName="$DB_NAME" \
-            --parameters sqlAdministratorLoginPassword="${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}" \
-            --parameters sqlAdministratorLoginUser="$DB_USER_NAME" \
-            --parameters adminGroupName="$ADMIN_GROUP_NAME" \
-            --parameters adminGroupId="$ADMIN_GROUP_ID" \
-            --parameters storageAccountId=$storageId
+    - uses: azure/login@v1
+      with:
+        client-id: ${{ env.AZURE_CLIENT_ID }}
+        tenant-id: ${{ env.AZURE_TENANT_ID }}
+        subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Whitelist Runner IP in firewalls
-        shell: pwsh
-        run: |
-          $runnerIp = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
-          az sql server firewall-rule create `
-            --end-ip-address $runnerIp `
-            --start-ip-address $runnerIp `
-            --name ${env:FIREWALL_RULE_NAME} `
-            --resource-group ${env:RESOURCE_GROUP} `
-            --server ${env:SQL_SERVER_NAME}
-      - name: Creating DB schema and tables
-        shell: pwsh
-        run: |
-          Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-          Install-Module -Name SqlServer
+    - name: Get DB password from KV
+      run: |
+        db_admin_pw=$(az keyvault secret show --id https://${KEY_VAULT_NAME}.vault.azure.net/secrets/${DB_ADMIN_SECRET_NAME} --query value --output tsv)
+        echo "::add-mask::$db_admin_pw"
+        echo "DB_ADMIN_PASSWORD=$db_admin_pw" >> $GITHUB_ENV
 
-          $targetSqlServerFQDN = "$(az sql server show -n ${env:SQL_SERVER_NAME} -g ${env:RESOURCE_GROUP} | jq -r .fullyQualifiedDomainName)"
+    - name: Deploy SQL Server and DB
+      run: |
+        $GITHUB_WORKSPACE/.github/workflows/scripts/deploy.sh
 
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/preDeployScript.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createSchema.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTables.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createTypes.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createViews.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-          Invoke-Sqlcmd -InputFile ./azure-infrastructure/createProcedures.sql -ServerInstance $targetSqlServerFQDN -Database ${env:DB_NAME} -Username ${env:DB_USER_NAME} -password ${{ steps.adminPassword.outputs.radix-cost-allocation-db-admin }}
-      - name: Blacklist Runner IP in firewalls
-        shell: pwsh
-        if: ${{ always() }}
-        run: |
-          az sql server firewall-rule delete `
-            --name ${env:FIREWALL_RULE_NAME} `
-            --resource-group ${env:RESOURCE_GROUP} `
-            --server ${env:SQL_SERVER_NAME}
+    - name: Generate random firewall rule name
+      run: |
+        fw_rule_name="github-runner-$(uuidgen)"
+        echo "FIREWALL_RULE_NAME=$fw_rule_name" >> $GITHUB_ENV
+        
+    - name: Install SqlServer PS module
+      shell: pwsh
+      run: |
+        Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+        Install-Module -Name SqlServer
+
+    - name: Whitelist Runner IP in firewalls
+      shell: pwsh
+      run: |
+        ./.github/workflows/scripts/whitelist-ip-in-db.ps1 -FirewallRuleName "${env:FIREWALL_RULE_NAME}"
+
+    - name: Creating DB schema and tables
+      shell: pwsh
+      run: |
+        ./.github/workflows/scripts/create-db.ps1
+
+    - name: Blacklist Runner IP in firewalls
+      shell: pwsh
+      if: ${{ always() }}
+      run: |
+        ./.github/workflows/scripts/blacklist-ip-in-db.ps1 -FirewallRuleName "${env:FIREWALL_RULE_NAME}"
