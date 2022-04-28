@@ -1,4 +1,4 @@
-name: radix-cost-allocation-build
+name: Build & push
 on:
   push:
     branches:
