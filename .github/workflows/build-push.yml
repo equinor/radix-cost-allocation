@@ -1,4 +1,4 @@
-name: radix-cost-allocation-build
+name: Build & push
 on:
   push:
     branches:
@@ -7,86 +7,50 @@ on:
 permissions:
   id-token: write
 jobs:
-  build-deploy-image-dev:
-    name: Build-push to dev
-    env:
-      IMAGE: radix-cost-allocation
-    runs-on: ubuntu-latest
+  get-target-configs:
+    name: Get target configs for branch
+    outputs:
+      target_configs: ${{ steps.get-target-configs.outputs.target_configs }}
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - name: 'Login to dev'
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID_DEV }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
-      - name: 'Whitelist runner IP'
+      - name: Get target configs
+        id: get-target-configs
         run: |
-          RUNNER_IP="$(curl --silent http://ifconfig.me/ip)"
-          if [ -z "$(az acr network-rule list --name radixdev --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }} | grep ${RUNNER_IP})"]; then
-            echo "Adding runner IP '${RUNNER_IP}' to Azure Container Registry 'radixdev' firewall whitelist"
-            az acr network-rule add --name radixdev --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }} --ip-address $RUNNER_IP
-          else
-            echo "Runner is already whitelisted; skipping."
-          fi
-      - name: Generate build ID
-        id: prep
-        run: |
-          branch=${GITHUB_REF##*/}
-          sha=${GITHUB_SHA::8}
-          ts=$(date +%s)
-          echo "::set-output name=BUILD_ID::${branch}-${sha}-${ts}"
-      - name: 'Build docker image'
-        run: |
-          docker build . -t radixdev.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }}
-      - name: 'Push to dev'
-        run: |
-          az acr login --name radixdev --resource-group common
-          docker push radixdev.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }}
-      - name: 'Blacklist runner IP'
-        run: |
-          RUNNER_IP="$(curl --silent http://ifconfig.me/ip)"
-          echo "Adding runner IP '${RUNNER_IP}' to Azure Container Registry 'radixdev' firewall whitelist"
-          az acr network-rule remove --name radixdev --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }} --ip-address $RUNNER_IP --only-show-errors --output none
-  build-deploy-image-prod:
-    if: github.ref == 'refs/heads/release'
-    name: Build-push to prod
-    env:
-      IMAGE: radix-cost-allocation
-    runs-on: ubuntu-latest
+          configs=$(ls $GITHUB_WORKSPACE/.github/workflows/config/${GITHUB_REF_NAME} | jq -Rsc '. / "\n" - [""]')
+          echo ::set-output name=target_configs::${configs}
+
+  build-deploy-image:
+    name: Build & push
+    outputs:
+      runner_ips: ${{ steps.get-runner-ip.outputs.runner_ip }}
+    runs-on: ubuntu-20.04
+    needs:
+      - get-target-configs
+    strategy:
+      fail-fast: false
+      matrix: 
+        config: ${{ fromJson(needs.get-target-configs.outputs.target_configs) }}
     steps:
-      - uses: actions/checkout@v2
-      - name: 'Login to prod'
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID_PROD }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
-      - name: 'Whitelist runner IP'
-        run: |
-          RUNNER_IP="$(curl --silent http://ifconfig.me/ip)"
-          if [ -z "$(az acr network-rule list --name radixprod --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }} | grep ${RUNNER_IP})"]; then
-            echo "Adding runner IP '${RUNNER_IP}' to Azure Container Registry 'radixprod' firewall whitelist"
-            az acr network-rule add --name radixprod --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }} --ip-address $RUNNER_IP
-          else
-            echo "Runner is already whitelisted; skipping."
-          fi
-      - name: Generate build ID
-        id: prep
-        run: |
-          branch=${GITHUB_REF##*/}
-          sha=${GITHUB_SHA::8}
-          ts=$(date +%s)
-          echo "::set-output name=BUILD_ID::${branch}-${sha}-${ts}"
-      - name: 'Build docker image'
-        run: |
-          docker build . -t radixprod.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }}
-      - name: 'Push to prod'
-        run: |
-          az acr login --name radixprod --resource-group common
-          docker push radixprod.azurecr.io/${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }}
-      - name: 'Blacklist runner IP'
-        run: |
-          RUNNER_IP="$(curl --silent http://ifconfig.me/ip)"
-          echo "Adding runner IP '${RUNNER_IP}' to Azure Container Registry 'radixprod' firewall whitelist"
-          az acr network-rule remove --name radixprod --resource-group common --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }} --ip-address $RUNNER_IP --only-show-errors --output none
+    - uses: actions/checkout@v2
+    - name: Persist environment from ${{ matrix.config }} across steps
+      run: |
+        $GITHUB_WORKSPACE/.github/workflows/scripts/persist-env.sh ${{ matrix.config }}
+
+    - uses: azure/login@v1
+      with:
+        client-id: ${{ env.AZURE_CLIENT_ID }}
+        tenant-id: ${{ env.AZURE_TENANT_ID }}
+        subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+    
+    - name: Whitelist runner IP
+      run: |
+        $GITHUB_WORKSPACE/.github/workflows/scripts/whitelist-ip-in-acr.sh
+
+    - name: Build and push image
+      run: |
+        $GITHUB_WORKSPACE/.github/workflows/scripts/build-push.sh
+
+    - name: Blacklist runner IP
+      run: |
+        $GITHUB_WORKSPACE/.github/workflows/scripts/blacklist-ip-in-acr.sh
