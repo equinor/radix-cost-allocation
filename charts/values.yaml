@@ -9,6 +9,11 @@ image:
 secret:
   name: sql-credential
 
+serviceAccount:
+  # The name of the service account to use.
+  # If not set, a name is generated using the fullname template
+  name: ""
+
 db:
   user: radixwriter
   database: sqldb-radix-cost-allocation

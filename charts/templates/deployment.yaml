@@ -1,26 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
-  namespace: {{ .Chart.Name }}
+  name: {{ template "cost-allocation.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
   labels:
-    app: "radix-cost-allocation"
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    {{- include "cost-allocation.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: "radix-cost-allocation"
-      release: {{ .Release.Name }}
+      {{- include "cost-allocation.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: "radix-cost-allocation"
-        release: {{ .Release.Name }}
+        {{- include "cost-allocation.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccount: "{{ .Chart.Name }}"
+      serviceAccount: {{ include "cost-allocation.serviceAccountName" . }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
