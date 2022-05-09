@@ -42,15 +42,7 @@ jobs:
         client-id: ${{ env.AZURE_CLIENT_ID }}
         tenant-id: ${{ env.AZURE_TENANT_ID }}
         subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
-    
-    - name: Whitelist runner IP
-      run: |
-        $GITHUB_WORKSPACE/.github/workflows/scripts/whitelist-ip-in-acr.sh
 
     - name: Build and push image
       run: |
         $GITHUB_WORKSPACE/.github/workflows/scripts/build-push.sh
-
-    - name: Blacklist runner IP
-      run: |
-        $GITHUB_WORKSPACE/.github/workflows/scripts/blacklist-ip-in-acr.sh
