@@ -25,7 +25,9 @@ func MapContainerBulkDtoFromPod(pod *corev1.Pod, rrMap map[string]*radixv1.Radix
 	environmentName := getEnvironmentNameFromNamespace(appName, pod.Namespace)
 
 	for _, containerStatus := range pod.Status.ContainerStatuses {
-		if containerStatus.State.Waiting != nil {
+		// Ignore containers in waiting state and containers without ContainerId
+		// ContainerId can be empty when Pod exceeds the activeDeadlineSeconds and is killed by K8S
+		if containerStatus.State.Waiting != nil || len(containerStatus.ContainerID) == 0 {
 			continue
 		}
 
