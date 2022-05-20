@@ -139,6 +139,23 @@ func TestMapContainerBulkDtoFromPod(t *testing.T) {
 		assert.Len(t, actual, 0)
 	})
 
+	// Pod, correct label, container missing Id
+	t.Run("correct label, container missing Id", func(t *testing.T) {
+		t.Parallel()
+		podName, env, node, app, containerName, containerId, startedAt, finishedAt :=
+			"pod1", "prod", "node1", "app1", "c1", "", time.Date(2020, 1, 1, 1, 1, 1, 0, time.UTC), time.Date(2020, 2, 1, 1, 1, 1, 0, time.UTC)
+		pod := buildPodForTest(podName, fmt.Sprintf("%s-%s", app, env), node,
+			setPodAppLabel(app),
+			appendPodContainerStatus(
+				buildContainerStatusForTest(containerName, containerId,
+					setContainerStateTerminated(containerId, startedAt, finishedAt),
+				),
+			),
+		)
+		actual := MapContainerBulkDtoFromPod(pod, make(map[string]*radixv1.RadixRegistration), make(map[string]*corev1.LimitRange), &clock.RealClock{})
+		assert.Len(t, actual, 0)
+	})
+
 	// Pod, correct label, missing resources, lr exist
 	t.Run("correct label, missing resources, lr exist", func(t *testing.T) {
 		t.Parallel()
