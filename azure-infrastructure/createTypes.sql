@@ -7,9 +7,6 @@ BEGIN
 	)
 END
 
-GRANT EXEC ON TYPE::cost.node_upsert_type TO datareader
-
-
 IF NOT EXISTS(SELECT 1 FROM sys.table_types WHERE name='container_upsert_type' AND schema_id=SCHEMA_ID('cost'))
 BEGIN
 	CREATE TYPE cost.container_upsert_type AS TABLE(
@@ -28,5 +25,3 @@ BEGIN
 		PRIMARY KEY(container_id)
 	)
 END
-
-GRANT EXEC ON TYPE::cost.container_upsert_type TO datareader
