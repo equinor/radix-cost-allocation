@@ -9,3 +9,11 @@ BEGIN
 END
 
 GRANT EXEC ON SCHEMA::cost TO datawriter
+GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::cost TO datawriter
+
+IF NOT EXISTS(SELECT 1 FROM sys.database_principals WHERE principal_id = DATABASE_PRINCIPAL_ID('datareader'))
+BEGIN
+	CREATE ROLE datareader
+END
+
+GRANT SELECT ON SCHEMA::cost TO datareader
