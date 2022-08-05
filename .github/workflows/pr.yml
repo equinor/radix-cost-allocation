@@ -1,4 +1,4 @@
-name: radix-operator-pr
+name: radix-cost-allocation-pr
 on:
   pull_request:
     branches:
