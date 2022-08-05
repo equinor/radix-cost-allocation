@@ -2,7 +2,6 @@ package config
 
 // AppConfig holds all configuration options for the application
 type AppConfig struct {
-	PrometheusAPI      string
 	CronSchedule       string `envconfig:"default=0 0 * * * *"`
 	Schedule           CronSchedule
 	SQL                SQLConfig

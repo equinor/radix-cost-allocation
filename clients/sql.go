@@ -55,7 +55,7 @@ func (sqlClient SQLClient) SaveRequiredResources(run models.Run) error {
 			sql.Named("memoryMegaBytes", req.MemoryMegaBytes),
 			sql.Named("replicas", req.Replicas))
 		if err != nil {
-			return fmt.Errorf("Failed to insert req resources %v", err)
+			return fmt.Errorf("failed to insert req resources %v", err)
 		}
 	}
 	return nil
