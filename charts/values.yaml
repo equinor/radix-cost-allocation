@@ -37,9 +37,6 @@ appNameExcludeList: canarycicd-test1,canarycicd-test2,canarycicd-test3,canarycic
 # Logging
 logLevel: info
 
-prometheus:
-  api: http://prometheus-operator-prometheus.default:9090
-
 resources:
   limits:
     cpu: 50m

@@ -42,8 +42,6 @@ spec:
               value: {{ .Values.db.server }}
             - name: SQL_PORT
               value: {{ .Values.db.port | quote }}
-            - name: PROMETHEUS_API
-              value: {{ .Values.prometheus.api }}
             - name: LOG_LEVEL
               value: {{ .Values.logLevel }}
             - name: APP_NAME_EXCLUDE_LIST

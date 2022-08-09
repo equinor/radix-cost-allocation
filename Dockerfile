@@ -1,12 +1,9 @@
-FROM golang:1.17-alpine as builder
+FROM golang:1.18.5-alpine3.16 as builder
 
-RUN apk update
-RUN apk add ca-certificates curl git && \
+RUN apk update && \
+    apk add ca-certificates curl git && \
     apk add --no-cache gcc musl-dev
-RUN go get -u \
-    golang.org/x/lint/golint \
-    github.com/frapposelli/wwhrd \
-    github.com/nats-io/nats-server/v2
+RUN go install honnef.co/go/tools/cmd/staticcheck@v0.3.3
 
 WORKDIR /go/src/github.com/equinor/radix-cost-allocation/
 
@@ -14,16 +11,12 @@ WORKDIR /go/src/github.com/equinor/radix-cost-allocation/
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Check dependency licenses using https://github.com/frapposelli/wwhrd
-COPY .wwhrd.yml ./
-RUN wwhrd -q check
-
 # Copy project code
 COPY . .
 
 # run tests and linting
-RUN golint `go list ./...` && \
-    go vet `go list ./...` && \
+RUN staticcheck ./... && \
+    go vet ./... && \
     CGO_ENABLED=0 GOOS=linux go test `go list ./...`
 
 # Build
