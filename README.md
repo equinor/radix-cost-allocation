@@ -2,8 +2,6 @@
 
 Pulls and stores container and node information into a SQL Server database.
 
-TO BE DEPRECATED: Pulls cost data from cluster prometheus instance for each application and push it into a sql database
-
 We use helm charts to install on cluster
 
 We use arm template and github action to create azure resources
@@ -59,8 +57,3 @@ git push origin v1.0.0
 ## Debugging locally
 
 Create a copy of .env.template and name it .env. Set variables to allow local debugging. This file is ignored by git.
-
-Prometheus operator must be port forwarded to a local port:
-```
-kubectl port-forward pod/prometheus-prometheus-operator-prometheus-0 9090:9090
-```

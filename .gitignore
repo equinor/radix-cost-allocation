@@ -5,6 +5,7 @@
 *.so
 *.dylib
 __debug_bin
+/.vscode/*.log
 
 # Test binary, built with `go test -c`
 *.test

@@ -13,7 +13,7 @@ func ContainsString(slice []string, value string) bool {
 }
 
 func ToLowerCase(slice []string) []string {
-	lowerSlice := make([]string, len(slice), len(slice))
+	lowerSlice := make([]string, len(slice))
 
 	for i, s := range slice {
 		lowerSlice[i] = strings.ToLower(s)

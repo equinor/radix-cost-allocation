@@ -13,7 +13,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestMapContainerBulkDtoFromPod(t *testing.T) {
@@ -553,7 +552,7 @@ func buildContainerForTest(name string, builders ...func(*corev1.Container)) cor
 
 func buildPodForTest(name, namespace, node string, builders ...func(*corev1.Pod)) *corev1.Pod {
 	pod := &corev1.Pod{
-		ObjectMeta: v1.ObjectMeta{Name: name, Namespace: namespace, Labels: make(map[string]string)},
+		ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace, Labels: make(map[string]string)},
 		Spec: corev1.PodSpec{
 			NodeName: node,
 		},
