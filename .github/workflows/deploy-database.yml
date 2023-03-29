@@ -1,4 +1,4 @@
-name: Deploy ARM
+name: Deploy Database
 
 on:
   push:
@@ -45,10 +45,6 @@ jobs:
         db_admin_pw=$(az keyvault secret show --id https://${KEY_VAULT_NAME}.vault.azure.net/secrets/${DB_ADMIN_SECRET_NAME} --query value --output tsv)
         echo "::add-mask::$db_admin_pw"
         echo "DB_ADMIN_PASSWORD=$db_admin_pw" >> $GITHUB_ENV
-
-    - name: Deploy SQL Server and DB
-      run: |
-        $GITHUB_WORKSPACE/.github/workflows/scripts/deploy.sh
 
     - name: Generate random firewall rule name
       run: |
