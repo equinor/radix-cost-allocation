@@ -121,6 +121,84 @@ func TestMapContainerBulkDtoFromPod(t *testing.T) {
 		assert.Equal(t, expected, actual)
 	})
 
+	// Pod, correct label, container terminated
+	t.Run("correct label, container terminated, last termination state with different ID", func(t *testing.T) {
+		t.Parallel()
+		podName, env, node, app, containerName, containerId, startedAt, finishedAt :=
+			"pod1", "prod", "node1", "app1", "c1", "cid1", time.Date(2020, 1, 1, 1, 1, 1, 0, time.UTC), time.Date(2020, 2, 1, 1, 1, 1, 0, time.UTC)
+		lastContainerId, lastStartedAt, lastFinishedAt := "cid2", time.Date(2021, 1, 1, 1, 1, 1, 0, time.UTC), time.Date(2021, 2, 1, 1, 1, 1, 0, time.UTC)
+		pod := buildPodForTest(podName, fmt.Sprintf("%s-%s", app, env), node,
+			setPodAppLabel(app),
+			appendPodContainerStatus(
+				buildContainerStatusForTest(containerName, containerId,
+					setContainerStateTerminated(containerId, startedAt, finishedAt),
+					setContainerLastTerminatedState(lastContainerId, lastStartedAt, lastFinishedAt),
+				),
+			),
+		)
+		expected := []repository.ContainerBulkDto{{
+			ContainerID:          containerId,
+			ContainerName:        containerName,
+			PodName:              podName,
+			ApplicationName:      app,
+			EnvironmentName:      env,
+			ComponentName:        "",
+			Wbs:                  "",
+			StartedAt:            startedAt,
+			LastKnowRunningAt:    finishedAt,
+			CPURequestMillicores: 0,
+			MemoryRequestBytes:   0,
+			NodeName:             node,
+		}, {
+			ContainerID:          lastContainerId,
+			ContainerName:        containerName,
+			PodName:              podName,
+			ApplicationName:      app,
+			EnvironmentName:      env,
+			ComponentName:        "",
+			Wbs:                  "",
+			StartedAt:            lastStartedAt,
+			LastKnowRunningAt:    lastFinishedAt,
+			CPURequestMillicores: 0,
+			MemoryRequestBytes:   0,
+			NodeName:             node,
+		}}
+		actual := MapContainerBulkDtoFromPod(pod, make(map[string]*radixv1.RadixRegistration), make(map[string]*corev1.LimitRange), &clock.RealClock{})
+		assert.ElementsMatch(t, expected, actual)
+	})
+
+	t.Run("correct label, container terminated, last termination state with same ID", func(t *testing.T) {
+		t.Parallel()
+		podName, env, node, app, containerName, containerId, startedAt, finishedAt :=
+			"pod1", "prod", "node1", "app1", "c1", "cid1", time.Date(2020, 1, 1, 1, 1, 1, 0, time.UTC), time.Date(2020, 2, 1, 1, 1, 1, 0, time.UTC)
+		lastContainerId, lastStartedAt, lastFinishedAt := containerId, time.Date(2021, 1, 1, 1, 1, 1, 0, time.UTC), time.Date(2021, 2, 1, 1, 1, 1, 0, time.UTC)
+		pod := buildPodForTest(podName, fmt.Sprintf("%s-%s", app, env), node,
+			setPodAppLabel(app),
+			appendPodContainerStatus(
+				buildContainerStatusForTest(containerName, containerId,
+					setContainerStateTerminated(containerId, startedAt, finishedAt),
+					setContainerLastTerminatedState(lastContainerId, lastStartedAt, lastFinishedAt),
+				),
+			),
+		)
+		expected := []repository.ContainerBulkDto{{
+			ContainerID:          lastContainerId,
+			ContainerName:        containerName,
+			PodName:              podName,
+			ApplicationName:      app,
+			EnvironmentName:      env,
+			ComponentName:        "",
+			Wbs:                  "",
+			StartedAt:            lastStartedAt,
+			LastKnowRunningAt:    lastFinishedAt,
+			CPURequestMillicores: 0,
+			MemoryRequestBytes:   0,
+			NodeName:             node,
+		}}
+		actual := MapContainerBulkDtoFromPod(pod, make(map[string]*radixv1.RadixRegistration), make(map[string]*corev1.LimitRange), &clock.RealClock{})
+		assert.ElementsMatch(t, expected, actual)
+	})
+
 	// Pod, correct label, container waiting
 	t.Run("correct label, container waiting", func(t *testing.T) {
 		t.Parallel()
