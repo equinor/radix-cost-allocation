@@ -47,11 +47,20 @@ func MapContainerBulkDtoFromPod(pod *corev1.Pod, rrMap map[string]*radixv1.Radix
 		setContainerBulkDtoLimitRangeProps(&containerDto, limitRangeMap[pod.Namespace])
 		setContainerBulkDtoRunningProps(&containerDto, containerStatus.State.Running, clock)
 		setContainerBulkDtoTerminatedProps(&containerDto, containerStatus.State.Terminated)
+		// Use info from last termination state if its containerID is the same as current containerID.
+		if lastTerminatedState := containerStatus.LastTerminationState.Terminated; lastTerminatedState != nil && lastTerminatedState.ContainerID == containerStatus.ContainerID {
+			setContainerBulkDtoTerminatedProps(&containerDto, lastTerminatedState)
+		}
 		setContainerBulkDtoRadixRegistrationProps(&containerDto, rrMap[appName])
 
-		containersDto = append(containersDto, containerDto)
+		// Do not append containerDto if containerID is empty.
+		if len(containerDto.ContainerID) > 0 {
+			containersDto = append(containersDto, containerDto)
+		}
 
-		if lastTerminatedState := containerStatus.LastTerminationState.Terminated; lastTerminatedState != nil {
+		// Build and append container info from last termination state if this info
+		// exist and the last terminated containerID is not the same as the current containerID
+		if lastTerminatedState := containerStatus.LastTerminationState.Terminated; lastTerminatedState != nil && lastTerminatedState.ContainerID != containerDto.ContainerID {
 			lastTerminatedDto := containerDto
 			setContainerBulkDtoTerminatedProps(&lastTerminatedDto, lastTerminatedState)
 			containersDto = append(containersDto, lastTerminatedDto)
