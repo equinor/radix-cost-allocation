@@ -1,6 +1,6 @@
 module github.com/equinor/radix-cost-allocation
 
-go 1.19
+go 1.20
 
 require (
 	github.com/denisenkom/go-mssqldb v0.12.3
