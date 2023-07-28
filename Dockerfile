@@ -3,7 +3,7 @@ FROM golang:1.20-alpine3.18 as builder
 RUN apk update && \
     apk add ca-certificates curl git && \
     apk add --no-cache gcc musl-dev
-RUN go install honnef.co/go/tools/cmd/staticcheck@v0.4.2
+RUN go install honnef.co/go/tools/cmd/staticcheck@2023.1.3
 
 WORKDIR /go/src/github.com/equinor/radix-cost-allocation/
 
