@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	mssql "github.com/denisenkom/go-mssqldb"
+	mssql "github.com/microsoft/go-mssqldb"
 )
 
 // OpenSQLServer opens a new connection to a SQL Server
