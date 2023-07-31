@@ -5,9 +5,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/equinor/radix-cost-allocation/config"
 	"github.com/equinor/radix-cost-allocation/run"
+	_ "github.com/microsoft/go-mssqldb"
 	log "github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 )
