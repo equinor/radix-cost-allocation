@@ -1,9 +1,11 @@
 module github.com/equinor/radix-cost-allocation
 
-go 1.20
+go 1.21
+
+toolchain go1.21.0
 
 require (
-	github.com/equinor/radix-operator v1.40.0
+	github.com/equinor/radix-operator v1.43.0
 	github.com/golang/mock v1.6.0
 	github.com/microsoft/go-mssqldb v1.4.0
 	github.com/pkg/errors v0.9.1
@@ -12,16 +14,16 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/vrischmann/envconfig v1.3.0
 	golang.org/x/sync v0.3.0
-	k8s.io/api v0.26.7
-	k8s.io/apimachinery v0.26.7
-	k8s.io/client-go v0.26.7
+	k8s.io/api v0.27.6
+	k8s.io/apimachinery v0.27.6
+	k8s.io/client-go v0.27.6
 )
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.10.2 // indirect
-	github.com/equinor/radix-common v1.4.0 // indirect
+	github.com/equinor/radix-common v1.5.0 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
