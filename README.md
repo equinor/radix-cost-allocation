@@ -1,3 +1,5 @@
+![build workflow](https://github.com/equinor/radix-cost-allocation/actions/workflows/build-push.yml/badge.svg) 
+
 # RADIX-COST-ALLOCATION
 
 Pulls and stores container and node information into a SQL Server database.
@@ -25,6 +27,10 @@ Also needed:
 - [`gomock`](https://github.com/golang/mock) (GO111MODULE=on go get github.com/golang/mock/mockgen@v1.5.0)
 
 Clone the repo into your `GOPATH` and run `go mod download`.
+
+### Contributing
+
+Want to contribute? Read our [contributing guidelines](./CONTRIBUTING.md)
 
 ### Generating mocks
 We use gomock to generate mocks used in unit test.
@@ -57,3 +63,8 @@ git push origin v1.0.0
 ## Debugging locally
 
 Create a copy of .env.template and name it .env. Set variables to allow local debugging. This file is ignored by git.
+
+
+---------
+
+[Security notification](./SECURITY.md)
