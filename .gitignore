@@ -19,3 +19,5 @@ vendor/
 
 # Env file with secrets
 .env
+
+.idea
