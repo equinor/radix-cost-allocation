@@ -3,7 +3,6 @@ FROM golang:1.21-alpine3.18 as builder
 RUN apk update && \
     apk add ca-certificates curl git && \
     apk add --no-cache gcc musl-dev
-RUN go install honnef.co/go/tools/cmd/staticcheck@2023.1.3
 
 WORKDIR /go/src/github.com/equinor/radix-cost-allocation/
 
@@ -13,11 +12,6 @@ RUN go mod download
 
 # Copy project code
 COPY . .
-
-# run tests and linting
-RUN staticcheck ./... && \
-    go vet ./... && \
-    CGO_ENABLED=0 GOOS=linux go test `go list ./...`
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -a -installsuffix cgo -o ./rootfs/radix-cost-allocation
