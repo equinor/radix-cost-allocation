@@ -43,14 +43,18 @@ func handleSyncError(err error) {
 func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSchedule, appNameExcludeList []string, stopCh <-chan struct{}) error {
 	kubeclient, radixclient, err := kubeUtils.GetKubernetesClients()
 	if err != nil {
-		errors.WithMessage(err, "failed to get kubernetes clients")
+		return errors.WithMessage(err, "failed to get kubernetes clients")
 	}
 
 	db, err := mssqlUtils.OpenSQLServer(sqlConfig.Server, sqlConfig.Database, sqlConfig.User, sqlConfig.Password, sqlConfig.Port)
 	if err != nil {
-		errors.WithMessage(err, "failed to init database driver")
+		return errors.WithMessage(err, "failed to init database driver")
 	}
-	defer db.Close()
+	defer func() {
+		if err = db.Close(); err != nil {
+			log.Errorf("Failed to close db connection: %v", err)
+		}
+	}()
 	repo := repository.NewSQLRepository(context.Background(), db, sqlConfig.QueryTimeout)
 
 	// Create reflectors and stores
