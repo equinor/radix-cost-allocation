@@ -7,68 +7,79 @@ permissions:
   id-token: write
 
 jobs:
-  get-target-configs:
-    name: Get target configs for branch
-    outputs:
-      target_configs: ${{ steps.get-target-configs.outputs.target_configs }}
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Get target configs
-        id: get-target-configs
-        run: |
-          configs=$(ls $GITHUB_WORKSPACE/.github/workflows/config/${GITHUB_REF_NAME} | jq -Rsc '. / "\n" - [""]')
-          echo "target_configs=${configs}" >> $GITHUB_OUTPUT
 
-  deploy-sql-server:
+  deploy:
     runs-on: ubuntu-20.04
-    needs:
-      - get-target-configs
     strategy:
       fail-fast: false
-      matrix: 
-        config: ${{ fromJson(needs.get-target-configs.outputs.target_configs) }}
+      matrix:
+        target:
+          - name: "dev"
+            ref: "refs/heads/master"
+            client-id: "ca1b702f-a561-43b8-973a-c8b23a874d63"
+            server: "sql-radix-cost-allocation-dev.database.windows.net"
+
+          - name: "playground"
+            ref: "refs/heads/release"
+            client-id: "edb80ab7-4eb8-4477-a4e0-d42ec881b43d"
+            server: "sql-radix-cost-allocation-playground.database.windows.net"
+
+          - name: "platform"
+            ref: "refs/heads/release"
+            client-id: "to be decided" #FIXME
+            server: "sql-radix-cost-allocation-prod.database.windows.net"
+
+          - name: "c2"
+            ref: "refs/heads/release"
+            client-id: "to be decided" #FIXME
+            server: "sql-radix-cost-allocation-c2-prod.database.windows.net"
+
+    env:
+      connection: >-
+        Server=${{matrix.target.server}};
+        Initial Catalog=radix-vulnerability-scan;
+        Authentication=Active Directory Default; 
+        Encrypt=True;
+        TrustServerCertificate=False;
+        Connection Timeout=30;
+
     steps:
-    - uses: actions/checkout@v3
-    - name: Persist environment from ${{ matrix.config }} across steps
-      run: |
-        $GITHUB_WORKSPACE/.github/workflows/scripts/persist-env.sh ${{ matrix.config }}
+      - uses: actions/checkout@v4
+        if: matrix.target.run == github.ref
 
-    - uses: azure/login@v1
-      with:
-        client-id: ${{ env.AZURE_CLIENT_ID }}
-        tenant-id: ${{ env.AZURE_TENANT_ID }}
-        subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      - uses: azure/login@v1
+        if: matrix.target.run == github.ref
+        with:
+          client-id: ${{matrix.target.client-id}}
+          tenant-id: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
+          allow-no-subscriptions: true
 
-    - name: Get DB password from KV
-      run: |
-        db_admin_pw=$(az keyvault secret show --id https://${KEY_VAULT_NAME}.vault.azure.net/secrets/${DB_ADMIN_SECRET_NAME} --query value --output tsv)
-        echo "::add-mask::$db_admin_pw"
-        echo "DB_ADMIN_PASSWORD=$db_admin_pw" >> $GITHUB_ENV
+      - uses: azure/sql-action@v2.2.1
+        if: matrix.target.run == github.ref
+        with:
+          connection-string: ${{env.connection}}
+          path: './azure-infrastructure/preDeployScript.sql'
 
-    - name: Generate random firewall rule name
-      run: |
-        fw_rule_name="github-runner-$(uuidgen)"
-        echo "FIREWALL_RULE_NAME=$fw_rule_name" >> $GITHUB_ENV
-        
-    - name: Install SqlServer PS module
-      shell: pwsh
-      run: |
-        Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-        Install-Module -Name SqlServer
+      - uses: azure/sql-action@v2.2.1
+        if: matrix.target.run == github.ref
+        with:
+          connection-string: ${{env.connection}}
+          path: './azure-infrastructure/createSchema.sql'
 
-    - name: Whitelist Runner IP in firewalls
-      shell: pwsh
-      run: |
-        ./.github/workflows/scripts/whitelist-ip-in-db.ps1 -FirewallRuleName "${env:FIREWALL_RULE_NAME}"
+      - uses: azure/sql-action@v2.2.1
+        if: matrix.target.run == github.ref
+        with:
+          connection-string: ${{env.connection}}
+          path: './azure-infrastructure/createTables.sql'
 
-    - name: Creating DB schema and tables
-      shell: pwsh
-      run: |
-        ./.github/workflows/scripts/create-db.ps1
+      - uses: azure/sql-action@v2.2.1
+        if: matrix.target.run == github.ref
+        with:
+          connection-string: ${{env.connection}}
+          path: './azure-infrastructure/createTypes.sql'
 
-    - name: Blacklist Runner IP in firewalls
-      shell: pwsh
-      if: ${{ always() }}
-      run: |
-        ./.github/workflows/scripts/blacklist-ip-in-db.ps1 -FirewallRuleName "${env:FIREWALL_RULE_NAME}"
+      - uses: azure/sql-action@v2.2.1
+        if: matrix.target.run == github.ref
+        with:
+          connection-string: ${{env.connection}}
+          path: './azure-infrastructure/createProcedures.sql'

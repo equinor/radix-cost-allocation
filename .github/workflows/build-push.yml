@@ -6,43 +6,78 @@ on:
       - release
 permissions:
   id-token: write
-jobs:
-  get-target-configs:
-    name: Get target configs for branch
-    outputs:
-      target_configs: ${{ steps.get-target-configs.outputs.target_configs }}
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Get target configs
-        id: get-target-configs
-        run: |
-          configs=$(ls $GITHUB_WORKSPACE/.github/workflows/config/${GITHUB_REF_NAME} | jq -Rsc '. / "\n" - [""]')
-          echo "target_configs=${configs}" >> $GITHUB_OUTPUT
+  contents: read
 
-  build-deploy-image:
-    name: Build & push
-    outputs:
-      runner_ips: ${{ steps.get-runner-ip.outputs.runner_ip }}
+jobs:
+  build-deploy:
     runs-on: ubuntu-20.04
-    needs:
-      - get-target-configs
     strategy:
       fail-fast: false
-      matrix: 
-        config: ${{ fromJson(needs.get-target-configs.outputs.target_configs) }}
+      matrix:
+        target:
+          - name: "dev"
+            ref: "refs/heads/master"
+            acr-name: "radixdev"
+            client-id: "6e96429a-3ad5-40ee-b961-6de864d878fc"
+            subscription-id: "16ede44b-1f74-40a5-b428-46cca9a5741b"
+
+          - name: "playground"
+            ref: "refs/heads/release"
+            acr-name: "radixdev"
+            client-id: "6e96429a-3ad5-40ee-b961-6de864d878fc"
+            subscription-id: "16ede44b-1f74-40a5-b428-46cca9a5741b"
+
+          - name: "platform"
+            ref: "refs/heads/release"
+            acr-name: "radixprod"
+            client-id: "9304412c-98e6-414c-bde4-c5d5047add70"
+            subscription-id: "ded7ca41-37c8-4085-862f-b11d21ab341a"
+
+          - name: "c2"
+            ref: "refs/heads/release"
+            acr-name: "radixc2prod"
+            client-id: "9304412c-98e6-414c-bde4-c5d5047add70"
+            subscription-id: "ded7ca41-37c8-4085-862f-b11d21ab341a"
+
     steps:
-    - uses: actions/checkout@v3
-    - name: Persist environment from ${{ matrix.config }} across steps
-      run: |
-        $GITHUB_WORKSPACE/.github/workflows/scripts/persist-env.sh ${{ matrix.config }}
+      - uses: actions/checkout@v4
+        if: matrix.target.run == github.ref
 
-    - uses: azure/login@v1
-      with:
-        client-id: ${{ env.AZURE_CLIENT_ID }}
-        tenant-id: ${{ env.AZURE_TENANT_ID }}
-        subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      - uses: azure/login@v1
+        if: matrix.target.run == github.ref
+        with:
+          client-id: ${{matrix.target.client-id}}
+          tenant-id: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
+          subscription-id: ${{matrix.target.subscription-id}}
 
-    - name: Build and push image
-      run: |
-        $GITHUB_WORKSPACE/.github/workflows/scripts/build-push.sh
+      - name: Generate image tag
+        if: matrix.target.run == github.ref
+        id: tag
+        run: |
+          sha=${GITHUB_SHA::8}
+          ts=$(date +%s)
+          echo "tag=${GITHUB_REF_NAME}-${sha}-${ts}" >> $GITHUB_OUTPUT
+
+      - name: Build image
+        if: matrix.target.run == github.ref
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{matrix.target.subscription-id}}
+          ACR_NAME: ${{matrix.target.acr-name}}
+          IMAGE_NAME: radix-vulnerability-scanner
+          TAG: ${{steps.tag.outputs.tag}}
+        run: |
+          az acr task run \
+             --subscription ${AZURE_SUBSCRIPTION_ID} \
+             --name radix-image-builder-internal \
+             --registry ${ACR_NAME} \
+             --context ${GITHUB_WORKSPACE} \
+             --file ${GITHUB_WORKSPACE}/Dockerfile \
+             --set DOCKER_REGISTRY=${ACR_NAME} \
+             --set BRANCH=${GITHUB_REF_NAME} \
+             --set TAGS="--tag ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${TAG}" \
+             --set DOCKER_FILE_NAME=Dockerfile \
+             --set PUSH="--push" \
+             --set REPOSITORY_NAME=${IMAGE_NAME} \
+             --set CACHE="" \
+             --set CACHE_TO_OPTIONS="--cache-to=type=registry,ref=${ACR_NAME}.azurecr.io/${IMAGE_NAME}:radix-cache-${GITHUB_REF_NAME},mode=max"
+          
