@@ -63,7 +63,7 @@ jobs:
         env:
           AZURE_SUBSCRIPTION_ID: ${{matrix.target.subscription-id}}
           ACR_NAME: ${{matrix.target.acr-name}}
-          IMAGE_NAME: radix-vulnerability-scanner
+          IMAGE_NAME: radix-cost-allocation
           TAG: ${{steps.tag.outputs.tag}}
         run: |
           az acr task run \

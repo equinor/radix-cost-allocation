@@ -37,7 +37,7 @@ jobs:
     env:
       connection: >-
         Server=${{matrix.target.server}};
-        Initial Catalog=radix-vulnerability-scan;
+        Initial Catalog=sqldb-radix-cost-allocation;
         Authentication=Active Directory Default; 
         Encrypt=True;
         TrustServerCertificate=False;
