@@ -16,12 +16,12 @@ jobs:
         target:
           - name: "dev"
             ref: "refs/heads/master"
-            client-id: "ca1b702f-a561-43b8-973a-c8b23a874d63"
+            client-id: "8dcdedf9-b297-4c00-864a-ea52e7ec8732"
             server: "sql-radix-cost-allocation-dev.database.windows.net"
 
           - name: "playground"
             ref: "refs/heads/release"
-            client-id: "edb80ab7-4eb8-4477-a4e0-d42ec881b43d"
+            client-id: "12038969-a194-423c-8ff8-d8dc200c0d79"
             server: "sql-radix-cost-allocation-playground.database.windows.net"
 
           - name: "platform"
