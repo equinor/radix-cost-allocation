@@ -7,6 +7,7 @@ type AppConfig struct {
 	SQL                SQLConfig
 	AppNameExcludeList []string `envconfig:"optional"`
 	LogLevel           string   `envconfig:"default=info"`
+	PrettyPrint        bool     `envconfig:"default=false"`
 }
 
 // SQLConfig defines configuration settings used to manage connections to SQL Server

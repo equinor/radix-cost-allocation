@@ -3,7 +3,7 @@ package sync
 import (
 	"github.com/equinor/radix-cost-allocation/pkg/listers"
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -31,14 +31,14 @@ func (s *NodeSyncJob) Sync() error {
 	}
 	defer s.sem.Release(1)
 
-	log.Info("Start syncing nodes")
+	log.Info().Msg("Start syncing nodes")
 	nodeDtos := s.nodeDtoLister.List()
 
-	log.Debugf("Writing %v nodes to repository", len(nodeDtos))
+	log.Debug().Msgf("Writing %v nodes to repository", len(nodeDtos))
 	if err := s.repository.BulkUpsertNodes(nodeDtos); err != nil {
 		return err
 	}
 
-	log.Info("Finished syncing nodes")
+	log.Info().Msg("Finished syncing nodes")
 	return nil
 }

@@ -8,7 +8,7 @@ import (
 
 	mssql "github.com/microsoft/go-mssqldb"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -76,7 +76,7 @@ func (repo *sqlRepository) executeWithTransaction(query string, args ...interfac
 	}
 	defer func() {
 		if err = conn.Close(); err != nil {
-			log.Errorf("Unable to close connection: %v", err)
+			log.Error().Err(err).Msg("Unable to close connection")
 		}
 	}()
 
