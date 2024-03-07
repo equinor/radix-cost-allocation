@@ -51,6 +51,7 @@ func setupLogger(ctx context.Context, logLevel string, prettyPrint bool) (contex
 	if prettyPrint {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.TimeOnly})
 	}
+	zerolog.DefaultContextLogger = &log.Logger
 	ctx = log.Logger.WithContext(ctx)
 	return ctx, nil
 }
