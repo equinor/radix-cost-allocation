@@ -8,12 +8,14 @@ import (
 	"github.com/equinor/radix-cost-allocation/pkg/reflectorcontroller"
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
 	"github.com/equinor/radix-cost-allocation/pkg/sync"
+	"github.com/equinor/radix-cost-allocation/pkg/utils/cronlogger"
 	kubeUtils "github.com/equinor/radix-cost-allocation/pkg/utils/kube"
 	mssqlUtils "github.com/equinor/radix-cost-allocation/pkg/utils/mssql"
 	"github.com/equinor/radix-cost-allocation/pkg/utils/reflectorstore"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type syncerJobWrapper struct {
@@ -31,16 +33,15 @@ func (w *syncerJobWrapper) Run() {
 }
 
 func handleSyncError(err error) {
-	switch err.(type) {
-	case *sync.SyncAlreadyRunningError:
-		log.Debug(err)
-	default:
-		log.Error(err)
+	if errors.Is(err, sync.ErrSyncAlreadyRunning) {
+		log.Debug().Msg(err.Error())
+	} else {
+		log.Error().Msg(err.Error())
 	}
 }
 
 // InitAndStartCollector starts collecting and writing container and node resources to the database
-func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSchedule, appNameExcludeList []string, stopCh <-chan struct{}) error {
+func InitAndStartCollector(ctx context.Context, sqlConfig config.SQLConfig, cronConfig config.CronSchedule, appNameExcludeList []string) error {
 	kubeclient, radixclient, err := kubeUtils.GetKubernetesClients()
 	if err != nil {
 		return errors.WithMessage(err, "failed to get kubernetes clients")
@@ -52,7 +53,7 @@ func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSch
 	}
 	defer func() {
 		if err = db.Close(); err != nil {
-			log.Errorf("Failed to close db connection: %v", err)
+			log.Error().Err(err).Msgf("Failed to close db connection")
 		}
 	}()
 	repo := repository.NewSQLRepository(context.Background(), db, sqlConfig.QueryTimeout)
@@ -82,7 +83,7 @@ func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSch
 	nodeSyncJob := sync.NewNodeSyncJob(nodeDtoLister, repo)
 
 	// Create cron scheduler and add sync jobs
-	c := cron.New(cron.WithSeconds())
+	c := cron.New(cron.WithSeconds(), cron.WithLogger(cronlogger.New(zerolog.Ctx(ctx))))
 	if _, err := c.AddJob(cronConfig.PodSync, newSyncerJobWrapper(containerSyncJob)); err != nil {
 		return err
 	}
@@ -92,6 +93,6 @@ func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSch
 	c.Start()
 	defer c.Stop()
 
-	<-stopCh
+	<-ctx.Done()
 	return nil
 }
