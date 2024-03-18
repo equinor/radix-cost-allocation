@@ -1,7 +1,7 @@
 DOCKER_REGISTRY=radixdev.azurecr.io
 VERSION=latest
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
-IMAGE_NAME=$(DOCKER_REGISTRY)/radix-vulnerability-scanner:$(BRANCH)-$(VERSION)
+IMAGE_NAME=$(DOCKER_REGISTRY)/radix-cost-allocation:$(BRANCH)-$(VERSION)
 
 build:
 	docker build -t $(IMAGE_NAME) .

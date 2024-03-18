@@ -43,7 +43,6 @@ func main() {
 
 	<-ctx.Done()
 }
-
 func setupLogger(ctx context.Context, logLevel string, prettyPrint bool) (context.Context, error) {
 	zerolog.DurationFieldUnit = time.Millisecond
 	level, err := zerolog.ParseLevel(logLevel)
