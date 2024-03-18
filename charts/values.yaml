@@ -12,10 +12,17 @@ image:
 secret:
   name: sql-credential
 
+# Annotations to add to the Deployment
+deploymentAnnotations: {}
+# Extra pod labels
+podLabels: {}
+
 serviceAccount:
   # The name of the service account to use.
   # If not set, a name is generated using the fullname template
   name: ""
+  # Annotations to add to the service account
+  annotations: {}
 
 db:
   database: sqldb-radix-cost-allocation
