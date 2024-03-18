@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
 	"time"
 
@@ -30,6 +31,9 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize logger")
 	}
+
+	info, _ := debug.ReadBuildInfo()
+	log.Info().Str("version", info.Main.Version).Msg("Starting")
 
 	go func() {
 		if err := run.InitAndStartCollector(ctx, appConfig.SQL, appConfig.Schedule, appConfig.AppNameExcludeList); err != nil {
