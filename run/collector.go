@@ -47,7 +47,7 @@ func InitAndStartCollector(ctx context.Context, sqlConfig config.SQLConfig, cron
 		return errors.WithMessage(err, "failed to get kubernetes clients")
 	}
 
-	db, err := mssqlUtils.OpenSQLServer(sqlConfig.Server, sqlConfig.Database, sqlConfig.User, sqlConfig.Password, sqlConfig.Port)
+	db, err := mssqlUtils.OpenSQLServer(sqlConfig.Server, sqlConfig.Database, sqlConfig.Port)
 	if err != nil {
 		return errors.WithMessage(err, "failed to init database driver")
 	}

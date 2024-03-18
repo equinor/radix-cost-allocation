@@ -18,10 +18,8 @@ serviceAccount:
   name: ""
 
 db:
-  user: radixwriter
   database: sqldb-radix-cost-allocation
   server: sql-radix-cost-allocation-dev.database.windows.net
-  password: password
   port: "1433"
   queryTimeout: "30"
 
