@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
 	"time"
 
@@ -31,6 +32,9 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to initialize logger")
 	}
 
+	info, _ := debug.ReadBuildInfo()
+	log.Info().Str("version", info.Main.Version).Msg("Starting")
+
 	go func() {
 		if err := run.InitAndStartCollector(ctx, appConfig.SQL, appConfig.Schedule, appConfig.AppNameExcludeList); err != nil {
 			log.Fatal().Msg(err.Error())
@@ -39,7 +43,6 @@ func main() {
 
 	<-ctx.Done()
 }
-
 func setupLogger(ctx context.Context, logLevel string, prettyPrint bool) (context.Context, error) {
 	zerolog.DurationFieldUnit = time.Millisecond
 	level, err := zerolog.ParseLevel(logLevel)
