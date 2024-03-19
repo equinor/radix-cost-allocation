@@ -17,3 +17,16 @@ BEGIN
 END
 
 GRANT SELECT ON SCHEMA::cost TO datareader
+
+
+IF NOT EXISTS(SELECT 1 FROM sys.database_principals WHERE name = 'radix-id-cost-allocation-writer-$(RADIX_ZONE)')
+BEGIN
+    CREATE USER [radix-id-cost-allocation-writer-$(RADIX_ZONE)] FROM EXTERNAL PROVIDER;
+END
+ALTER ROLE datawriter ADD MEMBER [radix-id-cost-allocation-writer-$(RADIX_ZONE)]
+
+IF NOT EXISTS(SELECT 1 FROM sys.database_principals WHERE name = 'radix-id-cost-allocation-reader-$(RADIX_ZONE)')
+BEGIN
+    CREATE USER [radix-id-cost-allocation-reader-$(RADIX_ZONE)] FROM EXTERNAL PROVIDER;
+END
+ALTER ROLE datareader ADD MEMBER [radix-id-cost-allocation-reader-$(RADIX_ZONE)]

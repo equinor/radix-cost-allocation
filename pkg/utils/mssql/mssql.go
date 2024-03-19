@@ -4,14 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 
-	mssql "github.com/microsoft/go-mssqldb"
+	"github.com/microsoft/go-mssqldb/azuread"
 )
 
 // OpenSQLServer opens a new connection to a SQL Server
-func OpenSQLServer(server, database, userID, password string, port int) (*sql.DB, error) {
-	c, err := mssql.NewConnector(
-		GetSQLServerDsn(server, database, userID, password, port),
-	)
+func OpenSQLServer(server, database string, port int) (*sql.DB, error) {
+	c, err := azuread.NewConnector(GetSQLServerDsn(server, database, port))
 	if err != nil {
 		return nil, err
 	}
@@ -20,9 +18,8 @@ func OpenSQLServer(server, database, userID, password string, port int) (*sql.DB
 }
 
 // GetSQLServerDsn builds a SQL Server specific DSN
-func GetSQLServerDsn(server, database, userID, password string, port int) string {
-	dsn := fmt.Sprintf("server=%s;user id=%s;password=%s;database=%s",
-		server, userID, password, database)
+func GetSQLServerDsn(server, database string, port int) string {
+	dsn := fmt.Sprintf("server=%s;database=%s;fedauth=ActiveDirectoryDefault", server, database)
 
 	if port > 0 {
 		dsn = fmt.Sprintf("%s;port=%d", dsn, port)

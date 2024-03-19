@@ -5,6 +5,10 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "cost-allocation.labels" . | nindent 4 }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: 1
   selector:
@@ -14,6 +18,9 @@ spec:
     metadata:
       labels:
         {{- include "cost-allocation.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccount: {{ include "cost-allocation.serviceAccountName" . }}
       securityContext:
@@ -34,8 +41,6 @@ spec:
               value: {{ .Values.schedule.nodeSync | quote }}
             - name: SCHEDULE_POD_SYNC
               value: {{ .Values.schedule.podSync | quote }}
-            - name: SQL_USER
-              value: {{ .Values.db.user }}
             - name: SQL_DATABASE
               value: {{ .Values.db.database }}
             - name: SQL_SERVER
@@ -46,9 +51,6 @@ spec:
               value: {{ .Values.logLevel }}
             - name: APP_NAME_EXCLUDE_LIST
               value: {{ .Values.appNameExcludeList }}
-          envFrom:
-            - secretRef:
-                name: {{ .Values.secret.name }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:

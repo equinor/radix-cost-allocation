@@ -8,12 +8,14 @@ import (
 	"github.com/equinor/radix-cost-allocation/pkg/reflectorcontroller"
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
 	"github.com/equinor/radix-cost-allocation/pkg/sync"
+	"github.com/equinor/radix-cost-allocation/pkg/utils/cronlogger"
 	kubeUtils "github.com/equinor/radix-cost-allocation/pkg/utils/kube"
 	mssqlUtils "github.com/equinor/radix-cost-allocation/pkg/utils/mssql"
 	"github.com/equinor/radix-cost-allocation/pkg/utils/reflectorstore"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type syncerJobWrapper struct {
@@ -31,26 +33,29 @@ func (w *syncerJobWrapper) Run() {
 }
 
 func handleSyncError(err error) {
-	switch err.(type) {
-	case *sync.SyncAlreadyRunningError:
-		log.Debug(err)
-	default:
-		log.Error(err)
+	if errors.Is(err, sync.ErrSyncAlreadyRunning) {
+		log.Debug().Msg(err.Error())
+	} else {
+		log.Error().Msg(err.Error())
 	}
 }
 
 // InitAndStartCollector starts collecting and writing container and node resources to the database
-func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSchedule, appNameExcludeList []string, stopCh <-chan struct{}) error {
+func InitAndStartCollector(ctx context.Context, sqlConfig config.SQLConfig, cronConfig config.CronSchedule, appNameExcludeList []string) error {
 	kubeclient, radixclient, err := kubeUtils.GetKubernetesClients()
 	if err != nil {
-		errors.WithMessage(err, "failed to get kubernetes clients")
+		return errors.WithMessage(err, "failed to get kubernetes clients")
 	}
 
-	db, err := mssqlUtils.OpenSQLServer(sqlConfig.Server, sqlConfig.Database, sqlConfig.User, sqlConfig.Password, sqlConfig.Port)
+	db, err := mssqlUtils.OpenSQLServer(sqlConfig.Server, sqlConfig.Database, sqlConfig.Port)
 	if err != nil {
-		errors.WithMessage(err, "failed to init database driver")
+		return errors.WithMessage(err, "failed to init database driver")
 	}
-	defer db.Close()
+	defer func() {
+		if err = db.Close(); err != nil {
+			log.Error().Err(err).Msgf("Failed to close db connection")
+		}
+	}()
 	repo := repository.NewSQLRepository(context.Background(), db, sqlConfig.QueryTimeout)
 
 	// Create reflectors and stores
@@ -78,7 +83,7 @@ func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSch
 	nodeSyncJob := sync.NewNodeSyncJob(nodeDtoLister, repo)
 
 	// Create cron scheduler and add sync jobs
-	c := cron.New(cron.WithSeconds())
+	c := cron.New(cron.WithSeconds(), cron.WithLogger(cronlogger.New(zerolog.Ctx(ctx))))
 	if _, err := c.AddJob(cronConfig.PodSync, newSyncerJobWrapper(containerSyncJob)); err != nil {
 		return err
 	}
@@ -88,6 +93,6 @@ func InitAndStartCollector(sqlConfig config.SQLConfig, cronConfig config.CronSch
 	c.Start()
 	defer c.Stop()
 
-	<-stopCh
+	<-ctx.Done()
 	return nil
 }

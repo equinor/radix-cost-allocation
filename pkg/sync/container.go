@@ -6,7 +6,7 @@ import (
 	"github.com/equinor/radix-cost-allocation/pkg/listers"
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
 	"github.com/equinor/radix-cost-allocation/pkg/utils/slice"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -36,15 +36,15 @@ func (s *ContainerSyncJob) Sync() error {
 	}
 	defer s.sem.Release(1)
 
-	log.Info("Start syncing containers")
+	log.Info().Msg("Start syncing containers")
 	containerDtos := s.filterContainerByAppNameExcludeList(s.containerDtoLister.List())
 
-	log.Debugf("Writing %v containers to repository", len(containerDtos))
+	log.Debug().Msgf("Writing %v containers to repository", len(containerDtos))
 	if err := s.repository.BulkUpsertContainers(containerDtos); err != nil {
 		return err
 	}
 
-	log.Info("Finished syncing containers")
+	log.Info().Msg("Finished syncing containers")
 	return nil
 }
 

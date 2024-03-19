@@ -3,11 +3,12 @@ package repository
 import (
 	"context"
 	"database/sql"
-
+	"fmt"
 	"time"
 
 	mssql "github.com/microsoft/go-mssqldb"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -73,7 +74,11 @@ func (repo *sqlRepository) executeWithTransaction(query string, args ...interfac
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	defer func() {
+		if err = conn.Close(); err != nil {
+			log.Error().Err(err).Msg("Unable to close connection")
+		}
+	}()
 
 	tx, err := conn.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
@@ -81,7 +86,10 @@ func (repo *sqlRepository) executeWithTransaction(query string, args ...interfac
 	}
 
 	if _, err = tx.ExecContext(ctx, query, args...); err != nil {
-		tx.Rollback()
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			return fmt.Errorf("failed to rollback transaction: %w (transaction error: %w)", rollbackErr, err)
+		}
 		return err
 	}
 
