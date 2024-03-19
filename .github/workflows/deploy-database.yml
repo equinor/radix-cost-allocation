@@ -27,7 +27,7 @@ jobs:
           - name: "platform"
             ref: "refs/heads/release"
             client-id: "5dd06410-a4dd-4616-8fda-090d23b1528c"
-            server: "sql-radix-cost-allocation-prod.database.windows.net"
+            server: "sql-radix-cost-allocation-platform.database.windows.net"
 
           - name: "c2"
             ref: "refs/heads/release"
