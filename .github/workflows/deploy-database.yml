@@ -32,7 +32,7 @@ jobs:
           - name: "c2"
             ref: "refs/heads/release"
             client-id: "820a9ea1-9d2f-4056-9271-d2865cc70fb6"
-            server: "sql-radix-cost-allocation-c2-prod.database.windows.net"
+            server: "sql-radix-cost-allocation-c2.database.windows.net"
 
     env:
       connection: >-
