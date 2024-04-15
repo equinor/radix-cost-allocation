@@ -22,42 +22,42 @@ jobs:
             client-id: "64b117a6-dc1c-4697-a000-ef251333bdc4"
             subscription-id: "16ede44b-1f74-40a5-b428-46cca9a5741b"
 
-          - name: "playground"
-            ref: "refs/heads/release"
-            acr-name: "radixdev"
-            client-id: "4b607a0a-b4f7-4918-8586-0f1ee8a69d5b"
-            subscription-id: "16ede44b-1f74-40a5-b428-46cca9a5741b"
-
-          - name: "platform"
-            ref: "refs/heads/release"
-            acr-name: "radixprod"
-            client-id: "e7b711a6-8b96-4d19-b9d4-35e260af7e65"
-            subscription-id: "ded7ca41-37c8-4085-862f-b11d21ab341a"
-
-          - name: "c2"
-            ref: "refs/heads/release"
-            acr-name: "radixc2prod"
-            client-id: "03efd84e-6142-48e3-97cd-6d49e6aa3f93"
-            subscription-id: "ded7ca41-37c8-4085-862f-b11d21ab341a"
+#          - name: "playground"
+#            ref: "refs/heads/release"
+#            acr-name: "radixdev"
+#            client-id: "4b607a0a-b4f7-4918-8586-0f1ee8a69d5b"
+#            subscription-id: "16ede44b-1f74-40a5-b428-46cca9a5741b"
+#
+#          - name: "platform"
+#            ref: "refs/heads/release"
+#            acr-name: "radixprod"
+#            client-id: "e7b711a6-8b96-4d19-b9d4-35e260af7e65"
+#            subscription-id: "ded7ca41-37c8-4085-862f-b11d21ab341a"
+#
+#          - name: "c2"
+#            ref: "refs/heads/release"
+#            acr-name: "radixc2prod"
+#            client-id: "03efd84e-6142-48e3-97cd-6d49e6aa3f93"
+#            subscription-id: "ded7ca41-37c8-4085-862f-b11d21ab341a"
 
     steps:
       - uses: actions/checkout@v4
-        if: matrix.target.ref == github.ref
+#        if: matrix.target.ref == github.ref
 
       - uses: azure/login@v1
-        if: matrix.target.ref == github.ref
+#        if: matrix.target.ref == github.ref
         with:
           client-id: ${{matrix.target.client-id}}
           tenant-id: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
           subscription-id: ${{matrix.target.subscription-id}}
 
       - name: Get GitHub Public IP
-        if: matrix.target.ref == github.ref
+#        if: matrix.target.ref == github.ref
         id: github_public_ip
         run: echo "ipv4=$(curl 'https://ifconfig.me/ip')" >> $GITHUB_OUTPUT
 
       - name: Add GitHub IP to ACR
-        if: matrix.target.ref == github.ref
+#        if: matrix.target.ref == github.ref
         id: update_firewall
         run: az acr network-rule add
           --name ${{matrix.target.acr-name}}
@@ -65,7 +65,7 @@ jobs:
           --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
 
       - name: Generate image tag
-        if: matrix.target.ref == github.ref
+#        if: matrix.target.ref == github.ref
         id: tag
         run: |
           sha=${GITHUB_SHA::8}
@@ -73,7 +73,7 @@ jobs:
           echo "tag=${GITHUB_REF_NAME}-${sha}-${ts}" >> $GITHUB_OUTPUT
 
       - name: Build image
-        if: matrix.target.ref == github.ref
+#        if: matrix.target.ref == github.ref
         env:
           AZURE_SUBSCRIPTION_ID: ${{matrix.target.subscription-id}}
           ACR_NAME: ${{matrix.target.acr-name}}
