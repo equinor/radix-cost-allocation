@@ -3,6 +3,8 @@ name: Deploy Database
 on:
   push:
     branches: [master, release]
+  workflow_dispatch:
+
 permissions:
   id-token: write
 
@@ -27,12 +29,12 @@ jobs:
           - name: "platform"
             ref: "refs/heads/release"
             client-id: "5dd06410-a4dd-4616-8fda-090d23b1528c"
-            server: "sql-radix-cost-allocation-prod.database.windows.net"
+            server: "sql-radix-cost-allocation-platform.database.windows.net"
 
           - name: "c2"
             ref: "refs/heads/release"
             client-id: "820a9ea1-9d2f-4056-9271-d2865cc70fb6"
-            server: "sql-radix-cost-allocation-c2-prod.database.windows.net"
+            server: "sql-radix-cost-allocation-c2.database.windows.net"
 
     env:
       connection: >-
