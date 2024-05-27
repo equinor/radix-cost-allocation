@@ -68,3 +68,12 @@ volumes: []
 
 # Additional volume mounts to add to the radix-cost-allocation container.
 volumeMounts: []
+
+# Affinity for pod scheduling
+affinity: {}
+
+# Node selector for pod scheduling
+nodeSelector: {}
+
+# Tolerations for pod scheduling
+tolerations: []
