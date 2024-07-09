@@ -28,6 +28,7 @@ mocks: bootstrap
 	mockgen -source ./pkg/listers/containerbulkdto.go -destination ./pkg/listers/mock/containerbulkdto.go -package mock
 	mockgen -source ./pkg/listers/nodebulkdto.go -destination ./pkg/listers/mock/nodebulkdto.go -package mock
 
+
 HAS_GOLANGCI_LINT := $(shell command -v golangci-lint;)
 HAS_MOCKGEN       := $(shell command -v mockgen;)
 
