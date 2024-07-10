@@ -1,10 +1,8 @@
-FROM golang:1.21-alpine3.18 as builder
+FROM docker.io/golang:1.22-alpine3.20 as builder
+ENV CGO_ENABLED=0 \
+    GOOS=linux
 
-RUN apk update && \
-    apk add ca-certificates curl git && \
-    apk add --no-cache gcc musl-dev
-
-WORKDIR /go/src/github.com/equinor/radix-cost-allocation/
+WORKDIR /src
 
 # Install project dependencies
 COPY go.mod go.sum ./
@@ -13,16 +11,11 @@ RUN go mod download
 # Copy project code
 COPY . .
 
-# Build
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -a -installsuffix cgo -o ./rootfs/radix-cost-allocation
-RUN addgroup -S -g 1000 radix-cost-allocation
-RUN adduser -S -u 1000 -G radix-cost-allocation radix-cost-allocation
+RUN go build -ldflags="-s -w" -o /build/radix-cost-allocation
 
-# Run operator
-FROM scratch
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /go/src/github.com/equinor/radix-cost-allocation/rootfs/radix-cost-allocation /usr/local/bin/radix-cost-allocation
+# Final stage, ref https://github.com/GoogleContainerTools/distroless/blob/main/base/README.md for distroless
+FROM gcr.io/distroless/static
+WORKDIR /app
+COPY --from=builder /build/radix-cost-allocation .
 USER 1000
-
-ENTRYPOINT ["/usr/local/bin/radix-cost-allocation"]
+ENTRYPOINT ["/app/radix-cost-allocation"]

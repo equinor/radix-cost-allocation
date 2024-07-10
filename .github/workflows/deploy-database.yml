@@ -49,38 +49,38 @@ jobs:
       - uses: actions/checkout@v4
         if: matrix.target.ref == github.ref
 
-      - uses: azure/login@v1
+      - uses: azure/login@v2
         if: matrix.target.ref == github.ref
         with:
           client-id: ${{matrix.target.client-id}}
           tenant-id: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
           allow-no-subscriptions: true
 
-      - uses: azure/sql-action@v2.2.1
+      - uses: azure/sql-action@v2.3
         if: matrix.target.ref == github.ref
         with:
           connection-string: ${{env.connection}}
           path: './azure-infrastructure/preDeployScript.sql'
 
-      - uses: azure/sql-action@v2.2.1
+      - uses: azure/sql-action@v2.3
         if: matrix.target.ref == github.ref
         with:
           connection-string: ${{env.connection}}
           path: './azure-infrastructure/createSchema.sql'
 
-      - uses: azure/sql-action@v2.2.1
+      - uses: azure/sql-action@v2.3
         if: matrix.target.ref == github.ref
         with:
           connection-string: ${{env.connection}}
           path: './azure-infrastructure/createTables.sql'
 
-      - uses: azure/sql-action@v2.2.1
+      - uses: azure/sql-action@v2.3
         if: matrix.target.ref == github.ref
         with:
           connection-string: ${{env.connection}}
           path: './azure-infrastructure/createTypes.sql'
 
-      - uses: azure/sql-action@v2.2.1
+      - uses: azure/sql-action@v2.3
         if: matrix.target.ref == github.ref
         with:
           connection-string: ${{env.connection}}
