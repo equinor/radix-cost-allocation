@@ -59,6 +59,9 @@ jobs:
           tenant-id: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
           subscription-id: ${{matrix.target.subscription-id}}
 
+      - name: Log in to ACR
+        run: |
+          az acr login --name ${{matrix.target.acr-name}}
 #      - name: Get GitHub Public IP
 #        if: matrix.target.ref == github.ref
 #        id: github_public_ip
