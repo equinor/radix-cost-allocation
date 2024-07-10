@@ -2,8 +2,9 @@ name: Build & push
 on:
   push:
     branches:
-      - master
-      - release
+#      - master
+#      - release
+      - build-multiplatform
   workflow_dispatch:
 permissions:
   id-token: write
@@ -89,6 +90,7 @@ jobs:
           images: "${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${TAG}"
 
       - name: Build and push Docker image
+        if: matrix.target.ref == github.ref
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -122,9 +124,9 @@ jobs:
 #             --set CACHE="" \
 #             --set CACHE_TO_OPTIONS="--cache-to=type=registry,ref=${ACR_NAME}.azurecr.io/${IMAGE_NAME}:radix-cache-${GITHUB_REF_NAME},mode=max"
 #
-#      - name: Revoke GitHub IP on ACR
-#        if: ${{ steps.update_firewall.outcome == 'success' && !cancelled()}} # Always run this step even if previous step failed
-#        run: az acr network-rule remove
-#          --name ${{matrix.target.acr-name}}
-#          --subscription ${{matrix.target.subscription-id}}
-#          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
+      - name: Revoke GitHub IP on ACR
+        if: ${{ steps.update_firewall.outcome == 'success' && !cancelled()}} # Always run this step even if previous step failed
+        run: az acr network-rule remove
+          --name ${{matrix.target.acr-name}}
+          --subscription ${{matrix.target.subscription-id}}
+          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
