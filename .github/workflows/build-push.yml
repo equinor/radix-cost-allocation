@@ -83,7 +83,7 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ACR_NAME}}
+          registry: ${{ matrix.target.acr-name }}.azurecr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
