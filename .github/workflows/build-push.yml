@@ -88,7 +88,7 @@ jobs:
 #          username: ${{ github.actor }}
 #          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Echo environment variable for troubleshooting
+      - name: Echo environment variable1 for troubleshooting
         run: echo "The image tag is ${{ env.tag }}"
 
       - name: Set up Docker Buildx
@@ -98,9 +98,13 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: "${{ matrix.target.acr-name }}.azurecr.io/${{ github.repository }}:${{ env.tag }}"
+          images: "${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation:${{ env.tag }}"
 
-      - name: Echo environment variable for troubleshooting
+
+      - name: Echo environment variable2 for troubleshooting
+        run: echo "image name ${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation:${{ env.tag }}"
+
+      - name: Echo environment variable3 for troubleshooting
         run: echo "The metadata tags ${{ steps.meta.outputs.tags }}  and labels ${{ steps.meta.outputs.labels }}"
 
       - name: Build and push Docker image
