@@ -59,18 +59,18 @@ jobs:
           tenant-id: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
           subscription-id: ${{matrix.target.subscription-id}}
 
-      - name: Get GitHub Public IP
-        if: matrix.target.ref == github.ref
-        id: github_public_ip
-        run: echo "ipv4=$(curl 'https://ifconfig.me/ip')" >> $GITHUB_OUTPUT
-
-      - name: Add GitHub IP to ACR
-        if: matrix.target.ref == github.ref
-        id: update_firewall
-        run: az acr network-rule add
-          --name ${{matrix.target.acr-name}}
-          --subscription ${{matrix.target.subscription-id}}
-          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
+#      - name: Get GitHub Public IP
+#        if: matrix.target.ref == github.ref
+#        id: github_public_ip
+#        run: echo "ipv4=$(curl 'https://ifconfig.me/ip')" >> $GITHUB_OUTPUT
+#
+#      - name: Add GitHub IP to ACR
+#        if: matrix.target.ref == github.ref
+#        id: update_firewall
+#        run: az acr network-rule add
+#          --name ${{matrix.target.acr-name}}
+#          --subscription ${{matrix.target.subscription-id}}
+#          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
 
       - name: Generate image tag
         if: matrix.target.ref == github.ref
@@ -80,12 +80,12 @@ jobs:
           ts=$(date +%s)
           echo "tag=${GITHUB_REF_NAME}-${sha}-${ts}" >> $GITHUB_OUTPUT
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ matrix.target.acr-name }}.azurecr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Log in to the Container registry
+#        uses: docker/login-action@v3
+#        with:
+#          registry: ${{ matrix.target.acr-name }}.azurecr.io
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -131,9 +131,9 @@ jobs:
 #             --set CACHE="" \
 #             --set CACHE_TO_OPTIONS="--cache-to=type=registry,ref=${ACR_NAME}.azurecr.io/${IMAGE_NAME}:radix-cache-${GITHUB_REF_NAME},mode=max"
 #
-      - name: Revoke GitHub IP on ACR
-        if: ${{ steps.update_firewall.outcome == 'success' && !cancelled()}} # Always run this step even if previous step failed
-        run: az acr network-rule remove
-          --name ${{matrix.target.acr-name}}
-          --subscription ${{matrix.target.subscription-id}}
-          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
+#      - name: Revoke GitHub IP on ACR
+#        if: ${{ steps.update_firewall.outcome == 'success' && !cancelled()}} # Always run this step even if previous step failed
+#        run: az acr network-rule remove
+#          --name ${{matrix.target.acr-name}}
+#          --subscription ${{matrix.target.subscription-id}}
+#          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
