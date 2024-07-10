@@ -78,7 +78,8 @@ jobs:
         run: |
           sha=${GITHUB_SHA::8}
           ts=$(date +%s)
-          echo "tag=${GITHUB_REF_NAME}-${sha}-${ts}" >> $GITHUB_OUTPUT
+          echo "${GITHUB_REF_NAME}-${sha}-${ts}"
+          echo "${GITHUB_REF_NAME}-${sha}-${ts}" >> $GITHUB_OUTPUT
 
 #      - name: Log in to the Container registry
 #        uses: docker/login-action@v3
@@ -94,7 +95,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: "${{ matrix.target.acr-name }}.azurecr.io/${{ github.repository }}::${{ steps.tag.outputs.tag }}"
+          images: "${{ matrix.target.acr-name }}.azurecr.io/${{ github.repository }}::${{ steps.tag.outputs }}"
 
       - name: Build and push Docker image
         if: matrix.target.ref == github.ref
