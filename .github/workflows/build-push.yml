@@ -112,7 +112,7 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
-          tags: "radixdev.azurecr.io/equinor/radix-cost-allocation:build-multiplatform-40adfea0-1720619200"
+          tags: "radixdev.azurecr.io/radix-cost-allocation:build-multiplatform-40adfea0-1720619200"
 #          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 #
