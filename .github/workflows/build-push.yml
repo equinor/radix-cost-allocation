@@ -100,6 +100,9 @@ jobs:
         with:
           images: "${{ matrix.target.acr-name }}.azurecr.io/${{ github.repository }}:${{ env.tag }}"
 
+      - name: Echo environment variable for troubleshooting
+        run: echo "The metadata tags ${{ steps.meta.outputs.tags }}  and labels ${{ steps.meta.outputs.labels }}"
+
       - name: Build and push Docker image
         if: matrix.target.ref == github.ref
         uses: docker/build-push-action@v5
