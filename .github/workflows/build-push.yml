@@ -44,7 +44,7 @@ jobs:
       - uses: actions/checkout@v4
         if: matrix.target.ref == github.ref
 
-      - uses: azure/login@v1
+      - uses: azure/login@v2
         if: matrix.target.ref == github.ref
         with:
           client-id: ${{matrix.target.client-id}}
