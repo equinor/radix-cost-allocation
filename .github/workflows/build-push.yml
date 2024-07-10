@@ -72,32 +72,59 @@ jobs:
           ts=$(date +%s)
           echo "tag=${GITHUB_REF_NAME}-${sha}-${ts}" >> $GITHUB_OUTPUT
 
-      - name: Build image
-        if: matrix.target.ref == github.ref
-        env:
-          AZURE_SUBSCRIPTION_ID: ${{matrix.target.subscription-id}}
-          ACR_NAME: ${{matrix.target.acr-name}}
-          IMAGE_NAME: radix-cost-allocation
-          TAG: ${{steps.tag.outputs.tag}}
-        run: |
-          az acr task run \
-             --subscription ${AZURE_SUBSCRIPTION_ID} \
-             --name radix-image-builder-internal \
-             --registry ${ACR_NAME} \
-             --context ${GITHUB_WORKSPACE} \
-             --file ${GITHUB_WORKSPACE}/Dockerfile \
-             --set DOCKER_REGISTRY=${ACR_NAME} \
-             --set BRANCH=${GITHUB_REF_NAME} \
-             --set TAGS="--tag ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${TAG}" \
-             --set DOCKER_FILE_NAME=Dockerfile \
-             --set PUSH="--push" \
-             --set REPOSITORY_NAME=${IMAGE_NAME} \
-             --set CACHE="" \
-             --set CACHE_TO_OPTIONS="--cache-to=type=registry,ref=${ACR_NAME}.azurecr.io/${IMAGE_NAME}:radix-cache-${GITHUB_REF_NAME},mode=max"
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${ACR_NAME}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Revoke GitHub IP on ACR
-        if: ${{ steps.update_firewall.outcome == 'success' && !cancelled()}} # Always run this step even if previous step failed
-        run: az acr network-rule remove
-          --name ${{matrix.target.acr-name}}
-          --subscription ${{matrix.target.subscription-id}}
-          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: "${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${TAG}"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          platforms: |
+            linux/amd64
+            linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+#
+#      - name: Build image
+#        if: matrix.target.ref == github.ref
+#        env:
+#          AZURE_SUBSCRIPTION_ID: ${{matrix.target.subscription-id}}
+#          ACR_NAME: ${{matrix.target.acr-name}}
+#          IMAGE_NAME: radix-cost-allocation
+#          TAG: ${{steps.tag.outputs.tag}}
+#        run: |
+#          az acr task run \
+#             --subscription ${AZURE_SUBSCRIPTION_ID} \
+#             --name radix-image-builder-internal \
+#             --registry ${ACR_NAME} \
+#             --context ${GITHUB_WORKSPACE} \
+#             --file ${GITHUB_WORKSPACE}/Dockerfile \
+#             --set DOCKER_REGISTRY=${ACR_NAME} \
+#             --set BRANCH=${GITHUB_REF_NAME} \
+#             --set TAGS="--tag ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${TAG}" \
+#             --set DOCKER_FILE_NAME=Dockerfile \
+#             --set PUSH="--push" \
+#             --set REPOSITORY_NAME=${IMAGE_NAME} \
+#             --set CACHE="" \
+#             --set CACHE_TO_OPTIONS="--cache-to=type=registry,ref=${ACR_NAME}.azurecr.io/${IMAGE_NAME}:radix-cache-${GITHUB_REF_NAME},mode=max"
+#
+#      - name: Revoke GitHub IP on ACR
+#        if: ${{ steps.update_firewall.outcome == 'success' && !cancelled()}} # Always run this step even if previous step failed
+#        run: az acr network-rule remove
+#          --name ${{matrix.target.acr-name}}
+#          --subscription ${{matrix.target.subscription-id}}
+#          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
