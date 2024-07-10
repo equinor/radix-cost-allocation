@@ -94,7 +94,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: "${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${TAG}"
+          images: "${{ matrix.target.acr-name }}.azurecr.io/${{ github.repository }}:${{ steps.tag.outputs.tag }}"
 
       - name: Build and push Docker image
         if: matrix.target.ref == github.ref
