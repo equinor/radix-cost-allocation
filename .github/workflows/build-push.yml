@@ -67,40 +67,40 @@ jobs:
 #            az account show
 
 
-#      - name: Get GitHub Public IP
-#        if: matrix.target.ref == github.ref
-#        id: github_public_ip
-#        run: echo "ipv4=$(curl 'https://ifconfig.me/ip')" >> $GITHUB_OUTPUT
-#
-#      - name: Add GitHub IP to ACR
-#        if: matrix.target.ref == github.ref
-#        id: update_firewall
-#        run: az acr network-rule add
-#          --name ${{matrix.target.acr-name}}
-#          --subscription ${{matrix.target.subscription-id}}
-#          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
-#
-#      - name: Wait for Specific IP in ACR Network Rules
-#        run: |
-#          MAX_ATTEMPTS=10
-#          ATTEMPT=0
-#          TARGET_IP="${{ steps.github_public_ip.outputs.ipv4 }}"
-#          echo "Waiting for IP $TARGET_IP to be allowed in ACR network rules..."
-#          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-#            NETWORK_RULES=$(az acr network-rule list --name ${{matrix.target.acr-name}} --subscription ${{ matrix.target.subscription-id }}   --query "ipRules[]|[?contains(ipAddressOrRange, '$TARGET_IP')]"  --output tsv)
-#            if [ -n "$NETWORK_RULES" ]; then
-#              echo "IP $TARGET_IP is now allowed."
-#              break
-#            else
-#              echo "IP $TARGET_IP is not yet allowed. Attempt $((ATTEMPT+1)) of $MAX_ATTEMPTS. Retrying in 10 seconds..."
-#              ATTEMPT=$((ATTEMPT+1))
-#              sleep 5
-#            fi
-#            done
-#            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-#              echo "IP $TARGET_IP was not allowed after $MAX_ATTEMPTS attempts. Exiting."
-#              exit 1
-#            fi
+      - name: Get GitHub Public IP
+        if: matrix.target.ref == github.ref
+        id: github_public_ip
+        run: echo "ipv4=$(curl 'https://ifconfig.me/ip')" >> $GITHUB_OUTPUT
+
+      - name: Add GitHub IP to ACR
+        if: matrix.target.ref == github.ref
+        id: update_firewall
+        run: az acr network-rule add
+          --name ${{matrix.target.acr-name}}
+          --subscription ${{matrix.target.subscription-id}}
+          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
+
+      - name: Wait for Specific IP in ACR Network Rules
+        run: |
+          MAX_ATTEMPTS=10
+          ATTEMPT=0
+          TARGET_IP="${{ steps.github_public_ip.outputs.ipv4 }}"
+          echo "Waiting for IP $TARGET_IP to be allowed in ACR network rules..."
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            NETWORK_RULES=$(az acr network-rule list --name ${{matrix.target.acr-name}} --subscription ${{ matrix.target.subscription-id }}   --query "ipRules[]|[?contains(ipAddressOrRange, '$TARGET_IP')]"  --output tsv)
+            if [ -n "$NETWORK_RULES" ]; then
+              echo "IP $TARGET_IP is now allowed."
+              break
+            else
+              echo "IP $TARGET_IP is not yet allowed. Attempt $((ATTEMPT+1)) of $MAX_ATTEMPTS. Retrying in 10 seconds..."
+              ATTEMPT=$((ATTEMPT+1))
+              sleep 5
+            fi
+            done
+            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+              echo "IP $TARGET_IP was not allowed after $MAX_ATTEMPTS attempts. Exiting."
+              exit 1
+            fi
 
 #      - name: Log in to ACR
 #        run: |
