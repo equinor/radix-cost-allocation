@@ -141,8 +141,16 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.login-server }}
-          username: "00000000-0000-0000-0000-000000000000"
-          password: ${{ env.access_token }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: Log in to ACR
+#        if: matrix.target.ref == github.ref
+#        uses: docker/login-action@v3
+#        with:
+#          registry: ${{ env.login-server }}
+#          username: "00000000-0000-0000-0000-000000000000"
+#          password: ${{ env.access_token }}
 
       - name: Echo environment variable1 for troubleshooting
         run: echo "The image tag is ${{ env.tag }}"
