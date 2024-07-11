@@ -58,22 +58,22 @@ jobs:
           client-id: ${{matrix.target.client-id}}
           tenant-id: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
           subscription-id: ${{matrix.target.subscription-id}}
-
-      - name: Azure CLI script
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az account show
+#
+#      - name: Azure CLI script
+#        uses: azure/cli@v2
+#        with:
+#          azcliversion: latest
+#          inlineScript: |
+#            az account show
 
 #      - name: Log in to ACR
 #        run: |
 #          az acr login --name ${{matrix.target.acr-name}}
-#      - name: Get GitHub Public IP
-#        if: matrix.target.ref == github.ref
-#        id: github_public_ip
-#        run: echo "ipv4=$(curl 'https://ifconfig.me/ip')" >> $GITHUB_OUTPUT
-#
+      - name: Get GitHub Public IP
+        if: matrix.target.ref == github.ref
+        id: github_public_ip
+        run: echo "ipv4=$(curl 'https://ifconfig.me/ip')" >> $GITHUB_OUTPUT
+
       - name: Add GitHub IP to ACR
         if: matrix.target.ref == github.ref
         id: update_firewall
