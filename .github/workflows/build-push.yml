@@ -78,6 +78,7 @@ jobs:
         run: az acr network-rule add
           --name ${{matrix.target.acr-name}}
           --subscription ${{matrix.target.subscription-id}}
+          --resource-group common
           --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
 
       - name: Wait for Specific IP in ACR Network Rules
