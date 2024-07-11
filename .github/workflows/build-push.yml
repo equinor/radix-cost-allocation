@@ -74,13 +74,13 @@ jobs:
 #        id: github_public_ip
 #        run: echo "ipv4=$(curl 'https://ifconfig.me/ip')" >> $GITHUB_OUTPUT
 #
-#      - name: Add GitHub IP to ACR
-#        if: matrix.target.ref == github.ref
-#        id: update_firewall
-#        run: az acr network-rule add
-#          --name ${{matrix.target.acr-name}}
-#          --subscription ${{matrix.target.subscription-id}}
-#          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
+      - name: Add GitHub IP to ACR
+        if: matrix.target.ref == github.ref
+        id: update_firewall
+        run: az acr network-rule add
+          --name ${{matrix.target.acr-name}}
+          --subscription ${{matrix.target.subscription-id}}
+          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
 
       - name: Generate image tag
         if: matrix.target.ref == github.ref
