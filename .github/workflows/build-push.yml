@@ -80,6 +80,9 @@ jobs:
           --subscription ${{matrix.target.subscription-id}}
           --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
 
+      - name: Lets sleep for 30 seconds for FW rule to complete
+        run: sleep 30s
+
 #      - name: Log in to ACR
 #        run: |
 #          az acr login --name ${{matrix.target.acr-name}}
@@ -176,9 +179,9 @@ jobs:
 #             --set CACHE="" \
 #             --set CACHE_TO_OPTIONS="--cache-to=type=registry,ref=${ACR_NAME}.azurecr.io/${IMAGE_NAME}:radix-cache-${GITHUB_REF_NAME},mode=max"
 #
-#      - name: Revoke GitHub IP on ACR
-#        if: ${{ steps.update_firewall.outcome == 'success' && !cancelled()}} # Always run this step even if previous step failed
-#        run: az acr network-rule remove
-#          --name ${{matrix.target.acr-name}}
-#          --subscription ${{matrix.target.subscription-id}}
-#          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
+      - name: Revoke GitHub IP on ACR
+        if: ${{ steps.update_firewall.outcome == 'success' && !cancelled()}} # Always run this step even if previous step failed
+        run: az acr network-rule remove
+          --name ${{matrix.target.acr-name}}
+          --subscription ${{matrix.target.subscription-id}}
+          --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
