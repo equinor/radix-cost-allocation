@@ -66,9 +66,7 @@ jobs:
 #          inlineScript: |
 #            az account show
 
-#      - name: Log in to ACR
-#        run: |
-#          az acr login --name ${{matrix.target.acr-name}}
+
       - name: Get GitHub Public IP
         if: matrix.target.ref == github.ref
         id: github_public_ip
@@ -81,6 +79,10 @@ jobs:
           --name ${{matrix.target.acr-name}}
           --subscription ${{matrix.target.subscription-id}}
           --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
+
+      - name: Log in to ACR
+        run: |
+          az acr login --name ${{matrix.target.acr-name}}      
 
       - name: Generate image tag
         if: matrix.target.ref == github.ref
