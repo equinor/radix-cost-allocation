@@ -27,7 +27,7 @@ jobs:
           - name: "dev2"
             ref: "refs/heads/build-multiplatform"
             acr-name: "radixdev"
-            client-id: "7ef841f8-a263-45ea-8993-683cc6817ae2"
+            client-id: "64b117a6-dc1c-4697-a000-ef251333bdc4"
             subscription-id: "16ede44b-1f74-40a5-b428-46cca9a5741b"
 #
 #          - name: "playground"
