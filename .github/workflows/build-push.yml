@@ -97,6 +97,24 @@ jobs:
 #          registry: ${{ matrix.target.acr-name }}.azurecr.io
 #          username: ${{ github.actor }}
 #          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get ACR Login Server
+        id: get-acr-login-server
+        run: |
+          echo "login-server=$(az acr show --name ${{ matrix.target.acr-name }} --query loginServer --output tsv)" >> $GITHUB_ENV
+
+      - name: Get ACR Access Token
+        id: get-acr-token
+        run: |
+          echo "Getting ACR access token"
+          ACR_ACCESS_TOKEN=$(az acr login --name ${{ matrix.target.acr-name }} --expose-token --output tsv --query accessToken)
+          echo "access_token=${ACR_ACCESS_TOKEN}" >> $GITHUB_ENV
+
+      - name: Log in to ACR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.login-server }}
+          username: 00000000-0000-0000-0000-000000000000
+          password: ${{ env.access_token }}
 
       - name: Echo environment variable1 for troubleshooting
         run: echo "The image tag is ${{ env.tag }}"
@@ -126,7 +144,7 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
-          tags: "radixdev.azurecr.io/radix-cost-allocation:build-multiplatform-40adfea0-1720619200"
+          tags: "${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation:${{ env.tag }}"
 #          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 #
