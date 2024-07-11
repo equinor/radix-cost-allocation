@@ -92,7 +92,7 @@ jobs:
           echo "${GITHUB_REF_NAME}-${sha}-${ts}"
           echo "tag=${GITHUB_REF_NAME}-${sha}-${ts}" >> $GITHUB_ENV
 
-      - name: Log in to the Container registry
+      - name: Log in to the Container registry2
         uses: docker/login-action@v3
         with:
           registry: ${{ matrix.target.acr-name }}.azurecr.io
