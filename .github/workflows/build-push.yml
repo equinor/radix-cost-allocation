@@ -126,8 +126,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: "${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation:${{ env.tag }}"
-
+          images: "${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation"
 
       - name: Echo environment variable2 for troubleshooting
         run: echo "image name ${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation:${{ env.tag }}"
