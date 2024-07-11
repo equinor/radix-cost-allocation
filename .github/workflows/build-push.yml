@@ -58,7 +58,6 @@ jobs:
           client-id: ${{matrix.target.client-id}}
           tenant-id: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
           subscription-id: ${{matrix.target.subscription-id}}
-          enableOIDC: true
 
       - name: Azure CLI script
         uses: azure/cli@v2
