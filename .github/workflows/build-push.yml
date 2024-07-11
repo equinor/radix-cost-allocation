@@ -17,36 +17,36 @@ jobs:
       fail-fast: false
       matrix:
         target:
-          - name: "dev"
-            ref: "refs/heads/master"
-            acr-name: "radixdev"
-            client-id: "64b117a6-dc1c-4697-a000-ef251333bdc4"
-            subscription-id: "16ede44b-1f74-40a5-b428-46cca9a5741b"
-
+#          - name: "dev"
+#            ref: "refs/heads/master"
+#            acr-name: "radixdev"
+#            client-id: "64b117a6-dc1c-4697-a000-ef251333bdc4"
+#            subscription-id: "16ede44b-1f74-40a5-b428-46cca9a5741b"
+#
 
           - name: "dev2"
             ref: "refs/heads/build-multiplatform"
             acr-name: "radixdev"
             client-id: "64b117a6-dc1c-4697-a000-ef251333bdc4"
             subscription-id: "16ede44b-1f74-40a5-b428-46cca9a5741b"
-
-          - name: "playground"
-            ref: "refs/heads/release"
-            acr-name: "radixdev"
-            client-id: "4b607a0a-b4f7-4918-8586-0f1ee8a69d5b"
-            subscription-id: "16ede44b-1f74-40a5-b428-46cca9a5741b"
-
-          - name: "platform"
-            ref: "refs/heads/release"
-            acr-name: "radixprod"
-            client-id: "e7b711a6-8b96-4d19-b9d4-35e260af7e65"
-            subscription-id: "ded7ca41-37c8-4085-862f-b11d21ab341a"
-
-          - name: "c2"
-            ref: "refs/heads/release"
-            acr-name: "radixc2prod"
-            client-id: "03efd84e-6142-48e3-97cd-6d49e6aa3f93"
-            subscription-id: "ded7ca41-37c8-4085-862f-b11d21ab341a"
+#
+#          - name: "playground"
+#            ref: "refs/heads/release"
+#            acr-name: "radixdev"
+#            client-id: "4b607a0a-b4f7-4918-8586-0f1ee8a69d5b"
+#            subscription-id: "16ede44b-1f74-40a5-b428-46cca9a5741b"
+#
+#          - name: "platform"
+#            ref: "refs/heads/release"
+#            acr-name: "radixprod"
+#            client-id: "e7b711a6-8b96-4d19-b9d4-35e260af7e65"
+#            subscription-id: "ded7ca41-37c8-4085-862f-b11d21ab341a"
+#
+#          - name: "c2"
+#            ref: "refs/heads/release"
+#            acr-name: "radixc2prod"
+#            client-id: "03efd84e-6142-48e3-97cd-6d49e6aa3f93"
+#            subscription-id: "ded7ca41-37c8-4085-862f-b11d21ab341a"
 
     steps:
       - uses: actions/checkout@v4
@@ -97,24 +97,25 @@ jobs:
 #          registry: ${{ matrix.target.acr-name }}.azurecr.io
 #          username: ${{ github.actor }}
 #          password: ${{ secrets.GITHUB_TOKEN }}
-#      - name: Get ACR Login Server
-#        id: get-acr-login-server
-#        run: |
-#          echo "login-server=$(az acr show --name ${{ matrix.target.acr-name }} --query loginServer --output tsv)" >> $GITHUB_ENV
-#
-#      - name: Get ACR Access Token
-#        id: get-acr-token
-#        run: |
-#          echo "Getting ACR access token"
-#          ACR_ACCESS_TOKEN=$(az acr login --name ${{ matrix.target.acr-name }} --expose-token --output tsv --query accessToken)
-#          echo "access_token=${ACR_ACCESS_TOKEN}" >> $GITHUB_ENV
+      - name: Get ACR Login Server
+        id: get-acr-login-server
+        run: |
+          echo "login-server=$(az acr show --name ${{ matrix.target.acr-name }} --query loginServer --output tsv)" >> $GITHUB_ENV
 
-#      - name: Log in to ACR
-#        uses: docker/login-action@v3
-#        with:
-#          registry: ${{ env.login-server }}
-#          username: 00000000-0000-0000-0000-000000000000
-#          password: ${{ env.access_token }}
+      - name: Get ACR Access Token
+        id: get-acr-token
+        run: |
+          echo "Getting ACR access token"
+          ACR_ACCESS_TOKEN=$(az acr login --name ${{ matrix.target.acr-name }} --expose-token --output tsv --query accessToken)
+          echo "::add-mask::$access_token"
+          echo "access_token=$access_token" >> $GITHUB_ENV
+
+      - name: Log in to ACR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.login-server }}
+          username: 00000000-0000-0000-0000-000000000000
+          password: ${{ env.access_token }}
 
       - name: Echo environment variable1 for troubleshooting
         run: echo "The image tag is ${{ env.tag }}"
