@@ -98,19 +98,22 @@ jobs:
 #          username: ${{ github.actor }}
 #          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Get ACR Login Server
+        if: matrix.target.ref == github.ref
         id: get-acr-login-server
         run: |
           echo "login-server=$(az acr show --name ${{ matrix.target.acr-name }} --query loginServer --output tsv)" >> $GITHUB_ENV
 
       - name: Get ACR Access Token
+        if: matrix.target.ref == github.ref
         id: get-acr-token
         run: |
           echo "Getting ACR access token"
-          ACR_ACCESS_TOKEN=$(az acr login --name ${{ matrix.target.acr-name }} --expose-token --output tsv --query accessToken)
+          access_token=$(az acr login --name ${{ matrix.target.acr-name }} --expose-token --output tsv --query accessToken)
           echo "::add-mask::$access_token"
           echo "access_token=$access_token" >> $GITHUB_ENV
 
       - name: Log in to ACR
+        if: matrix.target.ref == github.ref
         uses: docker/login-action@v3
         with:
           registry: ${{ env.login-server }}
