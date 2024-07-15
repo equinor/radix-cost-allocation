@@ -129,8 +129,8 @@ jobs:
       if: matrix.target.ref == github.ref
       id: build-image-name
       run: |
-        image_name=${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation
-        echo "image_name=$image_name" >> $GITHUB_OUTPUTS
+        image=${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation
+        echo "image=$image" >> $GITHUB_OUTPUTS
 
     - name: Build an image tag
       if: matrix.target.ref == github.ref
@@ -146,7 +146,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ steps.build-image-name.outputs.image_name }}
+        images: ${{ steps.build-image-name.outputs.image }}
 
     - name: Build and push Docker image
       if: matrix.target.ref == github.ref
@@ -157,7 +157,7 @@ jobs:
         platforms: |
           linux/amd64
           linux/arm64
-        tags: "${{ steps.build-image-name.outputs.image_name }}:${{ steps.build-tags.outputs.tag }}"
+        tags: "${{ steps.build-image-name.outputs.image }}:${{ steps.build-tags.outputs.tag }}"
         labels: ${{ steps.meta.outputs.labels }}
 
     - name: Revoke GitHub IP on ACR
