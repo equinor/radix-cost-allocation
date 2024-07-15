@@ -130,7 +130,9 @@ jobs:
     - name: Build an image name
       if: matrix.target.ref == github.ref
       id: build-image-name
-      run: echo "image_name=${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation" >> $GITHUB_OUTPUTS
+      run: |
+        image_name=${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation
+        echo "image_name=$image_name" >> $GITHUB_OUTPUTS
 
     - name: Build an image tag
       if: matrix.target.ref == github.ref
