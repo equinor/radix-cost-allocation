@@ -102,7 +102,8 @@ jobs:
       if: matrix.target.ref == github.ref
       id: get-acr-login-server
       run: |
-        echo "login_server=$(az acr show --name ${{ matrix.target.acr-name }} --query loginServer --output tsv)" >> $GITHUB_ENV
+        echo "::add-mask::$login_server"
+        echo "login_server=$(az acr show --name ${{ matrix.target.acr-name }} --query loginServer --output tsv)" >> $GITHUB_OUTPUT
 
     - name: Get ACR Access Token
       if: matrix.target.ref == github.ref
@@ -111,22 +112,15 @@ jobs:
         echo "Getting ACR access token"
         access_token=$(az acr login --name ${{ matrix.target.acr-name }} --expose-token --output tsv --query accessToken)
         echo "::add-mask::$access_token"
-        echo "access_token=$access_token" >> $GITHUB_ENV
+        echo "access_token=$access_token" >> $GITHUB_OUTPUT
 
     - name: Log in to ACR
       if: matrix.target.ref == github.ref
       uses: docker/login-action@v3
       with:
-        registry: ${{ env.login_server }}
+        registry: ${{ steps.get-acr-login-server.outputs.login_server }}
         username: "00000000-0000-0000-0000-000000000000"
-        password: ${{ env.access_token }}
-
-    - name: Unset env-vars
-      if: matrix.target.ref == github.ref
-      id: unset-env-vars
-      run: |
-        echo "login_server=" >> $GITHUB_ENV
-        echo "access_token=" >> $GITHUB_ENV
+        password: ${{ steps.get-acr-token.outputs.access_token }}
 
     - name: Set up Docker Buildx
       if: matrix.target.ref == github.ref
