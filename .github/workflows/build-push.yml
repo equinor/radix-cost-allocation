@@ -2,8 +2,8 @@ name: Build & push
 on:
   push:
     branches:
-#      - master
-#      - release
+      - master
+      - release
       - build-multiplatform
   workflow_dispatch:
 permissions:
@@ -71,11 +71,13 @@ jobs:
         --subscription ${{matrix.target.subscription-id}}
         --ip-address ${{ steps.github_public_ip.outputs.ipv4 }}
 
-    - name: Wait 2 minutes for the network rule to take effect
+    - name: Wait for 2 minutes while the network rule to take effect
+      if: matrix.target.ref == github.ref
       run: |
         sleep 120
 
     - name: Wait for Specific IP in ACR Network Rules
+      if: matrix.target.ref == github.ref
       run: |
         MAX_ATTEMPTS=10
         ATTEMPT=0
@@ -87,7 +89,7 @@ jobs:
             echo "IP $TARGET_IP is allowed."
             break
           fi
-          echo "Attempt $((ATTEMPT+1)) of $MAX_ATTEMPTS. Retrying in 15 seconds..."
+          echo "Attempt $((ATTEMPT+1)) of $MAX_ATTEMPTS. Retrying in 10 seconds..."
           ATTEMPT=$((ATTEMPT+1))
           sleep 10
         done
@@ -129,9 +131,11 @@ jobs:
         echo "tag=${GITHUB_REF_NAME}-${sha}-${ts}" >> $GITHUB_ENV
 
     - name: Set up Docker Buildx
+      if: matrix.target.ref == github.ref
       uses: docker/setup-buildx-action@v3
 
     - name: Extract metadata (tags, labels) for Docker
+      if: matrix.target.ref == github.ref
       id: meta
       uses: docker/metadata-action@v5
       with:
@@ -150,7 +154,7 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
 
     - name: Revoke GitHub IP on ACR
-      if: ${{ steps.update_firewall.outcome == 'success' && !cancelled()}} # Always run this step even if previous step failed
+      if: ${{ matrix.target.ref == github.ref && steps.update_firewall.outcome == 'success' && !cancelled()}} # Always run this step even if previous step failed
       run: az acr network-rule remove
         --name ${{matrix.target.acr-name}}
         --subscription ${{matrix.target.subscription-id}}
