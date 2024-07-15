@@ -129,8 +129,7 @@ jobs:
       if: matrix.target.ref == github.ref
       id: build-image-name
       run: |
-        image=${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation
-        echo "image=$image" >> $GITHUB_OUTPUTS
+        echo "image=${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation" >> $GITHUB_OUTPUT
 
     - name: Build an image tag
       if: matrix.target.ref == github.ref
@@ -138,8 +137,7 @@ jobs:
       run: |
         sha=${GITHUB_SHA::8}
         ts=$(date +%s)
-        echo "${GITHUB_REF_NAME}-${sha}-${ts}"
-        echo "tag=${GITHUB_REF_NAME}-${sha}-${ts}" >> $GITHUB_OUTPUTS
+        echo "tag=${GITHUB_REF_NAME}-${sha}-${ts}" >> $GITHUB_OUTPUT
 
     - name: Extract labels from metadata for Docker
       if: matrix.target.ref == github.ref
