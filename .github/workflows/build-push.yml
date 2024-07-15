@@ -102,8 +102,9 @@ jobs:
       if: matrix.target.ref == github.ref
       id: get-acr-login-server
       run: |
+        login_server=$(az acr show --name ${{ matrix.target.acr-name }} --query loginServer --output tsv)
         echo "::add-mask::$login_server"
-        echo "login_server=$(az acr show --name ${{ matrix.target.acr-name }} --query loginServer --output tsv)" >> $GITHUB_OUTPUT
+        echo "login_server=$login_server" >> $GITHUB_OUTPUT
 
     - name: Get ACR Access Token
       if: matrix.target.ref == github.ref
@@ -126,21 +127,26 @@ jobs:
       if: matrix.target.ref == github.ref
       uses: docker/setup-buildx-action@v3
 
+    - name: Build an image name
+      if: matrix.target.ref == github.ref
+      id: build-image-name
+      run: echo "image_name=${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation" >> $GITHUB_OUTPUTS
+
+    - name: Build an image tag
+      if: matrix.target.ref == github.ref
+      id: build-tag
+      run: |
+        sha=${GITHUB_SHA::8}
+        ts=$(date +%s)
+        echo "${GITHUB_REF_NAME}-${sha}-${ts}"
+        echo "tag=${GITHUB_REF_NAME}-${sha}-${ts}" >> $GITHUB_OUTPUTS
+
     - name: Extract labels from metadata for Docker
       if: matrix.target.ref == github.ref
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: "${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation"
-
-    - name: Generate an image tag
-      if: matrix.target.ref == github.ref
-      id: tag
-      run: |
-        sha=${GITHUB_SHA::8}
-        ts=$(date +%s)
-        echo "${GITHUB_REF_NAME}-${sha}-${ts}"
-        echo "tag=${GITHUB_REF_NAME}-${sha}-${ts}" >> $GITHUB_ENV
+        images: ${{ steps.build-image-name.outputs.image_name }}
 
     - name: Build and push Docker image
       if: matrix.target.ref == github.ref
@@ -151,7 +157,7 @@ jobs:
         platforms: |
           linux/amd64
           linux/arm64
-        tags: "${{ matrix.target.acr-name }}.azurecr.io/radix-cost-allocation:${{ env.tag }}"
+        tags: "${{ steps.build-image-name.outputs.image_name }}:${{ steps.build-tags.outputs.tag }}"
         labels: ${{ steps.meta.outputs.labels }}
 
     - name: Revoke GitHub IP on ACR
