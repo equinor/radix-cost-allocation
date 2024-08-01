@@ -1,7 +1,10 @@
-FROM docker.io/golang:1.22-alpine3.20 AS builder
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.22-alpine3.20 AS builder
+
+ARG TARGETARCH
 
 ENV CGO_ENABLED=0 \
-    GOOS=linux
+    GOOS=linux \
+    GOARCH=$TARGETARCH
 
 WORKDIR /src
 
