@@ -3,12 +3,19 @@ VERSION=latest
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 IMAGE_NAME=$(DOCKER_REGISTRY)/radix-cost-allocation:$(BRANCH)-$(VERSION)
 
+.PHONY: build
 build:
 	docker build -t $(IMAGE_NAME) .
 
-push:
+.PHONY: push
+push: build
 	az acr login -n $(DOCKER_REGISTRY)
 	docker push $(IMAGE_NAME)
+
+.PHONY: pushmultiplatform
+pushmultiplatform:
+	az acr login -n $(DOCKER_REGISTRY)
+	docker buildx build --platform=linux/amd64,linux/arm64 -t $(IMAGE_NAME) --push .
 
 .PHONY: test
 test:
