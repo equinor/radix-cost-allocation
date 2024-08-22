@@ -1,4 +1,4 @@
-![build workflow](https://github.com/equinor/radix-cost-allocation/actions/workflows/build-push.yml/badge.svg) 
+![build workflow](https://github.com/equinor/radix-cost-allocation/actions/workflows/build-push.yml/badge.svg) [![SCM Compliance](https://scm-compliance-api.radix.equinor.com/repos/equinor/radix-cost-allocation/badge)](https://developer.equinor.com/governance/scm-policy/)
 
 # RADIX-COST-ALLOCATION
 
