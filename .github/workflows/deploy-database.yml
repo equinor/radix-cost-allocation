@@ -67,6 +67,7 @@ jobs:
         with:
           connection-string: ${{env.connection}}
           path: './azure-infrastructure/createSchema.sql'
+          arguments: '-v RADIX_ZONE=${{matrix.target.name}}'
 
       - uses: azure/sql-action@v2.3
         if: matrix.target.ref == github.ref

@@ -1,4 +1,4 @@
-![build workflow](https://github.com/equinor/radix-cost-allocation/actions/workflows/build-push.yml/badge.svg) 
+![build workflow](https://github.com/equinor/radix-cost-allocation/actions/workflows/build-push.yml/badge.svg) [![SCM Compliance](https://scm-compliance-api.radix.equinor.com/repos/equinor/radix-cost-allocation/badge)](https://developer.equinor.com/governance/scm-policy/)
 
 # RADIX-COST-ALLOCATION
 
@@ -11,12 +11,6 @@ We use arm template and github action to create azure resources
 # Deploy SQL scripts
 The SQL Server database and objects are deployed on push to master and release branch.
 All SQL scripts on azure-infrastructure must be idempotent.
-
-Note: The Github Workflow is not allowed to create new external users, so you must run it locally. Se more here: https://github.com/equinor/radix-vulnerability-scanner/issues/54
-Workaround:
-```sh
-sqlcmd -S ${SERVER_NAME}.database.windows.net -d ${DATABASE_NAME} -G --variables RADIX_ZONE=${RADIX_ZONE} -i createSchema.sql
-```
 
 ## Deploy to cluster
 
