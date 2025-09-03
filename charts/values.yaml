@@ -5,12 +5,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: radixdev.azurecr.io/radix-cost-allocation
-  tag: latest
+  repository: ghcr.io/equinor/radix/cost-allocation
+  tag: ""
   pullPolicy: Always
-
-secret:
-  name: sql-credential
 
 # Annotations to add to the Deployment
 deploymentAnnotations: {}
@@ -60,7 +57,7 @@ podSecurityContext:
 
 securityContext:
   privileged: false
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
 
 # Additional volumes to add to the radix-cost-allocation pod.
