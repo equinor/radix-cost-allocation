@@ -5,6 +5,7 @@ metadata:
   annotations:
     github.com/project-slug: equinor/radix-cost-allocation
 spec:
-  type: other
-  lifecycle: unknown
+  type: service
+  lifecycle: production
   owner: omnia-radix
+  system: Radix
