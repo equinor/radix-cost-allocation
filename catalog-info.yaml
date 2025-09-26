@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: radix-cost-allocation
+  annotations:
+    github.com/project-slug: equinor/radix-cost-allocation
+spec:
+  type: service
+  lifecycle: production
+  owner: omnia-radix
+  system: Radix
