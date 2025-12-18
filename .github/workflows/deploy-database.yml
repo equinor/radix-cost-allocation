@@ -1,15 +1,23 @@
 name: Deploy Database
 
 on:
-  push:
-    branches: [master, release]
   workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        description: Which DB to target
+        required: true
+        options:
+          - dev
+          - playground
+          - platform
+          - c2
+          - c3
 
 permissions:
   id-token: write
 
 jobs:
-
   deploy:
     runs-on: ubuntu-latest
     strategy:
@@ -36,6 +44,11 @@ jobs:
             client-id: "820a9ea1-9d2f-4056-9271-d2865cc70fb6"
             server: "sql-radix-cost-allocation-c2.database.windows.net"
 
+          - name: "c3"
+            ref: "refs/heads/release"
+            client-id: "a656974e-8e7a-479a-89f1-bbe9b34b15ff"
+            server: "sql-radix-cost-allocation-c3.database.windows.net"
+
     env:
       connection: >-
         Server=${{matrix.target.server}};
@@ -47,42 +60,42 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        if: matrix.target.ref == github.ref
+        if: github.event.inputs.target == matrix.target.name
 
       - uses: azure/login@v2
-        if: matrix.target.ref == github.ref
+        if: github.event.inputs.target == matrix.target.name
         with:
           client-id: ${{matrix.target.client-id}}
           tenant-id: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
           allow-no-subscriptions: true
 
       - uses: azure/sql-action@v2.3
-        if: matrix.target.ref == github.ref
+        if: github.event.inputs.target == matrix.target.name
         with:
           connection-string: ${{env.connection}}
-          path: './azure-infrastructure/preDeployScript.sql'
+          path: "./azure-infrastructure/preDeployScript.sql"
 
       - uses: azure/sql-action@v2.3
-        if: matrix.target.ref == github.ref
+        if: github.event.inputs.target == matrix.target.name
         with:
           connection-string: ${{env.connection}}
-          path: './azure-infrastructure/createSchema.sql'
-          arguments: '-v RADIX_ZONE=${{matrix.target.name}}'
+          path: "./azure-infrastructure/createSchema.sql"
+          arguments: "-v RADIX_ZONE=${{matrix.target.name}}"
 
       - uses: azure/sql-action@v2.3
-        if: matrix.target.ref == github.ref
+        if: github.event.inputs.target == matrix.target.name
         with:
           connection-string: ${{env.connection}}
-          path: './azure-infrastructure/createTables.sql'
+          path: "./azure-infrastructure/createTables.sql"
 
       - uses: azure/sql-action@v2.3
-        if: matrix.target.ref == github.ref
+        if: github.event.inputs.target == matrix.target.name
         with:
           connection-string: ${{env.connection}}
-          path: './azure-infrastructure/createTypes.sql'
+          path: "./azure-infrastructure/createTypes.sql"
 
       - uses: azure/sql-action@v2.3
-        if: matrix.target.ref == github.ref
+        if: github.event.inputs.target == matrix.target.name
         with:
           connection-string: ${{env.connection}}
-          path: './azure-infrastructure/createProcedures.sql'
+          path: "./azure-infrastructure/createProcedures.sql"
