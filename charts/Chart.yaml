@@ -2,8 +2,8 @@ apiVersion: v2
 name: radix-cost-allocation
 description: Pull cost data from containers and push to sql server
 kubeVersion: ">=1.24.0"
-appVersion: 1.3.0 # x-patch-semver
-version: 1.3.0 # x-patch-semver
+appVersion: 1.4.0 # x-patch-semver
+version: 1.4.0 # x-patch-semver
 sources:
   - https://github.com/equinor/radix-cost-allocation
 maintainers:
