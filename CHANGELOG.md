@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.4.0](https://github.com/equinor/radix-cost-allocation/compare/v1.3.0..v1.4.0) - 2025-12-18
+## [1.4.0](https://github.com/equinor/radix-cost-allocation/compare/v1.3.0..v1.4.0) - 2025-12-23
 
 ### 🚀 Features
 
