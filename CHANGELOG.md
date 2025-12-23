@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0](https://github.com/equinor/radix-cost-allocation/compare/v1.3.0..v1.4.0) - 2025-12-18
+
+### 🚀 Features
+
+- Migrate c3 (#163) - ([2b8c735](https://github.com/equinor/radix-cost-allocation/commit/2b8c735cafb81bd8f304799535ecd96da812326b)) by @Richard87 in [#163](https://github.com/equinor/radix-cost-allocation/pull/163)
+
+
+### 🐛 Bug Fixes
+
+- Rename LICENCE to LICENSE (#159) - ([09ec4df](https://github.com/equinor/radix-cost-allocation/commit/09ec4df544d101b32b857dda49a541c4d79886b9)) by @emirgens in [#159](https://github.com/equinor/radix-cost-allocation/pull/159)
+
+
+### ⚙️ Miscellaneous Tasks
+
+- Set workflow permissions - ([1d28884](https://github.com/equinor/radix-cost-allocation/commit/1d28884de4ae6f5817b232194eeee012fff3eb69)) by @emirgens in [#156](https://github.com/equinor/radix-cost-allocation/pull/156)
+
+- Add catalog-info.yaml config file (#157) - ([e286a35](https://github.com/equinor/radix-cost-allocation/commit/e286a3517f8d900ffa8b713fdc4090643d50f745)) by @emirgens in [#157](https://github.com/equinor/radix-cost-allocation/pull/157)
+
+
 ## [1.3.0](https://github.com/equinor/radix-cost-allocation/compare/v1.2.5..v1.3.0) - 2025-09-03
 
 ### 🚀 Features
@@ -9,6 +28,9 @@ All notable changes to this project will be documented in this file.
 - *(ci)* Configure new release workflows - ([379c2b0](https://github.com/equinor/radix-cost-allocation/commit/379c2b041b6439696c3be8f5ead470e763b99172)) by @nilsgstrabo in [#152](https://github.com/equinor/radix-cost-allocation/pull/152)
 
 
+## New Contributors ❤️
+
+* @github-actions[bot] made their first contribution in [#154](https://github.com/equinor/radix-cost-allocation/pull/154)
 ## [1.2.5](https://github.com/equinor/radix-cost-allocation/compare/v0.1.2..v1.2.5) - 2025-06-12
 
 ### 🐛 Bug Fixes
