@@ -51,7 +51,7 @@ func TestMapContainerBulkDtoFromPod(t *testing.T) {
 			MemoryRequestBytes:   memory,
 			NodeName:             node,
 		}}
-		rrMap := map[string]*radixv1.RadixRegistration{"app1": {Spec: radixv1.RadixRegistrationSpec{WBS: wbs}}}
+		rrMap := map[string]*radixv1.RadixRegistration{"app1": {Spec: radixv1.RadixRegistrationSpec{ConfigurationItem: wbs}}}
 		actual := MapContainerBulkDtoFromPod(pod, rrMap, make(map[string]*corev1.LimitRange), clock.NewFakeClock(currentTime))
 		assert.Len(t, actual, 1)
 		assert.Equal(t, expected, actual)

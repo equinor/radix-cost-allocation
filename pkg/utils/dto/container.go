@@ -83,7 +83,7 @@ func setContainerBulkDtoRadixRegistrationProps(cbt *repository.ContainerBulkDto,
 		return
 	}
 
-	cbt.Wbs = rr.Spec.WBS
+	cbt.Wbs = rr.Spec.ConfigurationItem
 }
 
 func setContainerBulkDtoResourceProps(cbt *repository.ContainerBulkDto, container *corev1.Container) {
