@@ -34,7 +34,7 @@ func (c *ReflectorController) Start() {
 	}
 }
 
-//Stop all reflectors referenced by this controller, or no-op if not running.
+// Stop all reflectors referenced by this controller, or no-op if not running.
 func (c *ReflectorController) Stop() {
 	c.mu.Lock()
 	defer c.mu.Unlock()

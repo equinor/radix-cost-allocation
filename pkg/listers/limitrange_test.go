@@ -5,12 +5,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/kubernetes/pkg/apis/discovery"
 )
 
 func TestLimitRangeLister(t *testing.T) {
 	expectedObj1 := &corev1.LimitRange{}
 	expectedObj2 := &corev1.LimitRange{}
-	otherObj := &corev1.Endpoints{}
+	otherObj := &discovery.EndpointSliceList{}
+
 	store := setupFakeStoreForTest(
 		expectedObj1,
 		expectedObj2,
