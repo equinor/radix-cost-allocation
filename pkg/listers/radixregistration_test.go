@@ -5,13 +5,13 @@ import (
 
 	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
 	"github.com/stretchr/testify/assert"
-	corev1 "k8s.io/api/core/v1"
+	"k8s.io/kubernetes/pkg/apis/discovery"
 )
 
 func TestRadixRegistrationLister(t *testing.T) {
 	expectedObj1 := &v1.RadixRegistration{}
 	expectedObj2 := &v1.RadixRegistration{}
-	otherObj := &corev1.Endpoints{}
+	otherObj := &discovery.EndpointSliceList{}
 	store := setupFakeStoreForTest(
 		expectedObj1,
 		expectedObj2,

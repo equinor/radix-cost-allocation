@@ -5,12 +5,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/kubernetes/pkg/apis/discovery"
 )
 
 func TestNodeLister(t *testing.T) {
 	expectedObj1 := &corev1.Node{}
 	expectedObj2 := &corev1.Node{}
-	otherObj := &corev1.Endpoints{}
+	otherObj := &discovery.EndpointSliceList{}
 	store := setupFakeStoreForTest(
 		expectedObj1,
 		expectedObj2,
