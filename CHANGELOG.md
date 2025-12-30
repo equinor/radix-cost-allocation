@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.4.0](https://github.com/equinor/radix-cost-allocation/compare/v1.3.0..v1.4.0) - 2025-12-18
+## [1.4.1](https://github.com/equinor/radix-cost-allocation/compare/v1.4.0..v1.4.1) - 2025-12-30
+
+### 🐛 Bug Fixes
+
+- Bump dependencies (#158) - ([a6c775f](https://github.com/equinor/radix-cost-allocation/commit/a6c775f3dff4e5211a704183cabb65eff9946c4f)) by @dependabot[bot] in [#158](https://github.com/equinor/radix-cost-allocation/pull/158)
+
+
+## [1.4.0](https://github.com/equinor/radix-cost-allocation/compare/v1.3.0..v1.4.0) - 2025-12-23
 
 ### 🚀 Features
 
