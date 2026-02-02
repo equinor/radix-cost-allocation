@@ -8,8 +8,8 @@ import (
 	mocklisters "github.com/equinor/radix-cost-allocation/pkg/listers/mock"
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
 	mockrepository "github.com/equinor/radix-cost-allocation/pkg/repository/mock"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestContainerSyncJob(t *testing.T) {

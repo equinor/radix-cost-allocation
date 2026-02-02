@@ -7,8 +7,8 @@ import (
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
 	"github.com/equinor/radix-cost-allocation/pkg/utils/clock"
 	radixv1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

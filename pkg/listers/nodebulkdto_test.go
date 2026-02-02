@@ -5,8 +5,8 @@ import (
 
 	"github.com/equinor/radix-cost-allocation/pkg/listers/mock"
 	"github.com/equinor/radix-cost-allocation/pkg/repository"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

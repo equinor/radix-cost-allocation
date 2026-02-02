@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	repository "github.com/equinor/radix-cost-allocation/pkg/repository"
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockRepository is a mock of Repository interface.
