@@ -2,10 +2,28 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: radix-cost-allocation
+  title: Radix Cost Allocation
+  description: "Export resource usage and cost data from prometheus running in cluster to external sql db"
   annotations:
     github.com/project-slug: equinor/radix-cost-allocation
 spec:
   type: service
   lifecycle: production
-  owner: omnia-radix
-  system: Radix
+  owner: team-radix
+  system: system:default/Radix
+  dependsOn:
+    - resource:default/radix-cost-allocation-db 
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: radix-cost-allocation-db
+  title: Cost Allocation database
+  description: "SQL database recording cost information"
+  annotations:
+    github.com/project-slug: equinor/radix-cost-allocation
+spec:
+  type: database
+  lifecycle: production
+  owner: team-radix
+  system: system:default/Radix
