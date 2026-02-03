@@ -4,13 +4,13 @@ go 1.25.5
 
 require (
 	github.com/equinor/radix-operator v1.107.0
-	github.com/golang/mock v1.6.0
 	github.com/microsoft/go-mssqldb v1.9.5
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.11.1
 	github.com/vrischmann/envconfig v1.4.1
+	go.uber.org/mock v0.6.0
 	golang.org/x/sync v0.19.0
 	k8s.io/api v0.35.0
 	k8s.io/apimachinery v0.35.0
@@ -51,6 +51,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect

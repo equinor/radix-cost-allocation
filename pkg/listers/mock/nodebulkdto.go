@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	repository "github.com/equinor/radix-cost-allocation/pkg/repository"
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockNodeBulkDtoLister is a mock of NodeBulkDtoLister interface.
