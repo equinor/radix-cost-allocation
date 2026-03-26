@@ -59,7 +59,7 @@ jobs:
         Connection Timeout=30;
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         if: github.event.inputs.target == matrix.target.name
 
       - uses: azure/login@v2
