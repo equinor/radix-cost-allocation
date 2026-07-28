@@ -59,7 +59,7 @@ jobs:
         Connection Timeout=30;
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: github.event.inputs.target == matrix.target.name
 
       - uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
@@ -69,32 +69,32 @@ jobs:
           tenant-id: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
           allow-no-subscriptions: true
 
-      - uses: azure/sql-action@dae62750f3e645283b7755717b44a2029c0735fb # v2.3
+      - uses: azure/sql-action@eb1f9a80487ca52b90f41a473f53da4943526994 # v2.4
         if: github.event.inputs.target == matrix.target.name
         with:
           connection-string: ${{env.connection}}
           path: "./azure-infrastructure/preDeployScript.sql"
 
-      - uses: azure/sql-action@dae62750f3e645283b7755717b44a2029c0735fb # v2.3
+      - uses: azure/sql-action@eb1f9a80487ca52b90f41a473f53da4943526994 # v2.4
         if: github.event.inputs.target == matrix.target.name
         with:
           connection-string: ${{env.connection}}
           path: "./azure-infrastructure/createSchema.sql"
           arguments: "-v RADIX_ZONE=${{matrix.target.name}}"
 
-      - uses: azure/sql-action@dae62750f3e645283b7755717b44a2029c0735fb # v2.3
+      - uses: azure/sql-action@eb1f9a80487ca52b90f41a473f53da4943526994 # v2.4
         if: github.event.inputs.target == matrix.target.name
         with:
           connection-string: ${{env.connection}}
           path: "./azure-infrastructure/createTables.sql"
 
-      - uses: azure/sql-action@dae62750f3e645283b7755717b44a2029c0735fb # v2.3
+      - uses: azure/sql-action@eb1f9a80487ca52b90f41a473f53da4943526994 # v2.4
         if: github.event.inputs.target == matrix.target.name
         with:
           connection-string: ${{env.connection}}
           path: "./azure-infrastructure/createTypes.sql"
 
-      - uses: azure/sql-action@dae62750f3e645283b7755717b44a2029c0735fb # v2.3
+      - uses: azure/sql-action@eb1f9a80487ca52b90f41a473f53da4943526994 # v2.4
         if: github.event.inputs.target == matrix.target.name
         with:
           connection-string: ${{env.connection}}
