@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.3](https://github.com/equinor/radix-cost-allocation/compare/v1.4.2..v1.4.3) - 2026-07-28
+
+### 🐛 Bug Fixes
+
+- *(deps)* Bump go version and dependencies (#183) - ([350533d](https://github.com/equinor/radix-cost-allocation/commit/350533d209303de09c3ec8fb1062adb181ea8c3d)) by @nilsgstrabo in [#183](https://github.com/equinor/radix-cost-allocation/pull/183)
+
+
+### ⚙️ Miscellaneous Tasks
+
+- *(ci)* Update github workflows to latest version and pin to sha - ([4adc656](https://github.com/equinor/radix-cost-allocation/commit/4adc656de4b7684f02d99ad86e5904bed2ccc457)) by @sveinpj in [#180](https://github.com/equinor/radix-cost-allocation/pull/180)
+
+- Add skill (#181) - ([1f898fa](https://github.com/equinor/radix-cost-allocation/commit/1f898fa50ab8a0d71b582d7bba6f45e2302aa0f3)) by @emirgens in [#181](https://github.com/equinor/radix-cost-allocation/pull/181)
+
+
+## New Contributors ❤️
+
+* @sveinpj made their first contribution in [#180](https://github.com/equinor/radix-cost-allocation/pull/180)
 ## [1.4.2](https://github.com/equinor/radix-cost-allocation/compare/v1.4.1..v1.4.2) - 2026-02-17
 
 ### 🐛 Bug Fixes
@@ -67,7 +84,7 @@ All notable changes to this project will be documented in this file.
 
 ### 💼 Other
 
-- Radix-cost-allocation - ([1c8b4cb](https://github.com/equinor/radix-cost-allocation/commit/1c8b4cbf00d139e367e33d16a8b477eb2cab93d9)) by @sveinpj
+- Radix-cost-allocation - ([1c8b4cb](https://github.com/equinor/radix-cost-allocation/commit/1c8b4cbf00d139e367e33d16a8b477eb2cab93d9))
 
 
 ### ⚙️ Miscellaneous Tasks
@@ -78,32 +95,29 @@ All notable changes to this project will be documented in this file.
 ## New Contributors ❤️
 
 * @dependabot[bot] made their first contribution in [#147](https://github.com/equinor/radix-cost-allocation/pull/147)
+* @nilsgstrabo made their first contribution in [#149](https://github.com/equinor/radix-cost-allocation/pull/149)
 * @Richard87 made their first contribution in [#143](https://github.com/equinor/radix-cost-allocation/pull/143)
 * @emirgens made their first contribution in [#138](https://github.com/equinor/radix-cost-allocation/pull/138)
+* @satr made their first contribution in [#133](https://github.com/equinor/radix-cost-allocation/pull/133)
 * @magnus-longva-bouvet made their first contribution in [#95](https://github.com/equinor/radix-cost-allocation/pull/95)
 * @sondresjolyst made their first contribution in [#90](https://github.com/equinor/radix-cost-allocation/pull/90)
 * @oterno made their first contribution in [#78](https://github.com/equinor/radix-cost-allocation/pull/78)
-* @sveinpj made their first contribution in [#69](https://github.com/equinor/radix-cost-allocation/pull/69)
+* @ made their first contribution
 ## [0.1.1] - 2020-10-01
 
 ### 💼 Other
 
-- Export data from prometheus to sql db - ([6cdbece](https://github.com/equinor/radix-cost-allocation/commit/6cdbece13aa915274b4a65426b39d3833ce2e69d)) by @keaaa
+- Export data from prometheus to sql db - ([6cdbece](https://github.com/equinor/radix-cost-allocation/commit/6cdbece13aa915274b4a65426b39d3833ce2e69d))
 
-- Add helm chart for deploying - ([e10b5fc](https://github.com/equinor/radix-cost-allocation/commit/e10b5fcd82aa78f9106eeb851999a2c8bdeb1f0e)) by @keaaa
+- Add helm chart for deploying - ([e10b5fc](https://github.com/equinor/radix-cost-allocation/commit/e10b5fcd82aa78f9106eeb851999a2c8bdeb1f0e))
 
-- Add arm template for server and db - ([0767efe](https://github.com/equinor/radix-cost-allocation/commit/0767efe3928bf164b305e4a98de79b51cebba86c)) by @keaaa
+- Add arm template for server and db - ([0767efe](https://github.com/equinor/radix-cost-allocation/commit/0767efe3928bf164b305e4a98de79b51cebba86c))
 
-- Add cost calculation - ([2ca0955](https://github.com/equinor/radix-cost-allocation/commit/2ca09559005f18b308ff5a5ced355b150e045025)) by @keaaa
+- Add cost calculation - ([2ca0955](https://github.com/equinor/radix-cost-allocation/commit/2ca09559005f18b308ff5a5ced355b150e045025))
 
-- Export wbs from prom (#8) - ([74f75e4](https://github.com/equinor/radix-cost-allocation/commit/74f75e4a079c0d2714f177628a9117b9cd88e739)) by @keaaa in [#8](https://github.com/equinor/radix-cost-allocation/pull/8)
+- Export wbs from prom (#8) - ([74f75e4](https://github.com/equinor/radix-cost-allocation/commit/74f75e4a079c0d2714f177628a9117b9cd88e739))
 
-- Handle cost allocation based on memory - ([4a88351](https://github.com/equinor/radix-cost-allocation/commit/4a88351d003bd18287c7a6c7c152e81f640b1463)) by @keaaa in [#9](https://github.com/equinor/radix-cost-allocation/pull/9)
+- Handle cost allocation based on memory - ([4a88351](https://github.com/equinor/radix-cost-allocation/commit/4a88351d003bd18287c7a6c7c152e81f640b1463))
 
 
-## New Contributors ❤️
-
-* @satr made their first contribution in [#16](https://github.com/equinor/radix-cost-allocation/pull/16)
-* @ made their first contribution in [#13](https://github.com/equinor/radix-cost-allocation/pull/13)
-* @keaaa made their first contribution
 <!-- generated by git-cliff -->
