@@ -69,7 +69,7 @@ func TestContainerSyncJob(t *testing.T) {
 		repo := mockrepository.NewMockRepository(ctrl)
 		containerDtoBuilder.EXPECT().List().Return(nil).Times(1)
 		repo.EXPECT().BulkUpsertContainers(gomock.Any()).DoAndReturn(
-			func(arg interface{}) interface{} {
+			func(arg any) any {
 				time.Sleep(100 * time.Millisecond) // Emulate delay in call to repository
 				return nil
 			},

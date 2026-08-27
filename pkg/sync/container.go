@@ -1,6 +1,7 @@
 package sync
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/equinor/radix-cost-allocation/pkg/listers"
@@ -54,7 +55,7 @@ func (s *ContainerSyncJob) filterContainerByAppNameExcludeList(containers []repo
 	lowerCaseExcludeList := slice.ToLowerCase(s.appNameExcludeList)
 
 	for _, c := range containers {
-		if slice.ContainsString(lowerCaseExcludeList, strings.ToLower(c.ApplicationName)) {
+		if slices.Contains(lowerCaseExcludeList, strings.ToLower(c.ApplicationName)) {
 			continue
 		}
 

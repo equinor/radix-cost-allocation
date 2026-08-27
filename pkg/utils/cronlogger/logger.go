@@ -15,10 +15,10 @@ func New(logger *zerolog.Logger) CronLogger {
 	return CronLogger{logger: logger}
 }
 
-func (c CronLogger) Info(msg string, v ...interface{}) {
+func (c CronLogger) Info(msg string, v ...any) {
 	c.logger.Info().Msgf(msg, v...)
 }
 
-func (c CronLogger) Error(err error, msg string, v ...interface{}) {
+func (c CronLogger) Error(err error, msg string, v ...any) {
 	c.logger.Error().Err(err).Msgf(msg, v...)
 }

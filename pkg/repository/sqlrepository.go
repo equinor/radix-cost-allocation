@@ -66,7 +66,7 @@ func (repo *sqlRepository) createConnection() (*sql.Conn, error) {
 	return repo.db.Conn(ctx)
 }
 
-func (repo *sqlRepository) executeWithTransaction(query string, args ...interface{}) error {
+func (repo *sqlRepository) executeWithTransaction(query string, args ...any) error {
 	ctx, cancel := repo.getContext()
 	defer cancel()
 
