@@ -11,7 +11,7 @@ func newStore() cache.Store {
 	return cache.NewStore(cache.MetaNamespaceKeyFunc)
 }
 
-func newReflector(store cache.Store, client cache.Getter, expectedType interface{}, resource, namespace string) *cache.Reflector {
+func newReflector(store cache.Store, client cache.Getter, expectedType any, resource, namespace string) *cache.Reflector {
 	return cache.NewReflector(
 		cache.NewListWatchFromClient(client, resource, namespace, fields.Everything()),
 		expectedType,

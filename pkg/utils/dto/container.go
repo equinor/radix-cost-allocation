@@ -71,7 +71,7 @@ func MapContainerBulkDtoFromPod(pod *corev1.Pod, rrMap map[string]*radixv1.Radix
 }
 
 func getEnvironmentNameFromNamespace(appName, ns string) string {
-	if env := strings.TrimPrefix(ns, fmt.Sprintf("%s-", appName)); env != ns {
+	if env, ok := strings.CutPrefix(ns, fmt.Sprintf("%s-", appName)); ok {
 		return env
 	}
 

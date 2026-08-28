@@ -42,7 +42,7 @@ func TestNodeSyncJob(t *testing.T) {
 		repo := mockrepository.NewMockRepository(ctrl)
 		nodeDtoBuilder.EXPECT().List().Return(nil).Times(1)
 		repo.EXPECT().BulkUpsertNodes(nil).DoAndReturn(
-			func(arg interface{}) interface{} {
+			func(arg any) error {
 				time.Sleep(100 * time.Millisecond) // Emulate delay in call to repository
 				return nil
 			},
