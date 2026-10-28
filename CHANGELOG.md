@@ -2,7 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.4.4](https://github.com/equinor/radix-cost-allocation/compare/v1.4.3..v1.4.4) - 2026-08-28
+## [1.4.5](https://github.com/equinor/radix-cost-allocation/compare/v1.4.4..v1.4.5) - 2026-10-28
+
+### 🐛 Bug Fixes
+
+- Bump github.com/kedacore/keda/v2 (#194) - ([8ffde7b](https://github.com/equinor/radix-cost-allocation/commit/8ffde7b1dd18fd2fdd964a754e9c51990e3cd477)) by @dependabot[bot] in [#194](https://github.com/equinor/radix-cost-allocation/pull/194)
+
+- Update deps (#193) - ([9a6787c](https://github.com/equinor/radix-cost-allocation/commit/9a6787cd269e3e01794d8b61ac0065527b738c9c)) by @herda1 in [#193](https://github.com/equinor/radix-cost-allocation/pull/193)
+
+
+## New Contributors ❤️
+
+* @herda1 made their first contribution in [#193](https://github.com/equinor/radix-cost-allocation/pull/193)
+## [1.4.4](https://github.com/equinor/radix-cost-allocation/compare/v1.4.3..v1.4.4) - 2026-09-01
 
 ### 🐛 Bug Fixes
 
