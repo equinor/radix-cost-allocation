@@ -41,7 +41,7 @@ HAS_MOCKGEN       := $(shell command -v mockgen;)
 
 bootstrap:
 ifndef HAS_GOLANGCI_LINT
-	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.7.2
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
 endif
 ifndef HAS_MOCKGEN
 	go install go.uber.org/mock/mockgen@v0.6.0

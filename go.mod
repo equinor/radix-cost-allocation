@@ -1,6 +1,6 @@
 module github.com/equinor/radix-cost-allocation
 
-go 1.26.5
+go 1.27.3
 
 require (
 	github.com/equinor/radix-operator v1.127.0
